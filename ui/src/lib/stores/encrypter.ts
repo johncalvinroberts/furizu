@@ -4,7 +4,7 @@ import { CRYP_FILE_EXTENSION, STATE, MESSAGE } from "../constants";
 import type { EncrypterState, MessageKey, MessagePayload } from "../../types/types";
 import IsomorphicWorker from "../isomorphic-worker";
 import BaseStore from "./base";
-import { whoami } from "./whoami";
+import { apiClient } from "./api";
 
 const initialState: EncrypterState = {
 	isProcessing: false,
@@ -74,7 +74,7 @@ class EncrypterStore extends BaseStore<EncrypterState> {
 	};
 
 	public handleEncrypt = async (password: string, hint: string) => {
-		const { isAuthenticated } = get(whoami.store);
+		const { isAuthenticated } = get(apiClient.store);
 		const nextState = isAuthenticated ? STATE.PROCESSING : STATE.SHOULD_AUTHENTICATE;
 		this.dispatch({
 			password,
@@ -87,7 +87,7 @@ class EncrypterStore extends BaseStore<EncrypterState> {
 	};
 
 	public handleDecrypt = async (password: string) => {
-		const { isAuthenticated } = get(whoami.store);
+		const { isAuthenticated } = get(apiClient.store);
 		const nextState = isAuthenticated ? STATE.PROCESSING : STATE.SHOULD_AUTHENTICATE;
 		this.dispatch({
 			password,

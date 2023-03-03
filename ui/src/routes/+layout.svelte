@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import { whoami } from "../lib/stores/whoami";
 	import { encrypter } from "../lib/stores/encrypter";
+	import { apiClient } from "../lib/stores/api";
 	import Dropdown from "../lib/components/Dropdown.svelte";
 	import Control from "../lib/components/icons/Control.svelte";
 	import Money from "../lib/components/icons/Money.svelte";
@@ -16,11 +16,11 @@
 	let returnFocusElement: HTMLElement;
 
 	const { store: encrypterStore } = encrypter;
-	const { store: whoamiStore } = whoami;
+	const { store: apiClientStore } = apiClient;
 	const { store: displayStore } = display;
 	let title = `furizu. | ${$encrypterStore.state}`;
-	$: isAuthenticated = $whoamiStore.isAuthenticated;
-	$: email = $whoamiStore.email;
+	$: isAuthenticated = $apiClientStore.isAuthenticated;
+	$: email = $apiClientStore.email;
 	$: dropdownOptions = [
 		...(isAuthenticated
 			? [
@@ -61,7 +61,7 @@
 
 {#if $displayStore.isAuthModalOpen}
 	<Modal onDismiss={() => display.toggleAuthModal()} {returnFocusElement} {initialFocusElement}>
-		{#if $whoamiStore.isLoading}
+		{#if $apiClientStore.isAuthLoading}
 			<OverlayLoading height={"312px"} />
 		{/if}
 		<div class="form-wrapper">

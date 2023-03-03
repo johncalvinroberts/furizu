@@ -1,7 +1,7 @@
-import decodeJwt, { type JwtPayload } from "jwt-decode";
+import decodeJwt from "jwt-decode";
 import { get } from "svelte/store";
 import type { APIClientState, HTTPMethod, HTTPRequestBody } from "../../types/types";
-import type { RefreshTokenDTO } from "../../types/dtos";
+import type { RefreshTokenDTO, TryWhoamiChallengeDTO, JWTPayload } from "../../types/dtos";
 import HTTPClient from "../http";
 import {
 	JWT_LOCAL_STORAGE_KEY,
@@ -16,7 +16,6 @@ import {
 import { delay } from "../utils";
 import BaseStore from "./base";
 import { display } from "./display";
-import { whoami } from "./whoami";
 import { browser } from "$app/environment";
 
 const MIN_TOKEN_REFRESH_MS = 1000 * 60; // 1 min
@@ -26,6 +25,10 @@ const initialState: APIClientState = {
 	isRefreshingToken: false,
 	tokenExpiresAt: undefined,
 	token: undefined,
+	isAuthenticated: false,
+	email: undefined,
+	isChallengeSent: false,
+	isAuthLoading: false,
 };
 
 /**
@@ -50,13 +53,12 @@ class APIClientStore extends BaseStore<APIClientState> {
 		if (browser) {
 			try {
 				localStorage.setItem(JWT_LOCAL_STORAGE_KEY, token);
-				const decoded: JwtPayload = decodeJwt(token);
-				if (decoded.exp) {
-					this.dispatch({ tokenExpiresAt: decoded.exp, token });
-				}
+				const decoded: JWTPayload = decodeJwt(token);
+				const { exp, email } = decoded;
+				this.dispatch({ tokenExpiresAt: exp, token, email, isAuthenticated: true });
 			} catch (error) {
 				localStorage.removeItem(JWT_LOCAL_STORAGE_KEY);
-				this.dispatch({ token: undefined });
+				this.reset();
 			}
 		}
 	}
@@ -67,7 +69,33 @@ class APIClientStore extends BaseStore<APIClientState> {
 			this.handleToken(res.jwt);
 		} catch (error) {
 			display.enqueueError(error);
-			whoami.reset();
+			this.reset();
+		}
+	}
+
+	public async startWhoamiChallenge(email: string) {
+		try {
+			this.dispatch({ isAuthLoading: true });
+			await this.post("api/whoami/start", { email });
+			this.dispatch({ isChallengeSent: true });
+		} catch (error) {
+			display.enqueueError(error);
+			throw error;
+		} finally {
+			this.dispatch({ isAuthLoading: false });
+		}
+	}
+
+	public async tryWhoamiChallenge(email: string, otp: string) {
+		try {
+			this.dispatch({ isAuthLoading: true });
+			const res = await this.post<TryWhoamiChallengeDTO>("api/whoami/try", { email, otp });
+			this.handleToken(res.jwt);
+		} catch (error) {
+			display.enqueueError(error);
+			throw error;
+		} finally {
+			this.dispatch({ isAuthLoading: false });
 		}
 	}
 

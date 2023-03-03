@@ -5,3 +5,8 @@ export type RefreshTokenDTO = {
 export type TryWhoamiChallengeDTO = {
 	jwt: string;
 };
+
+export type JWTPayload = {
+	exp: number;
+	email: string;
+};

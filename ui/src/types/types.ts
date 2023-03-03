@@ -32,17 +32,14 @@ export type EncrypterState = {
 	totalFileBytes: number | undefined;
 };
 
-export type WhoamiState = {
-	isAuthenticated: boolean;
-	email: string | undefined;
-	isChallengeSent: boolean;
-	isLoading: boolean;
-};
-
 export type APIClientState = {
 	isRefreshingToken: boolean;
 	tokenExpiresAt: number | undefined;
 	token: string | undefined;
+	email: string | undefined;
+	isAuthenticated: boolean;
+	isChallengeSent: boolean;
+	isAuthLoading: boolean;
 };
 
 export type ThemeState = {

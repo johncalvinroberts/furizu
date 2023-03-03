@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { whoami } from "../stores/whoami";
 	import { display } from "../stores/display";
+	import { apiClient } from "../stores/api";
 	import Button from "./Button.svelte";
 	import Form from "./form/Form.svelte";
 	import Input from "./form/Input.svelte";
@@ -13,12 +13,12 @@
 	const { store: displayStore } = display;
 
 	const handleStartWhoami = async () => {
-		await whoami.startWhoamiChallenge(email);
+		await apiClient.startWhoamiChallenge(email);
 		step = "TRY_WHOAMI";
 	};
 
 	const tryWhoamiChallenge = async () => {
-		await whoami.tryWhoamiChallenge(email, otp);
+		await apiClient.tryWhoamiChallenge(email, otp);
 		if ($displayStore.isAuthModalOpen) {
 			display.toggleAuthModal();
 		}
