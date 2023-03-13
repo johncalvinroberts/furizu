@@ -8,6 +8,7 @@
 	export let title = "Authenticate who you are";
 	let step: "START_WHOAMI" | "TRY_WHOAMI" = "START_WHOAMI";
 	let email: string;
+	let tryWhoamiChallengeInput: HTMLInputElement;
 	let otp: string;
 
 	const { store: displayStore } = display;
@@ -15,6 +16,7 @@
 	const handleStartWhoami = async () => {
 		await apiClient.startWhoamiChallenge(email);
 		step = "TRY_WHOAMI";
+		tryWhoamiChallengeInput?.focus();
 	};
 
 	const tryWhoamiChallenge = async () => {
@@ -27,15 +29,19 @@
 
 <div class="box">
 	<h3>{title}</h3>
-	<Form on:submit={handleStartWhoami}>
+	<Form on:submit={handleStartWhoami} disabled={step === "TRY_WHOAMI"}>
 		<Input name="email" type="email" label="Email" bind:value={email} />
 		<Button type="submit">{step === "TRY_WHOAMI" ? "Resend Code" : "Send Code"}</Button>
 	</Form>
-	{#if step === "TRY_WHOAMI"}
-		<small>Code sent to email</small>
-	{/if}
 	<Form on:submit={tryWhoamiChallenge} disabled={step !== "TRY_WHOAMI"} prevent:default>
-		<Input name="otp" type="text" label="Code" disabled={step !== "TRY_WHOAMI"} bind:value={otp} />
+		<Input
+			name="otp"
+			type="text"
+			label="Code"
+			disabled={step !== "TRY_WHOAMI"}
+			bind:value={otp}
+			ref={tryWhoamiChallengeInput}
+		/>
 		<Button type="submit" disabled={step !== "TRY_WHOAMI"}>Submit</Button>
 	</Form>
 </div>

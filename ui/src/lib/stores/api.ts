@@ -13,7 +13,7 @@ import {
 	PATCH,
 	JWT_AUTH_HEADER,
 } from "../constants";
-import { delay } from "../utils";
+import { delay, extractErrorMessageString } from "../utils";
 import BaseStore from "./base";
 import { display } from "./display";
 import { browser } from "$app/environment";
@@ -23,7 +23,6 @@ const TOKEN_REFRESH_BACKOFF_MS = 700;
 
 const initialState: APIClientState = {
 	isRefreshingToken: false,
-	tokenExpiresAt: undefined,
 	token: undefined,
 	isAuthenticated: false,
 	email: undefined,
@@ -53,9 +52,11 @@ class APIClientStore extends BaseStore<APIClientState> {
 		if (browser) {
 			try {
 				localStorage.setItem(JWT_LOCAL_STORAGE_KEY, token);
+				const isValid = this.checkIsJWTValid(token);
+				if (!isValid) throw new Error("Invalid Token");
 				const decoded: JWTPayload = decodeJwt(token);
-				const { exp, email } = decoded;
-				this.dispatch({ tokenExpiresAt: exp, token, email, isAuthenticated: true });
+				const { email } = decoded;
+				this.dispatch({ token, email, isAuthenticated: true });
 			} catch (error) {
 				localStorage.removeItem(JWT_LOCAL_STORAGE_KEY);
 				this.reset();
@@ -68,7 +69,7 @@ class APIClientStore extends BaseStore<APIClientState> {
 			const res = await this.httpClient.post<RefreshTokenDTO>("api/whoami/refresh", {});
 			this.handleToken(res.jwt);
 		} catch (error) {
-			display.enqueueError(error);
+			display.enqueueMessage(extractErrorMessageString(error), "error");
 			this.reset();
 		}
 	}
@@ -78,8 +79,9 @@ class APIClientStore extends BaseStore<APIClientState> {
 			this.dispatch({ isAuthLoading: true });
 			await this.post("api/whoami/start", { email });
 			this.dispatch({ isChallengeSent: true });
+			display.enqueueMessage("Code sent to email");
 		} catch (error) {
-			display.enqueueError(error);
+			display.enqueueMessage(extractErrorMessageString(error), "error");
 			throw error;
 		} finally {
 			this.dispatch({ isAuthLoading: false });
@@ -91,8 +93,9 @@ class APIClientStore extends BaseStore<APIClientState> {
 			this.dispatch({ isAuthLoading: true });
 			const res = await this.post<TryWhoamiChallengeDTO>("api/whoami/try", { email, otp });
 			this.handleToken(res.jwt);
+			display.enqueueMessage("Successfully Authenticated");
 		} catch (error) {
-			display.enqueueError(error);
+			display.enqueueMessage(extractErrorMessageString(error), "error");
 			throw error;
 		} finally {
 			this.dispatch({ isAuthLoading: false });
@@ -100,12 +103,12 @@ class APIClientStore extends BaseStore<APIClientState> {
 	}
 
 	private async fetch<T>(path: string, method: HTTPMethod, body?: HTTPRequestBody): Promise<T> {
-		const { isRefreshingToken, tokenExpiresAt, token } = get(this.store);
+		const { token, isRefreshingToken, isAuthenticated } = get(this.store);
 		if (isRefreshingToken) {
 			await delay(TOKEN_REFRESH_BACKOFF_MS);
 			return this.fetch<T>(path, method, body);
 		}
-		if (tokenExpiresAt != null && tokenExpiresAt - Date.now() < MIN_TOKEN_REFRESH_MS) {
+		if (!this.isTokenValid && isAuthenticated) {
 			await this.refreshToken();
 		}
 		let headers: Record<string, string> = {};
@@ -113,6 +116,24 @@ class APIClientStore extends BaseStore<APIClientState> {
 			headers = { [JWT_AUTH_HEADER]: token };
 		}
 		return this.httpClient.fetch<T>(path, method, body, headers);
+	}
+
+	private get isTokenValid(): boolean {
+		const { token } = get(this.store);
+		if (!token) return false;
+		const isValid = this.checkIsJWTValid(token);
+		return isValid;
+	}
+
+	private checkIsJWTValid(token: string): boolean {
+		const { exp }: JWTPayload = decodeJwt(token);
+		const isValid = exp != null && exp * 1000 - Date.now() > MIN_TOKEN_REFRESH_MS;
+		return isValid;
+	}
+
+	public endSession() {
+		localStorage.removeItem(JWT_LOCAL_STORAGE_KEY);
+		this.reset();
 	}
 
 	public get<T>(path: string): Promise<T> {

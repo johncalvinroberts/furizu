@@ -34,7 +34,6 @@ export type EncrypterState = {
 
 export type APIClientState = {
 	isRefreshingToken: boolean;
-	tokenExpiresAt: number | undefined;
 	token: string | undefined;
 	email: string | undefined;
 	isAuthenticated: boolean;
@@ -42,10 +41,15 @@ export type APIClientState = {
 	isAuthLoading: boolean;
 };
 
-export type ThemeState = {
+export type DisplayMessageLevel = "error" | "info" | "success";
+export type DisplayMessage = {
+	level: DisplayMessageLevel;
+	message: string;
+};
+export type DisplayState = {
 	theme: Theme;
 	isAuthModalOpen: boolean;
-	errors: MaybeError[];
+	messages: DisplayMessage[];
 };
 
 export type ApiResponse<T> = {

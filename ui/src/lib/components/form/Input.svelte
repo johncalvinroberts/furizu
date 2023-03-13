@@ -26,6 +26,7 @@
 	export let placeholder = "";
 	export let value: string | number = "";
 	export let tip = "";
+	export let ref: HTMLInputElement | undefined = undefined;
 	let showPassword = false;
 	$: actualType = type === "password" && showPassword ? "text" : type;
 	// you need to this to avoid 2-way binding
@@ -60,6 +61,7 @@
 			spellcheck="false"
 			use:setType={actualType}
 			{...$$restProps}
+			bind:this={ref}
 		/>
 	{/if}
 	{#if type === "password"}
@@ -82,6 +84,7 @@
 				on:change
 				{...$$restProps}
 				tabindex={variant === "minimal" ? -1 : 0}
+				bind:this={ref}
 			/>
 			{#if variant !== "minimal"}
 				<div class="vertical-center">

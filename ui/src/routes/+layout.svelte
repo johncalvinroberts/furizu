@@ -4,8 +4,8 @@
 	import { apiClient } from "../lib/stores/api";
 	import Dropdown from "../lib/components/Dropdown.svelte";
 	import Control from "../lib/components/icons/Control.svelte";
-	import Money from "../lib/components/icons/Money.svelte";
 	import Keycaps from "../lib/components/icons/Keycaps.svelte";
+	import End from "../lib/components/icons/End.svelte";
 	import { display } from "../lib/stores/display";
 	import WhoamiForm from "../lib/components/WhoamiForm.svelte";
 	import Modal from "../lib/components/modal/Modal.svelte";
@@ -22,25 +22,23 @@
 	$: isAuthenticated = $apiClientStore.isAuthenticated;
 	$: email = $apiClientStore.email;
 	$: dropdownOptions = [
-		...(isAuthenticated
-			? [
-					{
-						Icon: Money,
-						label: "Authenticate",
-						onClick: () => alert("TODO: implement me"),
-					},
-			  ]
-			: [
-					{
-						Icon: Keycaps,
-						label: "Authenticate",
-						onClick: () => display.toggleAuthModal(),
-					},
-			  ]),
+		{
+			Icon: Keycaps,
+			label: "Authenticate",
+			onClick: () => display.toggleAuthModal(),
+			isVisible: !isAuthenticated,
+		},
 		{
 			Icon: Control,
 			label: "Settings",
 			href: "/settings",
+			isVisible: true,
+		},
+		{
+			Icon: End,
+			label: "End Session",
+			onClick: () => apiClient.endSession(),
+			isVisible: isAuthenticated,
 		},
 	];
 
@@ -56,7 +54,10 @@
 	<a href="/" class="vertical-center">
 		<span>❆</span>
 	</a>
-	<Dropdown label={isAuthenticated ? email : "Guest"} options={dropdownOptions} />
+	<Dropdown
+		label={isAuthenticated ? email : "Guest"}
+		options={dropdownOptions.filter((item) => item.isVisible)}
+	/>
 </nav>
 
 {#if $displayStore.isAuthModalOpen}

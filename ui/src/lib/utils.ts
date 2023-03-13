@@ -1,3 +1,4 @@
+import type { MaybeError } from "../types/types";
 import { CRYP_DELIMITER, CRYP_FILE_EXTENSION } from "./constants";
 
 const MAX_NAME_LENGTH = 100;
@@ -39,3 +40,10 @@ export const clone = (obj: unknown) => JSON.parse(JSON.stringify(obj));
 export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const noop = () => undefined;
+
+export const extractErrorMessageString = (err: MaybeError): string => {
+	let msg = "An unknown error occured";
+	if (typeof err == "string") msg = err;
+	if (err instanceof Error) msg = err.message;
+	return msg;
+};

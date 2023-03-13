@@ -15,6 +15,13 @@
 	});
 </script>
 
-<div bind:this={ref}>
+<div bind:this={ref} class="portal">
 	<slot />
 </div>
+
+<style>
+	.portal {
+		position: fixed;
+		z-index: var(--z-index-popover);
+	}
+</style>

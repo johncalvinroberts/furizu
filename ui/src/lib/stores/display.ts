@@ -1,16 +1,22 @@
 import { get } from "svelte/store";
 import { THEME_LOCAL_STORAGE_KEY } from "../constants";
-import type { MaybeError, ThemeState, Theme } from "../../types/types";
+import type {
+	MaybeError,
+	DisplayState,
+	Theme,
+	DisplayMessageLevel,
+	DisplayMessage,
+} from "../../types/types";
 import BaseStore from "./base";
 import { browser } from "$app/environment";
 
-const initialState: ThemeState = {
+const initialState: DisplayState = {
 	theme: "light",
 	isAuthModalOpen: false,
-	errors: [],
+	messages: [],
 };
 
-class DisplayStore extends BaseStore<ThemeState> {
+class DisplayStore extends BaseStore<DisplayState> {
 	constructor() {
 		super(initialState);
 	}
@@ -44,15 +50,25 @@ class DisplayStore extends BaseStore<ThemeState> {
 		this.dispatch({ isAuthModalOpen: !isAuthModalOpen });
 	}
 
-	public enqueueError(err: MaybeError) {
-		const { errors } = get(this.store);
-		this.dispatch({ errors: [...errors, err] });
+	public enqueueMessage(msg: string | DisplayMessage, level: DisplayMessageLevel = "success") {
+		const { messages } = get(this.store);
+		let message: DisplayMessage;
+		if (typeof msg === "string") {
+			message = {
+				message: msg,
+				level,
+			};
+		} else {
+			message = msg;
+		}
+
+		this.dispatch({ messages: [...messages, message] });
 	}
 
-	public dequeueError(): MaybeError {
-		const { errors } = get(this.store);
-		const [err, ...rest] = errors;
-		this.dispatch({ errors: rest });
+	public dequeueMessage(): MaybeError {
+		const { messages } = get(this.store);
+		const [err, ...rest] = messages;
+		this.dispatch({ messages: rest });
 		return err;
 	}
 }
