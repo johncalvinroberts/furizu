@@ -24,7 +24,7 @@
 		background: var(--light);
 		color: var(--dark);
 		border: solid 1px var(--dark);
-		border-radius: 5px;
+		border-radius: var(--spacing);
 		transition: all 0.2s ease;
 	}
 

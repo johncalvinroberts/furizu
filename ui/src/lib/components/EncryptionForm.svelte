@@ -60,9 +60,19 @@
 		/>
 		<!-- <div class="pointless-seperator" /> -->
 		<Input label="Secret Key" type="text" name="secret" bind:value={password}>
-			<InfoTip title="Secrettttt thing don't lose it" />
+			<div class="infotip-box">
+				<InfoTip
+					title="The Secret Key is like a password, used to encrypt and decrypt your files. Don't lose this!"
+				/>
+			</div>
 		</Input>
-		<Input name="hint" label="Hint" bind:value={hint} tip="Optional secret key hint" />
+		<Input name="hint" label="Hint (optional)" bind:value={hint}>
+			<div class="infotip-box">
+				<InfoTip
+					title="The hint will be displayed before decrypting the file, in case the Secret Key is lost."
+				/>
+			</div>
+		</Input>
 		<div class="bottom-box">
 			<Button type="reset">Cancel</Button>
 			<Button type="submit" disabled={!password}>Encrypt</Button>
@@ -102,5 +112,9 @@
 	.file-preview {
 		flex: 0 0 100%;
 		max-width: 300px;
+	}
+	.infotip-box {
+		flex: 1;
+		padding-left: var(--spacing);
 	}
 </style>

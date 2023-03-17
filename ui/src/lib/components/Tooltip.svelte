@@ -3,16 +3,18 @@
 	let isHovered = false;
 	let x: number;
 	let y: number;
+	let className = "";
+	export { className as class };
 
 	const handleMouseOver = (event: MouseEvent) => {
 		isHovered = true;
-		x = event.pageX + 5;
-		y = event.pageY + 5;
+		x = event.offsetX + 5;
+		y = event.offsetY + 5;
 	};
 
 	const handleMouseMove = (event: MouseEvent) => {
-		x = event.pageX + 5;
-		y = event.pageY + 5;
+		x = event.offsetX + 5;
+		y = event.offsetY + 5;
 	};
 
 	const handleFocus = () => {
@@ -29,6 +31,7 @@
 	on:mouseleave={handleMouseLeave}
 	on:mousemove={handleMouseMove}
 	on:focus={handleFocus}
+	class={`box ${className}`}
 >
 	<slot />
 	{#if isHovered}
@@ -37,12 +40,21 @@
 </div>
 
 <style>
+	.box {
+		position: relative;
+		cursor: pointer;
+	}
+
 	.tooltip {
-		border: 1px solid #ddd;
-		box-shadow: 1px 1px 1px #ddd;
-		background: white;
-		border-radius: 4px;
-		padding: 4px;
+		background-color: var(--light);
+		color: var(--dark);
+		box-shadow: var(--boxy-shadow);
+		border: solid 1px var(--dark);
+		border-radius: var(--spacing);
+		padding: var(--spacing);
 		position: absolute;
+		line-height: var(--default-line-height);
+		width: 120px;
+		z-index: var(--z-index-popover);
 	}
 </style>

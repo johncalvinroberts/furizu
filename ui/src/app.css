@@ -21,6 +21,7 @@
 	--spacing: 5px;
 	--font-family-chicago: "Chicago", sans-serif;
 	--z-index-popover: 99;
+	--default-line-height: 1.2;
 }
 
 @media (max-width: 1250px) {
@@ -51,7 +52,7 @@ input {
 	margin: 0;
 	font-family: var(--font-family-chicago);
 	font-size: var(--font-size-normal);
-	line-height: 1.5;
+	line-height: var(--default-line-height);
 	color: var(--dark);
 	text-align: left;
 }
