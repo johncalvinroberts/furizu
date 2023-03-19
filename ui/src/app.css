@@ -8,6 +8,7 @@
 	--gray: #8792a2;
 	--opaque: #ffffff8f;
 	--error: #dc3545;
+	--success: pink;
 	--light: #ffffff;
 	--dark: #000000;
 	--font-size-small: 10px;
@@ -21,6 +22,7 @@
 	--spacing: 5px;
 	--font-family-chicago: "Chicago", sans-serif;
 	--z-index-popover: 99;
+	--z-index-msg-center: 999;
 	--default-line-height: 1.2;
 }
 

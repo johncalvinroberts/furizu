@@ -3,7 +3,6 @@
 	import Button from "./Button.svelte";
 
 	type DropdownItem = {
-		// Icon: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 		Icon: typeof SvelteComponent;
 		label: string;
 		href?: string;
@@ -14,7 +13,8 @@
 	export let options: DropdownItem[] = [];
 
 	const toggle = () => (isOpen = !isOpen);
-	const handleMouseLeave = () => {
+	const handleMouseLeave = (e: MouseEvent) => {
+		console.log(e.relatedTarget);
 		if (isOpen) toggle();
 	};
 </script>

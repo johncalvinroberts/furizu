@@ -11,6 +11,7 @@
 	import Modal from "../lib/components/modal/Modal.svelte";
 	import Toy from "../lib/components/Toy.svelte";
 	import OverlayLoading from "../lib/components/OverlayLoading.svelte";
+	import Messages from "../lib/components/Messages.svelte";
 
 	let initialFocusElement: HTMLElement;
 	let returnFocusElement: HTMLElement;
@@ -76,6 +77,7 @@
 </main>
 
 <Toy />
+<Messages />
 
 <style>
 	nav {

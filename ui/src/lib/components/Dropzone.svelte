@@ -1,7 +1,7 @@
 <script lang="ts">
 	import FileDrop from "filedrop-svelte";
 	import { encrypter } from "../stores/encrypter";
-	import Plus from "./Plus.svelte";
+	import AnimatedPlus from "./AnimatedPlus.svelte";
 	import { browser } from "$app/environment";
 
 	const { handleFiles } = encrypter;
@@ -26,12 +26,12 @@
 				on:mouseleave={() => (isDraggingOver = false)}
 				on:focus={() => (isDraggingOver = true)}
 			>
-				<Plus {isDraggingOver} />
+				<AnimatedPlus {isDraggingOver} />
 			</div>
 		</FileDrop>
 	{:else}
 		<div class="dropzone">
-			<Plus {isDraggingOver} />
+			<AnimatedPlus {isDraggingOver} />
 		</div>
 	{/if}
 

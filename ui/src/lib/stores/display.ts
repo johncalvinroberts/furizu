@@ -1,12 +1,6 @@
 import { get } from "svelte/store";
 import { THEME_LOCAL_STORAGE_KEY } from "../constants";
-import type {
-	MaybeError,
-	DisplayState,
-	Theme,
-	DisplayMessageLevel,
-	DisplayMessage,
-} from "../../types/types";
+import type { DisplayState, Theme, DisplayMessageLevel, DisplayMessage } from "../../types/types";
 import BaseStore from "./base";
 import { browser } from "$app/environment";
 
@@ -63,13 +57,14 @@ class DisplayStore extends BaseStore<DisplayState> {
 		}
 
 		this.dispatch({ messages: [...messages, message] });
+		setTimeout(() => this.dequeueMessage(), 7000);
 	}
 
-	public dequeueMessage(): MaybeError {
+	public dequeueMessage(): DisplayMessage {
 		const { messages } = get(this.store);
-		const [err, ...rest] = messages;
+		const [msg, ...rest] = messages;
 		this.dispatch({ messages: rest });
-		return err;
+		return msg;
 	}
 }
 

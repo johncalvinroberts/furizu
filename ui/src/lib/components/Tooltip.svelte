@@ -50,11 +50,11 @@
 		color: var(--dark);
 		box-shadow: var(--boxy-shadow);
 		border: solid 1px var(--dark);
-		border-radius: var(--spacing);
 		padding: var(--spacing);
-		position: absolute;
 		line-height: var(--default-line-height);
-		width: 120px;
+		width: 140px;
 		z-index: var(--z-index-popover);
+		position: absolute;
+		transition: all 0.1s ease;
 	}
 </style>
