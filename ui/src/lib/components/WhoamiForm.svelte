@@ -4,6 +4,7 @@
 	import Button from "./Button.svelte";
 	import Form from "./form/Form.svelte";
 	import Input from "./form/Input.svelte";
+	import OverlayLoading from "./OverlayLoading.svelte";
 
 	export let title = "Authenticate who you are";
 	let step: "START_WHOAMI" | "TRY_WHOAMI" = "START_WHOAMI";
@@ -12,6 +13,7 @@
 	let otp: string;
 
 	const { store: displayStore } = display;
+	const { store: apiClientStore } = apiClient;
 
 	const handleStartWhoami = async () => {
 		await apiClient.startWhoamiChallenge(email);
@@ -26,6 +28,10 @@
 		}
 	};
 </script>
+
+{#if $apiClientStore.isAuthLoading}
+	<OverlayLoading height={"312px"} />
+{/if}
 
 <div class="box">
 	<h3>{title}</h3>

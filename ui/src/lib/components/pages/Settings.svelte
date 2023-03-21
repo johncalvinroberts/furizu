@@ -3,6 +3,7 @@
 	import ThemeSwitch from "../ThemeSwitch.svelte";
 	import { apiClient } from "../../stores/api";
 	const back = "<-";
+	const { store } = apiClient;
 </script>
 
 <div>
@@ -14,9 +15,11 @@
 		Home
 	</a>
 	<ThemeSwitch />
-	<section>
-		<Button on:click={apiClient.endSession}>End Session</Button>
-	</section>
+	{#if $store.isAuthenticated}
+		<section>
+			<Button on:click={apiClient.endSession}>End Session</Button>
+		</section>
+	{/if}
 </div>
 
 <style>

@@ -10,8 +10,8 @@
 	import WhoamiForm from "../lib/components/WhoamiForm.svelte";
 	import Modal from "../lib/components/modal/Modal.svelte";
 	import Toy from "../lib/components/Toy.svelte";
-	import OverlayLoading from "../lib/components/OverlayLoading.svelte";
 	import Messages from "../lib/components/Messages.svelte";
+	import Online from "../lib/components/Online.svelte";
 
 	let initialFocusElement: HTMLElement;
 	let returnFocusElement: HTMLElement;
@@ -63,9 +63,6 @@
 
 {#if $displayStore.isAuthModalOpen}
 	<Modal onDismiss={() => display.toggleAuthModal()} {returnFocusElement} {initialFocusElement}>
-		{#if $apiClientStore.isAuthLoading}
-			<OverlayLoading height={"312px"} />
-		{/if}
 		<div class="form-wrapper">
 			<WhoamiForm />
 		</div>
@@ -78,6 +75,7 @@
 
 <Toy />
 <Messages />
+<Online />
 
 <style>
 	nav {
@@ -95,11 +93,6 @@
 		padding: calc(var(--spacing) * 4);
 		min-height: calc(100vh - var(--nav-height));
 		display: flex;
-	}
-
-	:global(.whoami-modal-card) {
-		min-width: 400px;
-		padding: var(--spacing);
 	}
 
 	.form-wrapper {

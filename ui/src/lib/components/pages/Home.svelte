@@ -6,6 +6,7 @@
 	import { encrypter } from "../../stores/encrypter";
 	const { store: encrypterStore } = encrypter;
 	$: state = $encrypterStore.state;
+	$: innerWidth = 0;
 </script>
 
 <Card class="encrypter-card" isDraggable>
@@ -16,9 +17,14 @@
 		<Encrypter />
 	</div>
 </Card>
-<div class="banner-box">
-	<Banner />
-</div>
+
+{#if innerWidth > 1000}
+	<div class="banner-box">
+		<Banner />
+	</div>
+{/if}
+
+<svelte:window bind:innerWidth />
 
 <style>
 	.card-inner {
@@ -28,7 +34,7 @@
 
 	:global(.encrypter-card) {
 		min-height: 600px;
-		width: 380px;
+		width: var(--encrypter-card-width);
 		position: absolute;
 	}
 	.banner-box {

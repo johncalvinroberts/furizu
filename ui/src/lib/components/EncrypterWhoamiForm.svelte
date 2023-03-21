@@ -18,6 +18,7 @@
 		max-width: 300px;
 		height: 100%;
 		height: 200px;
+		position: relative;
 	}
 	button.back {
 		border: none;

@@ -44,7 +44,7 @@
 		position: fixed;
 		z-index: var(--z-index-popover);
 		font-size: var(--font-size-small);
-		width: 160px;
+		width: var(--message-width);
 		z-index: var(--z-index-msg-center);
 		right: 10px;
 	}

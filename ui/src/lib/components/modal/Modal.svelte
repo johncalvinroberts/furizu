@@ -14,7 +14,7 @@
 
 <style>
 	:global(.modal-card) {
-		min-width: 400px;
+		min-width: var(--modal-min-width);
 		position: relative;
 	}
 </style>

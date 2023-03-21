@@ -1,5 +1,6 @@
 <script lang="ts">
 	export let title = "";
+	import { fade } from "svelte/transition";
 	let isHovered = false;
 	let x: number;
 	let y: number;
@@ -35,7 +36,14 @@
 >
 	<slot />
 	{#if isHovered}
-		<div style="top: {y}px; left: {x}px;" class="tooltip" aria-expanded={isHovered}>{title}</div>
+		<div
+			style="top: {y}px; left: {x}px;"
+			class="tooltip"
+			aria-expanded={isHovered}
+			transition:fade={{ duration: 100 }}
+		>
+			{title}
+		</div>
 	{/if}
 </div>
 

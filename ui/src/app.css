@@ -24,11 +24,17 @@
 	--z-index-popover: 99;
 	--z-index-msg-center: 999;
 	--default-line-height: 1.2;
+	--modal-min-width: 400px;
+	--encrypter-card-width: 380px;
+	--message-width: 160px;
 }
 
 @media (max-width: 1250px) {
 	:root {
 		--font-size-huge: 80px;
+		--modal-min-width: 280px;
+		--encrypter-card-width: calc(100% - var(--spacing) * 8);
+		--message-width: calc(100% - var(--spacing) * 4);
 	}
 }
 
