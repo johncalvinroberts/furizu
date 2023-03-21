@@ -35,14 +35,14 @@
 >
 	<slot />
 	{#if isHovered}
-		<div style="top: {y}px; left: {x}px;" class="tooltip">{title}</div>
+		<div style="top: {y}px; left: {x}px;" class="tooltip" aria-expanded={isHovered}>{title}</div>
 	{/if}
 </div>
 
 <style>
 	.box {
 		position: relative;
-		cursor: pointer;
+		cursor: help;
 	}
 
 	.tooltip {
