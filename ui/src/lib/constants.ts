@@ -29,7 +29,7 @@ export const MESSAGE: Record<string, MessageKey> = {
 
 export const JWT_AUTH_HEADER = "x-jwt";
 export const JWT_LOCAL_STORAGE_KEY = "furizu-jwt";
-export const API_BASE_URL = env.PUBLIC_API_BASE_URL;
+export const API_BASE_URL = env.PUBLIC_API_BASE_URL || "/";
 export const IS_PROD = import.meta.env.PROD;
 
 export const GET = "GET";
