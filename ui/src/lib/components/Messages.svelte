@@ -7,6 +7,3 @@
 {#each $store.messages as message, offset}
 	<Message {message} {offset} />
 {/each}
-
-<style>
-</style>
