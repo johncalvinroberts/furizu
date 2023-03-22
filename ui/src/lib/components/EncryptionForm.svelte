@@ -8,7 +8,7 @@
 	import InfoTip from "./InfoTip.svelte";
 
 	const { store, reset, handleEncrypt, handleFiles } = encrypter;
-	$: files = $store.filesToEncrypt ?? [];
+	$: files = $store.files ?? [];
 	let password = "";
 	let hint = "";
 

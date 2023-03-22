@@ -7,7 +7,7 @@
 	const { store: encrypterStore } = encrypter;
 	$: state = $encrypterStore.state;
 	$: innerWidth = 0;
-	$: isMobile = innerWidth < 900;
+	$: isMobile = innerWidth < 1000;
 </script>
 
 <Card class="encrypter-card" isDraggable>

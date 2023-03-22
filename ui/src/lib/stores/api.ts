@@ -16,6 +16,7 @@ import {
 import { delay, extractErrorMessageString } from "../utils";
 import BaseStore from "./base";
 import { display } from "./display";
+import { encrypter } from "./encrypter";
 import { browser } from "$app/environment";
 
 const MIN_TOKEN_REFRESH_MS = 1000 * 60; // 1 min
@@ -134,6 +135,7 @@ class APIClientStore extends BaseStore<APIClientState> {
 	public endSession() {
 		localStorage.removeItem(JWT_LOCAL_STORAGE_KEY);
 		this.reset();
+		encrypter.reset();
 	}
 
 	public get<T>(path: string): Promise<T> {

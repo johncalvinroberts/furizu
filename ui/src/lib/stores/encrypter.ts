@@ -5,10 +5,11 @@ import type { EncrypterState, MessageKey, MessagePayload } from "../../types/typ
 import IsomorphicWorker from "../isomorphic-worker";
 import BaseStore from "./base";
 import { apiClient } from "./api";
+import { display } from "./display";
 
 const initialState: EncrypterState = {
 	isProcessing: false,
-	filesToEncrypt: undefined,
+	files: undefined,
 	ciphertext: undefined,
 	password: undefined,
 	hint: undefined,
@@ -17,6 +18,7 @@ const initialState: EncrypterState = {
 	crypString: undefined,
 	decryptedFiles: undefined,
 	totalFileBytes: undefined,
+	isCrypFile: false,
 };
 
 class EncrypterStore extends BaseStore<EncrypterState> {
@@ -52,13 +54,15 @@ class EncrypterStore extends BaseStore<EncrypterState> {
 
 	public handleFiles = async (files: File[]) => {
 		const isCrypFile = files?.[0]?.name?.trim()?.endsWith(CRYP_FILE_EXTENSION);
+		console.log({ files });
 		if (!isCrypFile) {
-			const { filesToEncrypt: currentFiles = [] } = get(this.store);
-			const filesToEncrypt = [...currentFiles, ...files];
+			const { files: currentFiles = [] } = get(this.store);
+			const nextFiles = [...currentFiles, ...files];
+			console.log({ nextFiles });
 			const totalFileBytes = files.reduce((memo, current) => {
 				return memo + current.size;
 			}, 0);
-			this.dispatch({ filesToEncrypt, state: STATE.SHOULD_ENCRYPT, totalFileBytes });
+			this.dispatch({ files: nextFiles, state: STATE.SHOULD_ENCRYPT, totalFileBytes, isCrypFile });
 		}
 		if (isCrypFile) {
 			const arrayBuffer = await files?.[0].arrayBuffer();
@@ -69,11 +73,13 @@ class EncrypterStore extends BaseStore<EncrypterState> {
 				hint,
 				crypString,
 				state: STATE.SHOULD_DECRYPT,
+				isCrypFile,
+				files,
 			});
 		}
 	};
 
-	public handleEncrypt = async (password: string, hint: string) => {
+	public handleEncrypt = async (password: string, hint?: string) => {
 		const { isAuthenticated } = get(apiClient.store);
 		const nextState = isAuthenticated ? STATE.PROCESSING : STATE.SHOULD_AUTHENTICATE;
 		this.dispatch({
@@ -97,6 +103,29 @@ class EncrypterStore extends BaseStore<EncrypterState> {
 			this.postMessage(MESSAGE.DECRYPT);
 		}
 	};
+
+	public handleAuthSuccess() {
+		const { isCrypFile, password, files, hint } = get(this.store);
+		if (isCrypFile && password) {
+			this.handleDecrypt(password);
+		}
+
+		if (isCrypFile && !password && files) {
+			this.handleFiles(files);
+		}
+		if (isCrypFile && !password && !files) {
+			display.enqueueMessage("No password or files. Unable to decrypt.", "error");
+		}
+		if (!isCrypFile && password) {
+			this.handleEncrypt(password, hint);
+		}
+		if (!isCrypFile && !password && files) {
+			this.handleFiles(files);
+		}
+		if (!isCrypFile && !password && !files) {
+			display.enqueueMessage("No password or files. Unable to encrypt.", "error");
+		}
+	}
 }
 
 export const encrypter = new EncrypterStore();

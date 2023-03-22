@@ -2,6 +2,8 @@
 	import { onDestroy, onMount } from "svelte";
 	import { delay } from "../utils";
 	export let height = "100vh";
+	let className = "";
+	export { className as class };
 
 	let progress = 0;
 	let keepGoing = true;
@@ -19,7 +21,7 @@
 	onDestroy(() => stop());
 </script>
 
-<div class="overlay vertical-center" style="height: {height};">
+<div class="overlay vertical-center {className}" style="height: {height};">
 	<div class="vertical-center">
 		<div class="bar">
 			<div class="progress" style="width: {progress}%" />

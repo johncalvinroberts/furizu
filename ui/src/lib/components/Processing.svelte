@@ -34,7 +34,7 @@
 </script>
 
 <div class="box vertical-center">
-	<OverlayLoading />
+	<OverlayLoading height="200px" class="processing-overlay" />
 	<div class="bar truncate">
 		{#each randomChars as row}
 			<div>
@@ -46,9 +46,9 @@
 
 <style>
 	.box {
-		min-height: 100px;
 		position: relative;
 		width: 100%;
+		/* margin-top: -20px; */
 	}
 	.bar {
 		background-color: var(--light);
@@ -60,5 +60,8 @@
 		left: 0;
 		right: 0;
 		z-index: var(--z-index-popover);
+	}
+	:global(.processing-overlay) {
+		margin-top: -77px;
 	}
 </style>

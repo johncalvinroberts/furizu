@@ -1,11 +1,19 @@
 <script lang="ts">
 	import { encrypter } from "../stores/encrypter";
+	import { apiClient } from "../stores/api";
 	import { STATE } from "../constants";
 	import WhoamiForm from "./WhoamiForm.svelte";
+
 	const backText = "<- Back";
-	const handleBack = () => {
-		encrypter.dispatch({ state: STATE.SHOULD_ENCRYPT });
-	};
+	const handleBack = () => encrypter.dispatch({ state: STATE.SHOULD_ENCRYPT });
+
+	const { store: apiClientStore } = apiClient;
+
+	$: {
+		if ($apiClientStore.isAuthenticated) {
+			encrypter.handleAuthSuccess();
+		}
+	}
 </script>
 
 <div class="box">

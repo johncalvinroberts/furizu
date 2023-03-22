@@ -21,7 +21,7 @@ export type HexEncodedFile = {
 
 export type EncrypterState = {
 	isProcessing: boolean;
-	filesToEncrypt: File[] | undefined;
+	files: File[] | undefined;
 	ciphertext: string | undefined;
 	state: StateKey;
 	password: string | undefined;
@@ -30,6 +30,7 @@ export type EncrypterState = {
 	crypString: string | undefined;
 	decryptedFiles: File[] | undefined;
 	totalFileBytes: number | undefined;
+	isCrypFile: boolean;
 };
 
 export type APIClientState = {
