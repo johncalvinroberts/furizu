@@ -7,6 +7,7 @@
 	const { store: encrypterStore } = encrypter;
 	$: state = $encrypterStore.state;
 	$: innerWidth = 0;
+	$: isMobile = innerWidth < 900;
 </script>
 
 <Card class="encrypter-card" isDraggable>
@@ -14,11 +15,14 @@
 		{state}
 	</MacintoshBar>
 	<div class="card-inner vertical-center">
+		{#if isMobile && state === "INITIAL"}
+			<Banner />
+		{/if}
 		<Encrypter />
 	</div>
 </Card>
 
-{#if innerWidth > 1000}
+{#if !isMobile}
 	<div class="banner-box">
 		<Banner />
 	</div>
@@ -28,12 +32,12 @@
 
 <style>
 	.card-inner {
-		min-height: 600px;
+		min-height: var(--encrypter-card-height);
 		padding-bottom: calc(var(--spacing) * 4);
 	}
 
 	:global(.encrypter-card) {
-		min-height: 600px;
+		min-height: var(--encrypter-card-height);
 		width: var(--encrypter-card-width);
 		position: absolute;
 	}

@@ -20,7 +20,7 @@
 <div
 	class="box"
 	style="top: {(offset + 1) * 10 + NAV_HEIGHT}px;"
-	transition:fly={{ y: 200, duration: 400 }}
+	in:fly={{ y: 200, duration: 400 }}
 >
 	<div class="vertical-center inner">
 		<div class="title">
@@ -47,6 +47,7 @@
 		width: var(--message-width);
 		z-index: var(--z-index-msg-center);
 		right: 10px;
+		transition: top 0.2s ease;
 	}
 	.inner {
 		justify-content: space-between;

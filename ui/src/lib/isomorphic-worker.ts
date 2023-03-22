@@ -1,5 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
+/**
+ * A stubbed implementation of the Worker API interface
+ * Designed to be able to run on the server (Node or Deno) with no side effects and no off-limit apis.
+ *
+ * The entire API is  actually a noop, nothing runs.
+ */
 class StubWorker implements Worker {
 	onmessage() {
 		// noop
@@ -38,6 +44,10 @@ class StubWorker implements Worker {
 	}
 }
 
+/**
+ * Designed to be able to run on both server and the browser.
+ * When run on the server it merely stubs the Worker API interface.
+ */
 const IsomorphicWorker = typeof window == "undefined" ? StubWorker : Worker;
 
 export default IsomorphicWorker;

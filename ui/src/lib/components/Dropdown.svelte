@@ -13,8 +13,7 @@
 	export let options: DropdownItem[] = [];
 
 	const toggle = () => (isOpen = !isOpen);
-	const handleMouseLeave = (e: MouseEvent) => {
-		console.log(e.relatedTarget);
+	const handleMouseLeave = () => {
 		if (isOpen) toggle();
 	};
 </script>

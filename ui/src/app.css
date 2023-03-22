@@ -26,15 +26,17 @@
 	--default-line-height: 1.2;
 	--modal-min-width: 400px;
 	--encrypter-card-width: 380px;
+	--encrypter-card-height: 600px;
 	--message-width: 160px;
 }
 
-@media (max-width: 1250px) {
+@media (max-width: 900px) {
 	:root {
 		--font-size-huge: 80px;
 		--modal-min-width: 280px;
 		--encrypter-card-width: calc(100% - var(--spacing) * 8);
 		--message-width: calc(100% - var(--spacing) * 4);
+		--encrypter-card-height: calc(100vh - var(--nav-height) - calc(var(--spacing) * 13));
 	}
 }
 
