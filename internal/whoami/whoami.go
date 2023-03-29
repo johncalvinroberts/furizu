@@ -36,6 +36,9 @@ func (svc *WhoamiService) FindWhoamiChallenge(email string) (string, error) {
 
 // create otp + start whoami flow
 func (svc *WhoamiService) StartWhoamiChallenge(email string) error {
+	if email == "" {
+		return errors.ErrValidationFailure
+	}
 	otp := utils.RandomSecret(OTP_LENGTH)
 	key := storage.ComposeKey(WHOAMI_CHALLENGE_PREFIX, email)
 	_, err := svc.storageSrv.Write(svc.whoamiBucketName, key, strings.NewReader(otp))
@@ -52,6 +55,9 @@ func (svc *WhoamiService) StartWhoamiChallenge(email string) error {
 
 // redeem otp
 func (svc *WhoamiService) TryWhoamiChallenge(email string, otp string) (string, error) {
+	if email == "" || otp == "" {
+		return "", errors.ErrValidationFailure
+	}
 	challenge, err := svc.FindWhoamiChallenge(email)
 	if err != nil {
 		log.Printf("encountered error when finding whoami challenge: %v\n", err)

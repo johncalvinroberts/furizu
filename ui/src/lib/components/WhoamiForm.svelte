@@ -36,7 +36,7 @@
 <div class="box">
 	<h3>{title}</h3>
 	<Form on:submit={handleStartWhoami} disabled={step === "TRY_WHOAMI"}>
-		<Input name="email" type="email" label="Email" bind:value={email} />
+		<Input name="email" type="email" label="Email" bind:value={email} required />
 		<Button type="submit">{step === "TRY_WHOAMI" ? "Resend Code" : "Send Code"}</Button>
 	</Form>
 	<Form on:submit={tryWhoamiChallenge} disabled={step !== "TRY_WHOAMI"} prevent:default>
@@ -47,6 +47,7 @@
 			disabled={step !== "TRY_WHOAMI"}
 			bind:value={otp}
 			ref={tryWhoamiChallengeInput}
+			required
 		/>
 		<Button type="submit" disabled={step !== "TRY_WHOAMI"}>Submit</Button>
 	</Form>
