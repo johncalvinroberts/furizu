@@ -41,12 +41,14 @@ func (svc *WhoamiService) HandleTryWhoamiChallenge(c echo.Context) error {
 
 func (svc *WhoamiService) HandleGetWhoami(c echo.Context) error {
 	// TODO: get info about current token holder
-	// uploads, credits, etc.
 	return utils.RespondOK(c, "good")
 }
 
 func (svc *WhoamiService) HandleRefreshWhoamiToken(c echo.Context) error {
-	token := extractTokenFromRequest(c)
+	token, err := extractTokenFromRequest(c)
+	if err != nil || token == "" {
+		return utils.RespondUnauthorized(c, err)
+	}
 	claims, err := svc.tokenSrv.VerifyTokenAndParseClaims(token)
 	// error parsing JWT
 	if err != nil {
@@ -65,8 +67,11 @@ func (svc *WhoamiService) HandleRefreshWhoamiToken(c echo.Context) error {
 }
 
 func (svc *WhoamiService) HandleDestroyWhoamiToken(c echo.Context) error {
-	token := extractTokenFromRequest(c)
-	err := svc.tokenSrv.EvictToken(token)
+	token, err := extractTokenFromRequest(c)
+	if err != nil || token == "" {
+		return utils.RespondUnauthorized(c, err)
+	}
+	err = svc.tokenSrv.EvictToken(token)
 	if err != nil {
 		return utils.RespondError(c, http.StatusBadRequest, err)
 	} else {
@@ -80,7 +85,10 @@ func (svc *WhoamiService) HandleDestroyEverything(c echo.Context) error {
 
 func (svc *WhoamiService) VerifyWhoamiMiddleware(endpointHandler echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		token := extractTokenFromRequest(c)
+		token, err := extractTokenFromRequest(c)
+		if err != nil || token == "" {
+			return utils.RespondUnauthorized(c, err)
+		}
 		claims, err := svc.tokenSrv.VerifyTokenAndParseClaims(token)
 		// error parsing JWT
 		if err != nil {
@@ -97,11 +105,11 @@ func GetUserFromContext(c echo.Context) *token.Claims {
 	return c.Get(CTX_JWT_CLAIMS_KEY).(*token.Claims)
 }
 
-func extractTokenFromRequest(c echo.Context) string {
-	token := c.Request().Header.Get("Authorization")
+func extractTokenFromRequest(c echo.Context) (string, error) {
+	token := c.Request().Header.Get("x-jwt") // TODO: make this header config driven, lest it gets buried again
 	// no token in header
 	if token == "" {
-		utils.RespondUnauthorized(c, errors.ErrUnauthorized)
+		return "", errors.ErrUnauthorized
 	}
-	return token
+	return token, nil
 }

@@ -12,6 +12,9 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// 1gb
+const DEFAULT_FREE_BALANCE_BYTES int64 = 1024 * 1024 * 1024
+
 type AppConfig struct {
 	Debug              bool     `env:"DEBUG,required"`
 	GinMode            string   `env:"GIN_MODE,required"`
@@ -35,6 +38,7 @@ type AppConfig struct {
 		BlobBucketName        string `env:"BLOB_BUCKET_NAME,required"`
 		BlobPointerBucketName string `env:"BLOB_POINTERS_BUCKET_NAME,required"`
 	}
+	FreeBalanceBytes int64 `env:"DEFAULT_FREE_BALANCE_BYTES"`
 }
 
 func InitAppConfig() *AppConfig {
@@ -54,6 +58,7 @@ func InitAppConfig() *AppConfig {
 			massagedAllowOrigins = append(massagedAllowOrigins, strings.TrimSpace(str))
 		}
 	}
+	c.FreeBalanceBytes = DEFAULT_FREE_BALANCE_BYTES
 	c.AllowOrigins = massagedAllowOrigins
 	c.AWSSession = session.Must(session.NewSession(&aws.Config{
 		S3ForcePathStyle: aws.Bool(true),

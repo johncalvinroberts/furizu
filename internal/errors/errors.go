@@ -22,4 +22,7 @@ var (
 
 	// email
 	ErrUnableToSendEmail = goerrs.New("unable to send email")
+
+	// blobs
+	ErrBalanceLimitExceeded = goerrs.New("insufficent blob balance")
 )

@@ -102,6 +102,10 @@ func (svc *WhoamiService) RefreshWhoamiToken(token string, claims *token.Claims)
 	return jwt, nil
 }
 
+func (svc *WhoamiService) GetWhoami() error {
+	return nil
+}
+
 func InitWhoamiService(JWTSecret string, whoamiBucketName string, TokenTTLMins int, storageSrv *storage.StorageService, emailSrv *email.EmailService) *WhoamiService {
 	return &WhoamiService{
 		secret:           JWTSecret,

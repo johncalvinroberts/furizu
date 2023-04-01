@@ -1,11 +1,12 @@
 import { get } from "svelte/store";
-import { parseCrypString } from "../utils";
+import { extractErrorMessageString, parseCrypString } from "../utils";
 import { CRYP_FILE_EXTENSION, STATE, MESSAGE } from "../constants";
 import type { EncrypterState, MessageKey, MessagePayload } from "../../types/types";
 import IsomorphicWorker from "../isomorphic-worker";
 import BaseStore from "./base";
 import { apiClient } from "./api";
 import { display } from "./display";
+import { blobsStore } from "./blobs";
 
 const initialState: EncrypterState = {
 	isProcessing: false,
@@ -34,8 +35,24 @@ class EncrypterStore extends BaseStore<EncrypterState> {
 	}
 
 	private handleMessage = (msg: MessageEvent<MessagePayload>) => {
-		const { payload } = msg.data;
+		const { payload, type } = msg.data;
 		this.dispatch(payload);
+		switch (type) {
+			case MESSAGE.ENCRYPTED:
+				this.handleEncryptSuccess();
+				break;
+			case MESSAGE.DECRYPTED:
+				this.dispatch({ state: STATE.DONE });
+				break;
+			case MESSAGE.FAILURE:
+				display.enqueueMessage(extractErrorMessageString(payload.error), "error");
+				this.dispatch({ state: STATE.FAILURE });
+				break;
+			default:
+				display.enqueueMessage("Unknown message received from crypto worker", "error");
+				this.dispatch({ state: STATE.FAILURE });
+				break;
+		}
 	};
 
 	private postMessage = (type: MessageKey) => {
@@ -54,11 +71,9 @@ class EncrypterStore extends BaseStore<EncrypterState> {
 
 	public handleFiles = async (files: File[]) => {
 		const isCrypFile = files?.[0]?.name?.trim()?.endsWith(CRYP_FILE_EXTENSION);
-		console.log({ files });
 		if (!isCrypFile) {
 			const { files: currentFiles = [] } = get(this.store);
 			const nextFiles = [...currentFiles, ...files];
-			console.log({ nextFiles });
 			const totalFileBytes = files.reduce((memo, current) => {
 				return memo + current.size;
 			}, 0);
@@ -124,6 +139,33 @@ class EncrypterStore extends BaseStore<EncrypterState> {
 		}
 		if (!isCrypFile && !password && !files) {
 			display.enqueueMessage("No password or files. Unable to encrypt.", "error");
+		}
+	}
+
+	private async handleEncryptSuccess() {
+		try {
+			const { crypString, files } = get(this.store);
+			if (!crypString) {
+				const message = "Ciphertext gone. Unable to persist cryptfile.";
+				throw new Error(message);
+			}
+			if (!files?.length) {
+				const message = "Files gone. Unable to persist cryptfile.";
+				throw new Error(message);
+			}
+			const title = files.reduce((memo: string, current: File) => {
+				const currentName = current.name ?? "Unknown File name";
+				if (memo.length > 0) {
+					memo += ", ";
+				}
+				memo += currentName;
+				return memo;
+			}, "");
+			await blobsStore.createBlob(crypString, title);
+			this.dispatch({ state: STATE.DONE });
+		} catch (error) {
+			display.enqueueMessage(extractErrorMessageString(error), "error");
+			this.dispatch({ state: STATE.FAILURE, error });
 		}
 	}
 }

@@ -26,7 +26,7 @@ export type EncrypterState = {
 	state: StateKey;
 	password: string | undefined;
 	hint: string | undefined;
-	error: Error | undefined;
+	error: MaybeError | undefined;
 	crypString: string | undefined;
 	decryptedFiles: File[] | undefined;
 	totalFileBytes: number | undefined;
@@ -61,8 +61,28 @@ export type ApiResponse<T> = {
 
 export type HTTPMethod = "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "PATCH";
 
-export type HTTPRequestBody = Record<string, unknown> | Blob | File;
+export type HTTPRequestBody = Record<string, unknown> | Blob | File | FormData;
 
 export type Theme = "dark" | "light";
 
 export type MaybeError = Error | string | unknown;
+
+export type BlobItem = {
+	url: string;
+	createdAt: number;
+	updatedAt: number;
+	title: string;
+	key: string;
+	sizeBytes: number;
+};
+
+export type BlobMap = Map<string, BlobItem>;
+
+export type BlobsState = {
+	blobs: BlobMap;
+	count: number;
+	balanceBytes: number;
+	isLoadingBlobs: boolean;
+	isInitialized: boolean;
+	isCreatingBlob: boolean;
+};

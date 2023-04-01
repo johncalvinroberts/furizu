@@ -103,7 +103,12 @@ class APIClientStore extends BaseStore<APIClientState> {
 		}
 	}
 
-	private async fetch<T>(path: string, method: HTTPMethod, body?: HTTPRequestBody): Promise<T> {
+	private async fetch<T>(
+		path: string,
+		method: HTTPMethod,
+		body?: HTTPRequestBody,
+		givenHeaders?: Record<string, string>,
+	): Promise<T> {
 		const { token, isRefreshingToken, isAuthenticated } = get(this.store);
 		if (isRefreshingToken) {
 			await delay(TOKEN_REFRESH_BACKOFF_MS);
@@ -114,7 +119,7 @@ class APIClientStore extends BaseStore<APIClientState> {
 		}
 		let headers: Record<string, string> = {};
 		if (token) {
-			headers = { [JWT_AUTH_HEADER]: token };
+			headers = { [JWT_AUTH_HEADER]: token, ...givenHeaders };
 		}
 		return this.httpClient.fetch<T>(path, method, body, headers);
 	}
@@ -138,24 +143,40 @@ class APIClientStore extends BaseStore<APIClientState> {
 		encrypter.reset();
 	}
 
-	public get<T>(path: string): Promise<T> {
-		return this.fetch(path, GET);
+	public get<T>(path: string, givenHeaders?: Record<string, string>): Promise<T> {
+		return this.fetch(path, GET, givenHeaders);
 	}
 
-	public post<T>(path: string, body: HTTPRequestBody): Promise<T> {
-		return this.fetch(path, POST, body);
+	public post<T>(
+		path: string,
+		body: HTTPRequestBody,
+		givenHeaders?: Record<string, string>,
+	): Promise<T> {
+		return this.fetch(path, POST, body, givenHeaders);
 	}
 
-	public delete<T>(path: string, body: HTTPRequestBody): Promise<T> {
-		return this.fetch(path, DELETE, body);
+	public delete<T>(
+		path: string,
+		body: HTTPRequestBody,
+		givenHeaders?: Record<string, string>,
+	): Promise<T> {
+		return this.fetch(path, DELETE, body, givenHeaders);
 	}
 
-	public patch<T>(path: string, body: HTTPRequestBody): Promise<T> {
-		return this.fetch(path, PATCH, body);
+	public patch<T>(
+		path: string,
+		body: HTTPRequestBody,
+		givenHeaders?: Record<string, string>,
+	): Promise<T> {
+		return this.fetch(path, PATCH, body, givenHeaders);
 	}
 
-	public put<T>(path: string, body: HTTPRequestBody): Promise<T> {
-		return this.fetch(path, PUT, body);
+	public put<T>(
+		path: string,
+		body: HTTPRequestBody,
+		givenHeaders?: Record<string, string>,
+	): Promise<T> {
+		return this.fetch(path, PUT, body, givenHeaders);
 	}
 }
 

@@ -15,9 +15,10 @@ import (
 type BlobService struct {
 	storageSrv                                             *storage.StorageService
 	blobBucketName, blobPointerBucketName, emailMaskSecret string
+	freeBalanceBytes                                       int64
 }
 
-func (svc *BlobService) CreateBlob(file multipart.File, title, email string) (*Blob, error) {
+func (svc *BlobService) CreateBlob(file multipart.File, title, email string, size int64) (*Blob, error) {
 	var (
 		guid          = xid.New()
 		id            = guid.String()
@@ -27,25 +28,30 @@ func (svc *BlobService) CreateBlob(file multipart.File, title, email string) (*B
 	if err != nil {
 		return nil, errors.ErrDataCreationFailure
 	}
-	blob, err := svc.AddBlobPointer(location, key, title, email)
+	blob, err := svc.AddBlobPointer(location, key, title, email, size)
 	if err != nil {
 		return nil, errors.ErrDataCreationFailure
 	}
 	return blob, nil
 }
 
-func (svc *BlobService) AddBlobPointer(url, key, title, email string) (*Blob, error) {
+func (svc *BlobService) AddBlobPointer(url, key, title, email string, size int64) (*Blob, error) {
 	var (
 		now               = time.Now().Unix()
-		blobToAdd         = &Blob{Url: url, CreatedAt: now, UpdatedAt: now, Key: key, Title: title}
+		blobToAdd         = &Blob{Url: url, CreatedAt: now, UpdatedAt: now, Key: key, Title: title, SizeBytes: size}
 		blobPointers, err = svc.FindOrCreateBlobPointers(email)
+		nextBalance       = blobPointers.BalanceBytes - size
 	)
 	if err != nil {
 		return nil, err
 	}
+	if nextBalance < 0 {
+		return nil, errors.ErrBalanceLimitExceeded
+	}
 	// TODO: need to lock the s3 object to prevent concurrent writes to the same object resulting in data loss
 	blobPointers.Blobs = append(blobPointers.Blobs, *blobToAdd)
 	blobPointers.Count++
+	blobPointers.BalanceBytes = nextBalance
 	encodedPointers, err := json.Marshal(blobPointers)
 	if err != nil {
 		return nil, err
@@ -65,6 +71,7 @@ func (svc *BlobService) FindOrCreateBlobPointers(email string) (*BlobPointers, e
 	if err != nil {
 		return nil, err
 	}
+
 	if exists {
 		var existingJSONPointers string
 		// read directly and copy to blobPointers
@@ -73,7 +80,11 @@ func (svc *BlobService) FindOrCreateBlobPointers(email string) (*BlobPointers, e
 			return nil, err
 		}
 		err = json.Unmarshal([]byte(existingJSONPointers), blobPointers)
-	} else {
+	}
+
+	if !exists {
+		// create initial blobPointers file
+		blobPointers.BalanceBytes = svc.freeBalanceBytes
 		var emptyPointersJSON []byte
 		// if doesn't exist, write the empty value to s3
 		emptyPointersJSON, err = json.Marshal(blobPointers)
@@ -139,14 +150,14 @@ func (svc *BlobService) DestroyBlob(email, key string) error {
 	// remove the blob, finally
 	err = svc.storageSrv.Delete(svc.blobBucketName, key)
 	return err
-
 }
 
-func InitBlobService(storageSrv *storage.StorageService, blobBucketName, blobPointerBucketName, emailMaskSecret string) *BlobService {
+func InitBlobService(storageSrv *storage.StorageService, blobBucketName, blobPointerBucketName, emailMaskSecret string, freeBalanceBytes int64) *BlobService {
 	return &BlobService{
 		storageSrv:            storageSrv,
 		blobBucketName:        blobBucketName,
 		blobPointerBucketName: blobPointerBucketName,
 		emailMaskSecret:       emailMaskSecret,
+		freeBalanceBytes:      freeBalanceBytes,
 	}
 }

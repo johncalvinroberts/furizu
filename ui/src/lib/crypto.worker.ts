@@ -1,6 +1,6 @@
 import type { MessagePayload, HexEncodedFile, EncrypterState } from "../types/types";
 import { encrypt, decrypt, hexEncode, hexDecode } from "./crypto";
-import { MESSAGE, STATE, FALLBACK_FILE_NAME } from "./constants";
+import { MESSAGE, FALLBACK_FILE_NAME } from "./constants";
 import { formatCrypString } from "./utils";
 
 // alias self to ctx and give it our newly created type
@@ -20,11 +20,10 @@ class CryptoWorker {
 			const plaintext = JSON.stringify(hexEncodedFiles);
 			const ciphertext = await encrypt(password, plaintext);
 			const crypString = formatCrypString(ciphertext, hint);
-			const payload = { ciphertext, crypString, state: STATE.DONE };
+			const payload = { ciphertext, crypString };
 			ctx.postMessage({ payload, type: MESSAGE.ENCRYPTED });
 		} catch (error) {
 			const payload = {
-				state: STATE.FAILURE,
 				error,
 			};
 			ctx.postMessage({ payload, type: MESSAGE.FAILURE });
@@ -40,11 +39,10 @@ class CryptoWorker {
 				const blob = new Blob([hexDecode(item.hex)]);
 				return new File([blob], item.name);
 			});
-			const payload = { decryptedFiles, state: STATE.DONE };
+			const payload = { decryptedFiles };
 			ctx.postMessage({ payload, type: MESSAGE.DECRYPTED });
 		} catch (error) {
 			ctx.postMessage({
-				state: STATE.FAILURE,
 				error,
 			});
 		}

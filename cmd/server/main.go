@@ -25,13 +25,13 @@ func main() {
 	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"http://localhost:1234", "https://furizu.cc"},
-		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, "x-jwt"},
 		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
 	}))
 	storageSrv := storage.InitStorageService(config.AWSSession, config.Timeout)
 	emailSrv := email.InitEmailService(config)
 	whoamiSrv := whoami.InitWhoamiService(config.JWTSecret, config.Storage.WhoamiBucketName, config.JWTTokenTTL, storageSrv, emailSrv)
-	blobSrv := blob.InitBlobService(storageSrv, config.Storage.BlobBucketName, config.Storage.BlobPointerBucketName, config.EmailMaskSecret)
+	blobSrv := blob.InitBlobService(storageSrv, config.Storage.BlobBucketName, config.Storage.BlobPointerBucketName, config.EmailMaskSecret, config.FreeBalanceBytes)
 	e.GET("/*", echo.WrapHandler(ui.GetHandler()))
 	e.GET("/api/health", health.HandleGetHealth)
 	// // whoami
