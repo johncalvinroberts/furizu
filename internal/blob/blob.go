@@ -23,7 +23,7 @@ func (svc *BlobService) CreateBlob(file, title, email string) (*Blob, error) {
 	var (
 		guid   = xid.New()
 		id     = guid.String()
-		key    = storage.ComposeKey(id, utils.EncryptMessage(svc.emailMaskSecret, email))
+		key    = storage.ComposeKey(id, utils.EncryptMessage(svc.emailMaskSecret, email), "-upload.cryp")
 		reader = strings.NewReader(file)
 		size   = reader.Len()
 	)
