@@ -42,9 +42,10 @@ class CryptoWorker {
 			const payload = { decryptedFiles };
 			ctx.postMessage({ payload, type: MESSAGE.DECRYPTED });
 		} catch (error) {
-			ctx.postMessage({
+			const payload = {
 				error,
-			});
+			};
+			ctx.postMessage({ payload, type: MESSAGE.FAILURE });
 		}
 	};
 

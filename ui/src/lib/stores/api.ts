@@ -65,9 +65,10 @@ class APIClientStore extends BaseStore<APIClientState> {
 		}
 	}
 
-	public async refreshToken() {
+	public async refreshToken(token: string) {
 		try {
-			const res = await this.httpClient.post<RefreshTokenDTO>("api/whoami/refresh", {});
+			const headers = { [JWT_AUTH_HEADER]: token };
+			const res = await this.httpClient.post<RefreshTokenDTO>("api/whoami/refresh", {}, headers);
 			this.handleToken(res.jwt);
 		} catch (error) {
 			display.enqueueMessage(extractErrorMessageString(error), "error");
@@ -114,8 +115,8 @@ class APIClientStore extends BaseStore<APIClientState> {
 			await delay(TOKEN_REFRESH_BACKOFF_MS);
 			return this.fetch<T>(path, method, body);
 		}
-		if (!this.isTokenValid && isAuthenticated) {
-			await this.refreshToken();
+		if (!this.isTokenValid && isAuthenticated && token) {
+			await this.refreshToken(token);
 		}
 		let headers: Record<string, string> = {};
 		if (token) {
