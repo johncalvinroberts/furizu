@@ -2,7 +2,6 @@ package blob
 
 import (
 	"net/http"
-	"os"
 
 	"github.com/johncalvinroberts/cryp/internal/utils"
 	"github.com/johncalvinroberts/cryp/internal/whoami"
@@ -10,33 +9,19 @@ import (
 )
 
 func (svc *BlobService) HandleCreateBlob(c echo.Context) error {
-	file, err := c.FormFile("file")
+	req := &UploadBlobRequestDTO{}
+	err := c.Bind(req)
 	if err != nil {
 		return utils.RespondError(c, http.StatusBadRequest, err)
 	}
-	src, err := file.Open()
-	if err != nil {
-		return err
-	}
-	defer src.Close()
-	// get size of file
-	var size int64
-	switch t := src.(type) {
-	case *os.File:
-		stat, _ := t.Stat()
-		size = stat.Size()
-	default:
-		size, _ = src.Seek(0, 0)
-	}
 	var (
-		claims            = whoami.GetUserFromContext(c)
-		email             = claims.Email
-		title             = c.FormValue("title")
-		blob, createError = svc.CreateBlob(src, title, email, size)
+		claims          = whoami.GetUserFromContext(c)
+		email           = claims.Email
+		blob, createErr = svc.CreateBlob(req.CrypString, req.Title, email)
 	)
 	// TODO: more granular error handling
-	if createError != nil {
-		return utils.RespondError(c, http.StatusBadRequest, createError)
+	if createErr != nil {
+		return utils.RespondError(c, http.StatusBadRequest, createErr)
 	}
 	res := &UploadBlobResponseDTO{
 		Blob{

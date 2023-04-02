@@ -2,7 +2,8 @@ package blob
 
 import (
 	"encoding/json"
-	"mime/multipart"
+	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -18,17 +19,20 @@ type BlobService struct {
 	freeBalanceBytes                                       int64
 }
 
-func (svc *BlobService) CreateBlob(file multipart.File, title, email string, size int64) (*Blob, error) {
+func (svc *BlobService) CreateBlob(file, title, email string) (*Blob, error) {
 	var (
-		guid          = xid.New()
-		id            = guid.String()
-		key           = storage.ComposeKey(id, utils.EncryptMessage(svc.emailMaskSecret, email))
-		location, err = svc.storageSrv.Write(svc.blobBucketName, key, file)
+		guid   = xid.New()
+		id     = guid.String()
+		key    = storage.ComposeKey(id, utils.EncryptMessage(svc.emailMaskSecret, email))
+		reader = strings.NewReader(file)
+		size   = reader.Len()
 	)
+	location, err := svc.storageSrv.Write(svc.blobBucketName, key, reader)
 	if err != nil {
+		log.Printf("Failed to create blob when writing to storage: %v\n", err)
 		return nil, errors.ErrDataCreationFailure
 	}
-	blob, err := svc.AddBlobPointer(location, key, title, email, size)
+	blob, err := svc.AddBlobPointer(location, key, title, email, int64(size))
 	if err != nil {
 		return nil, errors.ErrDataCreationFailure
 	}
@@ -153,6 +157,8 @@ func (svc *BlobService) DestroyBlob(email, key string) error {
 }
 
 func InitBlobService(storageSrv *storage.StorageService, blobBucketName, blobPointerBucketName, emailMaskSecret string, freeBalanceBytes int64) *BlobService {
+	fmt.Printf("blobBucketName %s\n", blobBucketName)
+	fmt.Printf("blobBublobPointerBucketNamecketName %s\n", blobPointerBucketName)
 	return &BlobService{
 		storageSrv:            storageSrv,
 		blobBucketName:        blobBucketName,

@@ -13,8 +13,13 @@ export type JWTPayload = {
 	email: string;
 };
 
-export type ListBlobsDTO = {
+export type ListBlobsResponseDTO = {
 	blobs: BlobItem[];
 	count: number;
 	balanceBytes: number;
+};
+
+export type UploadBlobRequestDTO = {
+	crypString: string;
+	title: string;
 };

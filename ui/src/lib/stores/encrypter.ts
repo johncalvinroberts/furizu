@@ -161,7 +161,7 @@ class EncrypterStore extends BaseStore<EncrypterState> {
 				memo += currentName;
 				return memo;
 			}, "");
-			await blobsStore.createBlob(crypString, title);
+			await blobsStore.createBlob({ crypString, title });
 			this.dispatch({ state: STATE.DONE });
 		} catch (error) {
 			display.enqueueMessage(extractErrorMessageString(error), "error");

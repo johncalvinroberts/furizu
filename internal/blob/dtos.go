@@ -14,6 +14,11 @@ type BlobPointers struct {
 	BalanceBytes int64  `json:"balanceBytes"`
 }
 
+type UploadBlobRequestDTO struct {
+	Title      string `json:"title"`
+	CrypString string `json:"crypString"`
+}
+
 type UploadBlobResponseDTO struct {
 	Blob
 }

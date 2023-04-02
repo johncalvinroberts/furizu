@@ -1,7 +1,7 @@
 import { get } from "svelte/store";
 import type { BlobItem, BlobsState, BlobMap } from "../../types/types";
 import { extractErrorMessageString } from "../utils";
-import type { ListBlobsDTO } from "../../types/dtos";
+import type { ListBlobsResponseDTO, UploadBlobRequestDTO } from "../../types/dtos";
 import BaseStore from "./base";
 import { apiClient } from "./api";
 import { display } from "./display";
@@ -28,7 +28,7 @@ class BlobsStore extends BaseStore<BlobsState> {
 				balanceBytes,
 				blobs: rawBlobs,
 				count,
-			} = await apiClient.get<ListBlobsDTO>("api/blobs");
+			} = await apiClient.get<ListBlobsResponseDTO>("api/blobs");
 			const blobs = rawBlobs.reduce((memo: BlobMap, current: BlobItem) => {
 				memo.set(current.key, current);
 				return memo;
@@ -41,11 +41,10 @@ class BlobsStore extends BaseStore<BlobsState> {
 		}
 	}
 
-	public async createBlob(crypString: string, title: string) {
+	public async createBlob(payload: UploadBlobRequestDTO) {
 		try {
 			this.dispatch({ isCreatingBlob: true });
-			const data = { crypString, title };
-			const res = await apiClient.post<BlobItem>("api/blobs", data);
+			const res = await apiClient.post<BlobItem>("api/blobs", payload);
 			const { blobs } = get(this.store);
 			blobs.set(res.key, res);
 			this.dispatch({ blobs });

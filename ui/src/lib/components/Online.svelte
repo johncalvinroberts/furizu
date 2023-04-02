@@ -6,7 +6,3 @@
 </script>
 
 <svelte:window bind:online />
-
-<style>
-	/* styles */
-</style>
