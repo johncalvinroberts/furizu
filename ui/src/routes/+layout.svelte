@@ -12,6 +12,8 @@
 	import Toy from "../lib/components/Toy.svelte";
 	import Messages from "../lib/components/Messages.svelte";
 	import Online from "../lib/components/Online.svelte";
+	import AuthFocusCheck from "../lib/components/AuthFocusCheck.svelte";
+	import Folder from "../lib/components/icons/Folder.svelte";
 
 	let initialFocusElement: HTMLElement;
 	let returnFocusElement: HTMLElement;
@@ -34,6 +36,12 @@
 			label: "Settings",
 			href: "/settings",
 			isVisible: true,
+		},
+		{
+			Icon: Folder,
+			label: "Files",
+			href: "/files",
+			isVisible: isAuthenticated,
 		},
 		{
 			Icon: End,
@@ -76,6 +84,7 @@
 <Toy />
 <Messages />
 <Online />
+<AuthFocusCheck />
 
 <style>
 	nav {

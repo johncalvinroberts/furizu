@@ -1,10 +1,7 @@
 <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
 	<rect width="17" height="17" fill="transparent" />
-	<rect x="15" y="5" width="1" height="9" fill="currentColor" />
-	<rect x="1" y="5" width="1" height="9" fill="currentColor" />
-	<rect x="2" y="3" width="1" height="1" fill="currentColor" />
-	<rect x="7" y="3" width="1" height="1" fill="currentColor" />
-	<rect x="3" y="2" width="4" height="1" fill="currentColor" />
+	<rect x="15" y="4" width="1" height="10" fill="currentColor" />
+	<rect x="1" y="4" width="1" height="10" fill="currentColor" />
 	<rect x="3" y="7" width="1" height="1" fill="currentColor" />
 	<rect x="6" y="7" width="1" height="1" fill="currentColor" />
 	<rect x="8" y="11" width="2" height="1" fill="currentColor" />

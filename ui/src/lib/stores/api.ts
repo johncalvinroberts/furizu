@@ -139,6 +139,13 @@ class APIClientStore extends BaseStore<APIClientState> {
 		return isValid;
 	}
 
+	public checkJWTAndEndSessionIfInvalid(): void {
+		if (!this.isTokenValid) {
+			this.reset();
+			display.enqueueMessage("Session has expired. Please authenticate again.");
+		}
+	}
+
 	public endSession() {
 		localStorage.removeItem(JWT_LOCAL_STORAGE_KEY);
 		this.reset();

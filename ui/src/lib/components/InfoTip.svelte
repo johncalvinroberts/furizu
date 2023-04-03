@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Tooltip from "./Tooltip.svelte";
-	export let title = "";
+	export let title: string;
 </script>
 
 <Tooltip {title} class="infotip vertical-center">
