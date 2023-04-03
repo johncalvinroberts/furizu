@@ -20,6 +20,7 @@ const initialState: EncrypterState = {
 	decryptedFiles: undefined,
 	totalFileBytes: undefined,
 	isCrypFile: false,
+	successfulBlobItem: undefined,
 };
 
 class EncrypterStore extends BaseStore<EncrypterState> {
@@ -161,8 +162,8 @@ class EncrypterStore extends BaseStore<EncrypterState> {
 				memo += currentName;
 				return memo;
 			}, "");
-			await blobsStore.createBlob({ crypString, title });
-			this.dispatch({ state: STATE.DONE });
+			const res = await blobsStore.createBlob({ crypString, title });
+			this.dispatch({ state: STATE.DONE, successfulBlobItem: res });
 		} catch (error) {
 			display.enqueueMessage(extractErrorMessageString(error), "error");
 			this.dispatch({ state: STATE.FAILURE, error });

@@ -41,13 +41,14 @@ class BlobsStore extends BaseStore<BlobsState> {
 		}
 	}
 
-	public async createBlob(payload: UploadBlobRequestDTO) {
+	public async createBlob(payload: UploadBlobRequestDTO): Promise<BlobItem> {
 		try {
 			this.dispatch({ isCreatingBlob: true });
 			const res = await apiClient.post<BlobItem>("api/blobs", payload);
 			const { blobs } = get(this.store);
 			blobs.set(res.key, res);
 			this.dispatch({ blobs });
+			return res;
 		} finally {
 			this.dispatch({ isCreatingBlob: false });
 		}

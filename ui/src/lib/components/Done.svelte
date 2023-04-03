@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { saveAs } from "file-saver";
-	import { encrypter } from "../stores/encrypter";
 	import { getEncryptedFilename } from "../utils";
+	import { encrypter } from "../stores/encrypter";
 	import Check from "./icons/Check.svelte";
 	import Button from "./Button.svelte";
+	import Input from "./form/Input.svelte";
+	import FileSize from "./FileSize.svelte";
 
 	const { store, reset } = encrypter;
 	const type = $store.decryptedFiles ? "decrypted" : "encrypted";
@@ -41,6 +43,10 @@
 	};
 
 	const handleDownload = () => (type === "encrypted" ? downloadEncrypted() : downloadDecrypted());
+	$: url = $store.successfulBlobItem?.url;
+
+	const handleChangeInput = () => (url = $store.successfulBlobItem?.url);
+	const handleCopyURL = () => navigator.clipboard.writeText($store.successfulBlobItem?.url || "");
 </script>
 
 <div>
@@ -52,6 +58,20 @@
 	</h3>
 	{#if isFailToDownload}
 		<div class="error">Failed to Download File.</div>
+	{/if}
+	{#if $store.successfulBlobItem}
+		<div class="success-blob-preview vertical-center">
+			<div>
+				{$store.successfulBlobItem.title} - <FileSize
+					bytes={$store.successfulBlobItem.sizeBytes}
+					class="file-size"
+				/>
+			</div>
+			<div class="vertical-center">
+				<Input name="successful-blob-item" bind:value={url} on:change={handleChangeInput} />
+				<Button class="copy-button" on:click={handleCopyURL}>Copy URL</Button>
+			</div>
+		</div>
 	{/if}
 	<div class="bottom-box">
 		<Button on:click={handleDownload}>Download</Button>
@@ -75,5 +95,16 @@
 		color: var(--error);
 		text-align: center;
 		padding-top: 1rem;
+	}
+	.success-blob-preview {
+		flex-wrap: wrap;
+	}
+	.success-blob-preview div:first-child {
+		flex: 0 0 100%;
+		text-align: center;
+	}
+
+	:global(.copy-button) {
+		margin-left: var(--spacing);
 	}
 </style>

@@ -73,6 +73,7 @@ class APIClientStore extends BaseStore<APIClientState> {
 		} catch (error) {
 			display.enqueueMessage(extractErrorMessageString(error), "error");
 			this.reset();
+			throw error;
 		}
 	}
 

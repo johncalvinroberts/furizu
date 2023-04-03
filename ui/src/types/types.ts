@@ -31,6 +31,7 @@ export type EncrypterState = {
 	decryptedFiles: File[] | undefined;
 	totalFileBytes: number | undefined;
 	isCrypFile: boolean;
+	successfulBlobItem: BlobItem | undefined;
 };
 
 export type APIClientState = {

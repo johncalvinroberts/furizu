@@ -1,5 +1,7 @@
 <script lang="ts">
 	type Variant = "dropdown" | "default";
+	let className = "";
+	export { className as class };
 	export let variant: Variant = "default";
 	const additionalClasses: Record<Variant, string> = {
 		default: "",
@@ -8,7 +10,7 @@
 </script>
 
 <button
-	class={`button ${additionalClasses[variant] || ""}`}
+	class={`button ${additionalClasses[variant] || ""} ${className}`}
 	{...$$restProps}
 	on:click
 	on:mouseleave
