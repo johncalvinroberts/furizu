@@ -1,6 +1,6 @@
 import { get } from "svelte/store";
 import type { BlobItem, BlobsState, BlobMap } from "../../types/types";
-import { extractErrorMessageString } from "../utils";
+import { delay, extractErrorMessageString } from "../utils";
 import type { ListBlobsResponseDTO, UploadBlobRequestDTO } from "../../types/dtos";
 import BaseStore from "./base";
 import { apiClient } from "./api";
@@ -21,8 +21,19 @@ class BlobsStore extends BaseStore<BlobsState> {
 		this.dispatch({ isInitialized: true });
 	}
 
-	public async getBlobs() {
+	public async getBlobs(): Promise<void> {
 		try {
+			const { isLoadingBlobs } = get(this.store);
+			// dedupe requests, kind of in a hacky way
+			if (isLoadingBlobs) {
+				await delay(1000);
+				const { isLoadingBlobs: isStillLoadingBlobs } = get(this.store);
+				if (isStillLoadingBlobs) {
+					return this.getBlobs();
+				} else {
+					return;
+				}
+			}
 			this.dispatch({ isLoadingBlobs: true });
 			const {
 				balanceBytes,

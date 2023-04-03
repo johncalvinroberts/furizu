@@ -18,7 +18,10 @@
 
 <div class="blob-preview">
 	<div class="blob-title">
-		{file.title} - <FileSize bytes={file.sizeBytes} class="file-size" />
+		<span class="truncate title-text">
+			{file.title} -
+		</span>
+		<FileSize bytes={file.sizeBytes} class="file-size" />
 	</div>
 	<div class="vertical-center" class:not-center={!center}>
 		<Input name={file.key} bind:value={url} on:change={handleChangeInput} />
@@ -54,6 +57,12 @@
 	}
 	.blob-title {
 		flex: 0 0 100%;
+		display: flex;
+	}
+
+	.blob-title .title-text {
+		max-width: 200px;
+		display: block;
 	}
 
 	.not-center {

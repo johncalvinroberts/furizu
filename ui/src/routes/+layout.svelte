@@ -14,6 +14,7 @@
 	import Online from "../lib/components/Online.svelte";
 	import AuthFocusCheck from "../lib/components/AuthFocusCheck.svelte";
 	import Folder from "../lib/components/icons/Folder.svelte";
+	import { blobsStore } from "../lib/stores/blobs";
 
 	let initialFocusElement: HTMLElement;
 	let returnFocusElement: HTMLElement;
@@ -52,7 +53,10 @@
 	];
 
 	// TODO: make this isomorphic + no FOUC
-	onMount(() => display.init());
+	onMount(() => {
+		display.initialize();
+		blobsStore.initialize();
+	});
 </script>
 
 <svelte:head>

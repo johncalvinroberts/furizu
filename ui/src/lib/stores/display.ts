@@ -15,7 +15,7 @@ class DisplayStore extends BaseStore<DisplayState> {
 		super(initialState);
 	}
 
-	public init() {
+	public initialize() {
 		let initialTheme = localStorage.getItem(THEME_LOCAL_STORAGE_KEY);
 		if (!initialTheme) {
 			initialTheme = "light";

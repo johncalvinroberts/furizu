@@ -140,7 +140,8 @@ class APIClientStore extends BaseStore<APIClientState> {
 	}
 
 	public checkJWTAndEndSessionIfInvalid(): void {
-		if (!this.isTokenValid) {
+		const { isAuthenticated } = get(this.store);
+		if (!this.isTokenValid && isAuthenticated) {
 			this.reset();
 			display.enqueueMessage("Session has expired. Please authenticate again.");
 		}
