@@ -114,8 +114,8 @@ small {
 
 .truncate {
 	overflow: hidden;
-	text-overflow: ellipsis;
 	white-space: nowrap;
+	text-overflow: ellipsis;
 }
 
 .vertical-center {

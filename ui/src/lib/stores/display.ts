@@ -57,7 +57,7 @@ class DisplayStore extends BaseStore<DisplayState> {
 		}
 
 		this.dispatch({ messages: [...messages, message] });
-		setTimeout(() => this.dequeueMessage(), 7000);
+		// setTimeout(() => this.dequeueMessage(), 7000);
 	}
 
 	public dequeueMessage(): DisplayMessage {

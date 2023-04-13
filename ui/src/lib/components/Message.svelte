@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { fly } from "svelte/transition";
 	import type { DisplayMessage, DisplayMessageLevel } from "../../types/types";
+	import { display } from "../stores/display";
 	export let message: DisplayMessage;
 	export let offset: number;
 
@@ -15,6 +16,10 @@
 		success: "Success",
 	};
 	const NAV_HEIGHT = 21;
+
+	const handleClose = () => {
+		display.dequeueMessage();
+	};
 </script>
 
 <div
@@ -32,6 +37,11 @@
 		<span>
 			{message.message}
 		</span>
+	</div>
+	<div class="exit">
+		<button on:click={handleClose}>
+			<small title="close message">exit</small>
+		</button>
 	</div>
 </div>
 
@@ -80,5 +90,14 @@
 	.icon.success {
 		background-color: var(--success);
 		color: var(--dark);
+	}
+
+	.exit {
+		display: flex;
+		justify-content: flex-end;
+	}
+	.exit button {
+		background: transparent;
+		border: none;
 	}
 </style>

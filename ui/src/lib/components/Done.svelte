@@ -5,6 +5,7 @@
 	import Check from "./icons/Check.svelte";
 	import Button from "./Button.svelte";
 	import BlobItem from "./BlobItem.svelte";
+	import BlobItemTitle from "./BlobItemTitle.svelte";
 
 	const { store, reset } = encrypter;
 	const type = $store.decryptedFiles ? "decrypted" : "encrypted";
@@ -55,10 +56,12 @@
 		<div class="error">Failed to Download File.</div>
 	{/if}
 	{#if $store.successfulBlobItem}
-		<BlobItem file={$store.successfulBlobItem} />
+		<BlobItem file={$store.successfulBlobItem} center>
+			<BlobItemTitle file={$store.successfulBlobItem} center />
+		</BlobItem>
 	{/if}
 	<div class="bottom-box">
-		<Button on:click={handleDownload}>Download</Button>
+		<Button on:click={handleDownload}>Download Raw</Button>
 		<Button on:click={reset}>Start Over</Button>
 	</div>
 </div>

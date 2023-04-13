@@ -17,7 +17,8 @@ const initialState: BlobsState = {
 
 class BlobsStore extends BaseStore<BlobsState> {
 	public async initialize() {
-		await this.getBlobs();
+		const { isAuthenticated } = get(apiClient.store);
+		if (isAuthenticated) await this.getBlobs();
 		this.dispatch({ isInitialized: true });
 	}
 
