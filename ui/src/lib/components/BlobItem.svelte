@@ -28,7 +28,7 @@
 		</Button>
 		<div>
 			<InfoTip
-				title="Copy a shareable public link to your clipboard. The link can be sent to anyone you want to share the file with, and will be prompted for the secret key for the file."
+				title="Copy a shareable public link to your clipboard. The link can be sent to anyone you want to share the file with <br/> The recipient will be prompted for the secret key for the file."
 			/>
 		</div>
 		<div class="vertical-center" class:not-center={!center}>

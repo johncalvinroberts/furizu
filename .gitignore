@@ -35,6 +35,7 @@ bin/*
 .terraform
 .env.*
 emails/*
+!emails/README.md
 
 dist
 build

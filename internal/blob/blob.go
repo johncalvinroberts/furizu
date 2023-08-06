@@ -27,6 +27,8 @@ func (svc *BlobService) CreateBlob(file, title, email string) (*Blob, error) {
 		reader = strings.NewReader(file)
 		size   = reader.Len()
 	)
+	fmt.Println(id)
+	fmt.Println(key)
 	location, err := svc.storageSrv.Write(svc.blobBucketName, key, reader)
 	if err != nil {
 		log.Printf("Failed to create blob when writing to storage: %v\n", err)

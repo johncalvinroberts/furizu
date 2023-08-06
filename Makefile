@@ -1,14 +1,12 @@
 FE_DIR=ui
-BE_CLI_ENTRYPOINT=cmd/server/main.go
+BE_ENTRYPOINT=cmd/server/main.go
 AIR_BIN=./bin/air
 BIN=./bin/cryp
 
 
-build: ## build everything
-	build-fe build-be
+build: build-fe build-be ## build everything
 
-install: ## install deps for both backend and frontend
-	install-be install-fe install-air
+install: install-be install-fe install-air ## install deps for both backend and frontend
 
 dev: ## run dev servers of both backend and frontend
 	make -j 2 dev-fe dev-be
@@ -48,11 +46,11 @@ docker-down: ## stop docker dependencies
 
 docker-restart: docker-down docker-up
 
-fmt: #format the files in the repo
+fmt: ## format the files in the repo
 	@gofmt -l -w internal cmd
 	cd $(FE_DIR); pnpm format;
 
-.PHONY: help fmt docker-up docker-down docker-restart clean install build build-fe build-be dev dev-be dev-fe
+.PHONY: help fmt docker-up docker-down docker-restart clean install install-be install-fe build build-fe build-be dev dev-be dev-fe
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

@@ -42,7 +42,7 @@
 			aria-expanded={isHovered}
 			transition:fade={{ duration: 100 }}
 		>
-			{title}
+			{@html title}
 		</div>
 	{/if}
 </div>

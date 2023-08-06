@@ -17,7 +17,6 @@ const DEFAULT_FREE_BALANCE_BYTES int64 = 1024 * 1024 * 1024
 
 type AppConfig struct {
 	Debug              bool     `env:"DEBUG,required"`
-	GinMode            string   `env:"GIN_MODE,required"`
 	JWTSecret          string   `env:"JWT_SECRET,required"`
 	JWTTokenTTL        int      `env:"JWT_TOKEN_TTL,default=10"`
 	EmailMaskSecret    string   `env:"EMAIL_MASK_SECRET,required"` // NOTE: This MUST be of 32 byte length
