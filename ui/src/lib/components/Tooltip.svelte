@@ -6,6 +6,7 @@
 	let y: number;
 	let className = "";
 	export { className as class };
+	const id = `tooltip-${Math.random() * 1000}`;
 
 	const handleMouseOver = (event: MouseEvent) => {
 		isHovered = true;
@@ -33,6 +34,8 @@
 	on:mousemove={handleMouseMove}
 	on:focus={handleFocus}
 	class={`box ${className}`}
+	aria-describedby={id}
+	role="tooltip"
 >
 	<slot />
 	{#if isHovered}
@@ -41,6 +44,7 @@
 			class="tooltip"
 			aria-expanded={isHovered}
 			transition:fade={{ duration: 100 }}
+			{id}
 		>
 			{@html title}
 		</div>

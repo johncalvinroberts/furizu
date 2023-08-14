@@ -1,9 +1,10 @@
 <script lang="ts">
-	import type { SvelteComponent } from "svelte";
+	import type { ComponentType } from "svelte";
+
 	import Button from "./Button.svelte";
 
 	type DropdownItem = {
-		Icon: typeof SvelteComponent;
+		Icon: ComponentType;
 		label: string;
 		href?: string;
 		onClick?: () => void;

@@ -41,12 +41,7 @@
 </script>
 
 <div class="input-box">
-	<label
-		for={name}
-		class:minimal={variant === "minimal"}
-		tabindex={variant === "minimal" ? 0 : -1}
-		role="button"
-	>
+	<label for={name} class:minimal={variant === "minimal"} tabindex="-1">
 		{label}
 	</label>
 	{#if type !== "file"}

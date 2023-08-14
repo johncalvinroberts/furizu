@@ -26,6 +26,7 @@
 			<LockScroll>
 				<div
 					{...$$restProps}
+					role="none"
 					data-svelte-dialog-overlay
 					class="vertical-center"
 					on:click|self|stopPropagation={handleClick}

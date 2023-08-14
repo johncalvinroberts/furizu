@@ -20,6 +20,10 @@ module.exports = {
 	},
 	overrides: [
 		{
+			rules: {
+				"svelte/no-at-html-tags": "off",
+				"@typescript-eslint/ban-ts-comment": "off",
+			},
 			files: ["*.svelte"],
 			parser: "svelte-eslint-parser",
 			parserOptions: {
