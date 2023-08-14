@@ -21,7 +21,8 @@
 		tryWhoamiChallengeInput?.focus();
 	};
 
-	const tryWhoamiChallenge = async () => {
+	const tryWhoamiChallenge = async (e: Event) => {
+		e.preventDefault();
 		await apiClient.tryWhoamiChallenge(email, otp);
 		if ($displayStore.isAuthModalOpen) {
 			display.toggleAuthModal();
@@ -39,7 +40,7 @@
 		<Input name="email" type="email" label="Email" bind:value={email} required />
 		<Button type="submit">Send Code</Button>
 	</Form>
-	<Form on:submit={tryWhoamiChallenge} disabled={step !== "TRY_WHOAMI"} prevent:default>
+	<Form on:submit={tryWhoamiChallenge} disabled={step !== "TRY_WHOAMI"}>
 		<Input
 			name="otp"
 			type="text"

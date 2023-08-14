@@ -7,7 +7,15 @@ const config = {
 	// for more information about preprocessors
 	preprocess: vitePreprocess(),
 	kit: {
-		adapter: adapter({ strict: false }),
+		adapter: adapter({
+			// default options are shown. On some platforms
+			// these options are set automatically — see below
+			pages: "build",
+			assets: "build",
+			fallback: "200.html",
+			precompress: false,
+			strict: true,
+		}),
 	},
 };
 

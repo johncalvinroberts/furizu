@@ -9,7 +9,6 @@
 	import { display } from "../lib/stores/display";
 	import WhoamiForm from "../lib/components/WhoamiForm.svelte";
 	import Modal from "../lib/components/modal/Modal.svelte";
-	import Toy from "../lib/components/Toy.svelte";
 	import Messages from "../lib/components/Messages.svelte";
 	import Online from "../lib/components/Online.svelte";
 	import AuthFocusCheck from "../lib/components/AuthFocusCheck.svelte";
@@ -85,7 +84,6 @@
 	<slot />
 </main>
 
-<Toy />
 <Messages />
 <Online />
 <AuthFocusCheck />

@@ -21,6 +21,8 @@
 		>
 			<div
 				class="dropzone"
+				role="button"
+				tabindex="0"
 				class:is-dragging-over={isDraggingOver}
 				on:mouseover={() => (isDraggingOver = true)}
 				on:mouseleave={() => (isDraggingOver = false)}
