@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
 import type { StateKey, MessageKey } from "../types/types";
-// @ts-ignore
 import { PUBLIC_API_BASE_URL } from "$env/static/public";
 
 /* eslint-enable @typescript-eslint/ban-ts-comment */

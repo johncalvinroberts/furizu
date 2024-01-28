@@ -15,6 +15,9 @@ jobs:
         run: bun install
         working-directory: ui
 
+      - name: Prepare
+        run: cd ui && bun run prepare
+
       - name: Check Typescript and Svelte files
         run: bun check
         working-directory: ui

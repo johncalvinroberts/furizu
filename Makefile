@@ -24,13 +24,13 @@ dev-be: ## run backend dev server with hot reload
 	$(AIR_BIN) $(BE_ENTRYPOINT)
 
 build-fe: ## build the frontend deploy artifacts
-	cd $(FE_DIR); pnpm run build;
+	cd $(FE_DIR); bun run build;
 
 install-fe: ## install frontend deps
-	cd $(FE_DIR); pnpm install;
+	cd $(FE_DIR); bun install;
 
 dev-fe: ## run frontend dev vite server with hot reload
-	cd $(FE_DIR); pnpm start;
+	cd $(FE_DIR); bun start;
 
 clean: ## delete all build artifacts
 	rm -rf $(BIN)
@@ -48,7 +48,7 @@ docker-restart: docker-down docker-up
 
 fmt: ## format the files in the repo
 	@gofmt -l -w internal cmd
-	cd $(FE_DIR); pnpm format;
+	cd $(FE_DIR); bun run format;
 
 .PHONY: help fmt docker-up docker-down docker-restart clean install install-be install-fe build build-fe build-be dev dev-be dev-fe
 

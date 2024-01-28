@@ -33,9 +33,10 @@
 		width: 11px;
 		height: 11px;
 		position: absolute;
-		left: 2px;
+		left: 11px;
 		top: 2px;
 		border: solid 1px var(--dark);
+		outline: 2px solid white;
 	}
 	.text {
 		flex: 0;
