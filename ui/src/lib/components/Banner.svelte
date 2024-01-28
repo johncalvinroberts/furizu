@@ -4,7 +4,7 @@
 <div class="outer vertical-center">
 	<div class="inner">
 		<h1>furizu.</h1>
-		<h2>Encrypted deep-freeze file storage</h2>
+		<h2>End-to-end encrypted deep-freeze file storage</h2>
 	</div>
 </div>
 

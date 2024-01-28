@@ -17,7 +17,7 @@ install-air: ## install Air for backend hot reload
 install-be: ## install backend dependencies
 	go mod tidy
 
-build-be: ## build backend 
+build-be: ## build backend
 	go build -o $(BIN) $(BE_ENTRYPOINT)
 
 dev-be: ## run backend dev server with hot reload

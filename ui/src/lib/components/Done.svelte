@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { saveAs } from "file-saver";
+	import fileSaver from "file-saver";
 	import { getEncryptedFilename } from "../utils";
 	import { encrypter } from "../stores/encrypter";
 	import Check from "./icons/Check.svelte";
 	import Button from "./Button.svelte";
 	import BlobItem from "./BlobItem.svelte";
 	import BlobItemTitle from "./BlobItemTitle.svelte";
-
+	const { saveAs } = fileSaver;
 	const { store, reset } = encrypter;
 	const type = $store.decryptedFiles ? "decrypted" : "encrypted";
 

@@ -18,13 +18,24 @@
 		border-bottom: solid 1px var(--dark);
 		height: 17px;
 		align-items: center;
-		background: linear-gradient(#000 21%, transparent 0);
+		background: linear-gradient(var(--dark) 21%, transparent 0);
 		background-clip: content-box;
 		background-size: 6.6666666667% 15.333333%;
 		display: flex;
 		justify-content: center;
 		flex-wrap: wrap;
 		padding: 2px 5px;
+		position: relative;
+	}
+	.lines::before {
+		content: " ";
+		background-color: var(--light);
+		width: 11px;
+		height: 11px;
+		position: absolute;
+		left: 2px;
+		top: 2px;
+		border: solid 1px var(--dark);
 	}
 	.text {
 		flex: 0;
