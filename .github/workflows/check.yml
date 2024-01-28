@@ -24,7 +24,7 @@ jobs:
         working-directory: ui
 
       - name: Ensure can build successfully
-        run: bun build
+        run: bun run build
         working-directory: ui
 
       - name: Check for clean status
