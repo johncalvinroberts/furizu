@@ -7,13 +7,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/setup-node@v3
-
       - uses: oven-sh/setup-bun@v1
         with:
-          version: 7.0.0
-          run_install: |
-            - cwd: ui
+          bun-version: latest
+
+      - name: Install Dependencies
+        run: bun install
+        working-directory: ui
+
       - name: Check Typescript and Svelte files
         run: bun check
         working-directory: ui
