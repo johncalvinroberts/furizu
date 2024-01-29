@@ -16,7 +16,13 @@ jobs:
         working-directory: ui
 
       - name: Prepare
-        run: cd ui && bun run prepare
+        run: |
+          cd ui
+          cd .svelte-kit
+          ls
+          cat ambient.d.ts
+          cd ..
+          bun run prepare
 
       - name: Check Typescript and Svelte files
         run: bun check
