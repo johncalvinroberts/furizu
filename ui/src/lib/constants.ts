@@ -1,9 +1,6 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-
-import type { StateKey, MessageKey } from "../types/types";
 import { PUBLIC_API_BASE_URL } from "$env/static/public";
+import type { StateKey, MessageKey } from "../types/types";
 
-/* eslint-enable @typescript-eslint/ban-ts-comment */
 export const ENCRYPT_ALGO = "AES-GCM";
 export const KEY_ALGO = "PBKDF2";
 export const CRYP_DELIMITER = "@CRYP@";

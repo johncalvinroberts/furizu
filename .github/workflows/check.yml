@@ -12,17 +12,10 @@ jobs:
           bun-version: latest
 
       - name: Install Dependencies
-        run: bun install
-        working-directory: ui
-
-      - name: Prepare
         run: |
-          cd ui
-          cd .svelte-kit
-          ls
-          cat ambient.d.ts
-          cd ..
+          bun install
           bun run prepare
+        working-directory: ui
 
       - name: Check Typescript and Svelte files
         run: bun check
