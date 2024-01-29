@@ -16,18 +16,28 @@ jobs:
           bun install
           bun run prepare
         working-directory: ui
+        env:
+          PUBLIC_API_BASE_URL: ${{ secrets.PUBLIC_API_BASE_URL }}
 
       - name: Check Typescript and Svelte files
         run: bun check
         working-directory: ui
+        env:
+          PUBLIC_API_BASE_URL: ${{ secrets.PUBLIC_API_BASE_URL }}
 
       - name: Format files
         run: bun format
         working-directory: ui
+        env:
+          PUBLIC_API_BASE_URL: ${{ secrets.PUBLIC_API_BASE_URL }}
 
       - name: Ensure can build successfully
         run: bun run build
         working-directory: ui
+        env:
+          PUBLIC_API_BASE_URL: ${{ secrets.PUBLIC_API_BASE_URL }}
 
       - name: Check for clean status
         run: sh scripts/ensure-git-clean.sh
+        env:
+          PUBLIC_API_BASE_URL: ${{ secrets.PUBLIC_API_BASE_URL }}
