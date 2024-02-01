@@ -34,7 +34,7 @@ const initialState: APIClientState = {
 /**
  * This API client is essentially a wrapper around the HTTPClient,
  * but with stateful handling of auth state.
- * Using the Svelte store to track the state of the
+ * Using the Svelte store to track the state of the jwt.
  */
 
 class APIClientStore extends BaseStore<APIClientState> {

@@ -2,7 +2,7 @@
 	font-family: "Chicago";
 	src:
 		local("Chicago"),
-		url("../ChicagoFLF.woff") format("woff2");
+		url("/ChicagoFLF.woff") format("woff2");
 	font-display: swap;
 }
 

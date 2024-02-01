@@ -74,6 +74,7 @@ export type BlobItem = {
 	updatedAt: number;
 	title: string;
 	key: string;
+	publicURL: string;
 	sizeBytes: number;
 };
 

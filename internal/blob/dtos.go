@@ -8,6 +8,7 @@ type Blob struct {
 	Key       string `json:"key"`
 	SizeBytes int64  `json:"sizeBytes"`
 }
+
 type BlobPointers struct {
 	Blobs        []Blob `json:"blobs"`
 	Count        int    `json:"count"`

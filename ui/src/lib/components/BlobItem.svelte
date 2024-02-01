@@ -7,18 +7,19 @@
 	export let file: BlobItem;
 	export let center = true;
 	$: url = file?.url;
+	$: publicURL = file?.publicURL;
 
 	const handleChangeInput = () => (url = file?.url);
-	const handleCopyRawURL = () => navigator.clipboard.writeText(file.url);
+	const handleCopyRawURL = () => navigator.clipboard.writeText(url);
 	const handleCopyShareURL = () => {
-		// TODO
+		navigator.clipboard.writeText(publicURL);
 	};
 </script>
 
 <div class="blob-preview">
 	<slot />
 	<div class="vertical-center blob-details" class:not-center={!center}>
-		<Input name={file.key} bind:value={url} on:change={handleChangeInput} />
+		<Input name={file.key} bind:value={publicURL} on:change={handleChangeInput} />
 		<Button
 			class="copy-button"
 			on:click={handleCopyShareURL}
