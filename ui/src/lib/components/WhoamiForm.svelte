@@ -6,7 +6,7 @@
 	import Input from "./form/Input.svelte";
 	import OverlayLoading from "./OverlayLoading.svelte";
 
-	export let title = "Authenticate who you are";
+	export let title = "Login/Signup";
 	let step: "START_WHOAMI" | "TRY_WHOAMI" = "START_WHOAMI";
 	let email: string;
 	let tryWhoamiChallengeInput: HTMLInputElement;

@@ -25,7 +25,7 @@
 			on:click={handleCopyShareURL}
 			title="Copy shareable public URL to clipboard"
 		>
-			Copy Share URL
+			Copy Public URL
 		</Button>
 		<div>
 			<InfoTip
@@ -55,6 +55,7 @@
 
 	.blob-details {
 		flex: 0 0 100%;
+		justify-content: flex-start;
 	}
 
 	.not-center {

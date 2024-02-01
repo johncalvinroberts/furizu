@@ -27,7 +27,7 @@
 	$: dropdownOptions = [
 		{
 			Icon: Keycaps,
-			label: "Authenticate",
+			label: "Login/Signup",
 			onClick: () => display.toggleAuthModal(),
 			isVisible: !isAuthenticated,
 		},
