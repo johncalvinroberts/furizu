@@ -13,6 +13,10 @@
 
 <RedirectUnauthenticated>
 	<div class="list">
+		{#if !$store.isLoadingBlobs && $store.isInitialized && blobs.length < 1}
+			<div>No files saved yet.</div>
+			<a href="/">Go upload some files</a>
+		{/if}
 		{#if $store.isLoadingBlobs && !$store.isInitialized}
 			<Processing />
 		{:else}

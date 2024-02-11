@@ -105,12 +105,11 @@ func (svc *BlobService) FindOrCreateBlobPointers(email string) (*BlobPointers, e
 
 func (svc *BlobService) ListBlobs(email string) (*BlobPointers, error) {
 	// TODO: pagination?
-	pointersStr, err := svc.storageSrv.ReadToString(svc.blobPointerBucketName, email)
+	// pointersStr, err := svc.storageSrv.ReadToString(svc.blobPointerBucketName, email)
+	pointers, err := svc.FindOrCreateBlobPointers(email)
 	if err != nil {
 		return nil, errors.ErrDataAccessFailure
 	}
-	pointers := &BlobPointers{}
-	err = json.Unmarshal([]byte(pointersStr), pointers)
 	return pointers, err
 }
 

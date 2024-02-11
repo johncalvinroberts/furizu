@@ -87,6 +87,7 @@
 	}
 	a {
 		display: flex;
+		flex: 0 0 100%;
 	}
 	a:hover {
 		color: var(--light);
