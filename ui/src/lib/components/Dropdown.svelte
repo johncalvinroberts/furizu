@@ -62,9 +62,11 @@
 		margin: 0;
 		padding: 0;
 		position: absolute;
-		background: var(--light);
-		top: calc(var(--nav-height) - 1px);
 		left: 0px;
+		top: calc(var(--nav-height) - 1px);
+		background: var(--light);
+		z-index: var(--z-index-popover);
+		background-color: var(--light);
 		box-shadow: var(--boxy-shadow);
 		border: solid 1px var(--dark);
 		display: none;
@@ -77,6 +79,7 @@
 		color: var(--dark);
 		padding: 2px 0;
 		display: flex;
+		background: var(--light);
 	}
 	li:hover {
 		background-color: var(--dark);

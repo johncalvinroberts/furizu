@@ -50,7 +50,10 @@ fmt: ## format the files in the repo
 	@gofmt -l -w internal cmd
 	cd $(FE_DIR); bun run format;
 
-.PHONY: help fmt docker-up docker-down docker-restart clean install install-be install-fe build build-fe build-be dev dev-be dev-fe
-
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
+migrate: ## migrate database
+	sh ./scripts/migrate.sh
+
+.PHONY: help fmt docker-up docker-down docker-restart clean install install-be install-fe build build-fe build-be dev dev-be dev-fe popenv migrate

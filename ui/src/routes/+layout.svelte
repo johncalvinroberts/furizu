@@ -14,6 +14,7 @@
 	import AuthFocusCheck from "../lib/components/AuthFocusCheck.svelte";
 	import Folder from "../lib/components/icons/Folder.svelte";
 	import { blobsStore } from "../lib/stores/blobs";
+	import initSnow from "$lib/snow/snow";
 
 	let initialFocusElement: HTMLElement;
 	let returnFocusElement: HTMLElement;
@@ -55,6 +56,8 @@
 	onMount(() => {
 		display.initialize();
 		blobsStore.initialize();
+		const snow = document.querySelector("#snow");
+		initSnow(snow);
 	});
 </script>
 
@@ -87,16 +90,19 @@
 <Messages />
 <Online />
 <AuthFocusCheck />
+<div id="snow"></div>
 
 <style>
 	nav {
-		background-color: var(--gray);
+		background-color: var(--light);
 		height: var(--nav-height);
 		width: 100%;
 		display: flex;
 		justify-content: space-between;
 		padding: 0 calc(var(--spacing) * 4);
 		border-bottom: solid 1px var(--dark);
+		z-index: var(--z-index-popover);
+		position: relative;
 	}
 
 	main {
@@ -104,9 +110,23 @@
 		padding: calc(var(--spacing) * 4);
 		min-height: calc(100vh - var(--nav-height));
 		display: flex;
+		z-index: var(--z-index-ui);
+		position: relative;
 	}
 
 	.form-wrapper {
 		padding: var(--spacing);
+	}
+	#snow {
+		display: block;
+		position: fixed;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		/* background-color: #0f2027; */
+		/* background-image: linear-gradient(to bottom, #0f2027, #080e10); */
+		z-index: var(--z-index-bg);
+		background-color: var(--accent);
 	}
 </style>

@@ -6,9 +6,9 @@ services:
     container_name: localstack
     image: localstack/localstack
     ports:
-      - "127.0.0.1:4566:4566"            # LocalStack Gateway
-      - "127.0.0.1:4510-4559:4510-4559"  # external services port range
-      - "127.0.0.1:443:443"              # LocalStack HTTPS Gateway (only required for Pro)
+      - "127.0.0.1:4566:4566" # LocalStack Gateway
+      - "127.0.0.1:4510-4559:4510-4559" # external services port range
+      - "127.0.0.1:443:443" # LocalStack HTTPS Gateway (only required for Pro)
     environment:
       - DEBUG=1
       - LOCALSTACK_HOSTNAME=localhost
@@ -19,3 +19,16 @@ services:
       - DOCKER_HOST=unix:///var/run/docker.sock
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
+  postgres:
+    container_name: postgres
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: some_secret_password
+      POSTGRES_DB: furizu
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+volumes:
+  postgres_data:
