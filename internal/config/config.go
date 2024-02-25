@@ -33,11 +33,11 @@ type AppConfig struct {
 		Token    string `env:"AWS_TOKEN"`
 	}
 	Storage struct {
-		WhoamiBucketName      string `env:"WHOAMI_BUCKET_NAME,required"`
 		BlobBucketName        string `env:"BLOB_BUCKET_NAME,required"`
 		BlobPointerBucketName string `env:"BLOB_POINTERS_BUCKET_NAME,required"`
 	}
-	FreeBalanceBytes int64 `env:"DEFAULT_FREE_BALANCE_BYTES"`
+	PostgresConnectionString string `env:"POSTGRES_CONNECTION_STRING"`
+	FreeBalanceBytes         int64  `env:"DEFAULT_FREE_BALANCE_BYTES"`
 }
 
 func InitAppConfig() *AppConfig {

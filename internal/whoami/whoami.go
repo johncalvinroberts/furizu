@@ -6,32 +6,26 @@ import (
 	"strings"
 	"time"
 
+	"github.com/johncalvinroberts/cryp/internal/database"
 	"github.com/johncalvinroberts/cryp/internal/email"
 	"github.com/johncalvinroberts/cryp/internal/errors"
-	"github.com/johncalvinroberts/cryp/internal/storage"
 	"github.com/johncalvinroberts/cryp/internal/token"
 	"github.com/johncalvinroberts/cryp/internal/utils"
 )
 
 const (
-	OTP_LENGTH              = 6
-	WHOAMI_CHALLENGE_PREFIX = "whoami-challenge"
-	CTX_JWT_KEY             = "CTX_JWT_KEY"
-	CTX_JWT_CLAIMS_KEY      = "CTX_JWT_CLAIMS_KEY"
-	CTX_JWT_EMAIL           = "CTX_JWT_EMAIL"
+	OTP_LENGTH         = 6
+	OTP_TTL            = 10 * time.Minute
+	CTX_JWT_KEY        = "CTX_JWT_KEY"
+	CTX_JWT_CLAIMS_KEY = "CTX_JWT_CLAIMS_KEY"
+	CTX_JWT_EMAIL      = "CTX_JWT_EMAIL"
 )
 
 type WhoamiService struct {
-	secret           string
-	whoamiBucketName string
-	storageSrv       *storage.StorageService
-	emailSrv         *email.EmailService
-	tokenSrv         *token.TokenService
-}
-
-func (svc *WhoamiService) FindWhoamiChallenge(email string) (string, error) {
-	key := storage.ComposeKey(WHOAMI_CHALLENGE_PREFIX, email)
-	return svc.storageSrv.ReadToString(svc.whoamiBucketName, key)
+	secret   string
+	dbSrv    *database.DatabaseService
+	emailSrv *email.EmailService
+	tokenSrv *token.TokenService
 }
 
 // create otp + start whoami flow
@@ -40,8 +34,8 @@ func (svc *WhoamiService) StartWhoamiChallenge(email string) error {
 		return errors.ErrValidationFailure
 	}
 	otp := utils.RandomSecret(OTP_LENGTH)
-	key := storage.ComposeKey(WHOAMI_CHALLENGE_PREFIX, email)
-	_, err := svc.storageSrv.Write(svc.whoamiBucketName, key, strings.NewReader(otp))
+	emailDigest := utils.Sha256Hash(strings.TrimSpace(email))
+	_, err := svc.dbSrv.DB.Exec("insert into whoami_challenges (email_digest, otp) values ($1, $2)", emailDigest, otp)
 	if err != nil {
 		return errors.ErrDataCreationFailure
 	}
@@ -58,36 +52,33 @@ func (svc *WhoamiService) TryWhoamiChallenge(email string, otp string) (string, 
 	if email == "" || otp == "" {
 		return "", errors.ErrValidationFailure
 	}
-	challenge, err := svc.FindWhoamiChallenge(email)
-	if err != nil {
-		log.Printf("encountered error when finding whoami challenge: %v\n", err)
-		if storage.IsNotFoundError(err) {
-			return "", errors.ErrWhoamiChallengeNotFound
-		}
-		return "", errors.ErrInternalServerError
-	}
-	if otp != challenge || challenge == "" {
+	challenge := &WhoamiChallengeRow{}
+	emailDigest := utils.Sha256Hash(email)
+	err := svc.dbSrv.DB.Get(challenge, "SELECT * FROM whoami_challenges WHERE otp=$1 AND email_digest=$2", strings.TrimSpace(otp), strings.TrimSpace(emailDigest))
+	if err != nil || otp != challenge.Otp || challenge.Otp == "" {
 		log.Println("whoami challenge failed or not found")
 		// cheap throttling
 		time.Sleep(2 * time.Second)
 		return "", errors.ErrWhoamiChallengeNotFound
 	}
-	// TODO: check expiration of whoami challenge
+	if time.Since(challenge.CreatedAt) > OTP_TTL {
+		log.Println("OTP has expired")
+		return "", errors.ErrWhoamiChallengeExpired
+	}
 	jwt, err := svc.tokenSrv.IssueJWT(email)
 	if err != nil {
 		log.Printf("failed to issue jwt: %v\n", err)
 		return "", errors.ErrInternalServerError
 	}
 	// cleanup
-	defer svc.DestroyWhoamiChallenge(email)
+	defer svc.DestroyWhoamiChallenge(emailDigest)
 	return jwt, nil
 }
 
-func (svc *WhoamiService) DestroyWhoamiChallenge(email string) {
-	key := storage.ComposeKey(WHOAMI_CHALLENGE_PREFIX, email)
-	err := svc.storageSrv.Delete(svc.whoamiBucketName, key)
+func (svc *WhoamiService) DestroyWhoamiChallenge(emailDigest string) {
+	_, err := svc.dbSrv.DB.Exec("delete from whoami_challenges where email = $1", emailDigest)
 	if err != nil {
-		log.Printf("failed to delete whoami challenge, key: %s", key)
+		log.Printf("failed to delete whoami challenge, key")
 	}
 }
 
@@ -106,12 +97,11 @@ func (svc *WhoamiService) GetWhoami() error {
 	return nil
 }
 
-func InitWhoamiService(JWTSecret string, whoamiBucketName string, TokenTTLMins int, storageSrv *storage.StorageService, emailSrv *email.EmailService) *WhoamiService {
+func InitWhoamiService(JWTSecret string, TokenTTLMins int, dbSrv *database.DatabaseService, emailSrv *email.EmailService) *WhoamiService {
 	return &WhoamiService{
-		secret:           JWTSecret,
-		storageSrv:       storageSrv,
-		whoamiBucketName: whoamiBucketName,
-		emailSrv:         emailSrv,
+		secret:   JWTSecret,
+		emailSrv: emailSrv,
+		dbSrv:    dbSrv,
 		tokenSrv: &token.TokenService{
 			Secret:   JWTSecret,
 			TokenTTL: time.Duration(TokenTTLMins) * time.Minute,

@@ -4,9 +4,12 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/base32"
 	"encoding/base64"
+	"encoding/hex"
 	"fmt"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var IV_BYTES = []byte{35, 46, 57, 24, 85, 35, 24, 74, 87, 35, 88, 98, 66, 32, 14, 05}
@@ -60,4 +63,20 @@ func DecryptMessage(secret, text string) (string, error) {
 	plainText := make([]byte, len(cipherText))
 	cfb.XORKeyStream(plainText, cipherText)
 	return string(plainText), nil
+}
+
+func BcryptHash(data string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(data), bcrypt.DefaultCost)
+	return string(bytes), err
+}
+
+func CompareBcryptHash(data, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(data))
+	return err == nil
+}
+
+func Sha256Hash(data string) string {
+	hasher := sha256.New()
+	hasher.Write([]byte(data))
+	return hex.EncodeToString(hasher.Sum(nil))
 }

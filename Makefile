@@ -6,13 +6,15 @@ BIN=./bin/cryp
 
 build: build-fe build-be ## build everything
 
-install: install-be install-fe install-air ## install deps for both backend and frontend
+install: install-be install-fe install-bins ## install deps for both backend and frontend
 
 dev: ## run dev servers of both backend and frontend
 	make -j 2 dev-fe dev-be
 
-install-air: ## install Air for backend hot reload
+install-bins: ## install CLI bins air and golang-migrate
 	curl -sSfL https://raw.githubusercontent.com/cosmtrek/air/master/install.sh | sh -s
+	brew install golang-migrate
+
 
 install-be: ## install backend dependencies
 	go mod tidy

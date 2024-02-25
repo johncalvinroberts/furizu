@@ -1,12 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
 	"github.com/johncalvinroberts/cryp/internal/config"
+	"github.com/johncalvinroberts/cryp/internal/database"
 	"github.com/johncalvinroberts/cryp/internal/email"
 	"github.com/johncalvinroberts/cryp/internal/storage"
 
@@ -20,6 +22,9 @@ func main() {
 	config := config.InitAppConfig()
 	e := echo.New()
 	e.Logger.Print("Starting Server")
+	fmt.Printf("config.PostgresConnectionString: %s\n", config.PostgresConnectionString)
+	dbSrv := database.InitDatabaseService(config.PostgresConnectionString)
+	defer dbSrv.Clean()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(200)))
@@ -30,7 +35,7 @@ func main() {
 	}))
 	storageSrv := storage.InitStorageService(config.AWSSession, config.Timeout)
 	emailSrv := email.InitEmailService(config)
-	whoamiSrv := whoami.InitWhoamiService(config.JWTSecret, config.Storage.WhoamiBucketName, config.JWTTokenTTL, storageSrv, emailSrv)
+	whoamiSrv := whoami.InitWhoamiService(config.JWTSecret, config.JWTTokenTTL, dbSrv, emailSrv)
 	blobSrv := blob.InitBlobService(storageSrv, config.Storage.BlobBucketName, config.Storage.BlobPointerBucketName, config.EmailMaskSecret, config.FreeBalanceBytes)
 	e.GET("/*", echo.WrapHandler(ui.GetHandler()))
 	e.GET("/api/health", health.HandleGetHealth)

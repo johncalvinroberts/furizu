@@ -18,6 +18,7 @@ var (
 
 	// auth
 	ErrWhoamiChallengeNotFound = goerrs.New("whoami challenge failed or not found")
+	ErrWhoamiChallengeExpired  = goerrs.New("whoami expired")
 	ErrNotImplemented          = goerrs.New("not implemented")
 
 	// email
