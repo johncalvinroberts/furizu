@@ -1,3 +1,6 @@
+/* eslint-disable  */
+// @ts-nocheck
+// prettier-ignore
 export default class ShaderProgram {
 	constructor(holder, options = {}) {
 		options = Object.assign(

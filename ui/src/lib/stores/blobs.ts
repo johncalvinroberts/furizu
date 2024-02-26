@@ -41,8 +41,8 @@ class BlobsStore extends BaseStore<BlobsState> {
 				blobs: rawBlobs,
 				count,
 			} = await apiClient.get<ListBlobsResponseDTO>("api/blobs");
-			if(!rawBlobs) {
-			 rawBlobs = []
+			if (!rawBlobs) {
+				rawBlobs = [];
 			}
 			const blobs = rawBlobs.reduce((memo: BlobMap, current: BlobItem) => {
 				memo.set(current.key, current);
