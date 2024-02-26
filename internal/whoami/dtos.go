@@ -23,7 +23,7 @@ type GetWhoamiResponseDTO struct {
 	Email string `json:"email"`
 }
 
-type WhoamiChallengeRow struct {
+type WhoamiChallengePGRow struct {
 	Id          *int      `db:"id"`
 	Otp         string    `db:"otp"`
 	EmailDigest string    `db:"email_digest"`

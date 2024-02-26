@@ -36,7 +36,7 @@ func main() {
 	storageSrv := storage.InitStorageService(config.AWSSession, config.Timeout)
 	emailSrv := email.InitEmailService(config)
 	whoamiSrv := whoami.InitWhoamiService(config.JWTSecret, config.JWTTokenTTL, dbSrv, emailSrv)
-	blobSrv := blob.InitBlobService(storageSrv, config.Storage.BlobBucketName, config.Storage.BlobPointerBucketName, config.EmailMaskSecret, config.FreeBalanceBytes)
+	blobSrv := blob.InitBlobService(storageSrv, dbSrv, config.Storage.BlobBucketName, config.EmailMaskSecret, config.FreeBalanceBytes)
 	e.GET("/*", echo.WrapHandler(ui.GetHandler()))
 	e.GET("/api/health", health.HandleGetHealth)
 	// // whoami
@@ -49,6 +49,6 @@ func main() {
 	// uploads
 	e.POST("/api/blobs", whoamiSrv.VerifyWhoamiMiddleware(blobSrv.HandleCreateBlob))
 	e.GET("/api/blobs", whoamiSrv.VerifyWhoamiMiddleware(blobSrv.HandleListBlobs))
-	e.DELETE("/api/blobs/:key", whoamiSrv.VerifyWhoamiMiddleware(blobSrv.HandleDeleteBlob))
+	e.DELETE("/api/blobs/:id", whoamiSrv.VerifyWhoamiMiddleware(blobSrv.HandleDeleteBlob))
 	e.Logger.Fatal(e.Start("localhost:" + config.Port))
 }

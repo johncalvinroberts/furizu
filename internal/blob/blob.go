@@ -2,11 +2,10 @@ package blob
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"strings"
-	"time"
 
+	"github.com/johncalvinroberts/cryp/internal/database"
 	"github.com/johncalvinroberts/cryp/internal/errors"
 	"github.com/johncalvinroberts/cryp/internal/storage"
 	"github.com/johncalvinroberts/cryp/internal/utils"
@@ -14,157 +13,99 @@ import (
 )
 
 type BlobService struct {
-	storageSrv                                             *storage.StorageService
-	blobBucketName, blobPointerBucketName, emailMaskSecret string
-	freeBalanceBytes                                       int64
+	storageSrv                      *storage.StorageService
+	dbSrv                           *database.DatabaseService
+	blobBucketName, emailMaskSecret string
+	freeBalanceBytes                int64
 }
 
-func (svc *BlobService) CreateBlob(file, title, email string) (*Blob, error) {
+func (svc *BlobService) CreateBlob(file, title, email string) (*BlobPGRow, error) {
 	var (
-		guid   = xid.New()
-		id     = guid.String()
-		key    = storage.ComposeKey(id, utils.EncryptMessage(svc.emailMaskSecret, email), "-upload.cryp")
-		reader = strings.NewReader(file)
-		size   = reader.Len()
+		guid        = xid.New()
+		id          = guid.String()
+		reader      = strings.NewReader(file)
+		size        = reader.Len()
+		emailDigest = utils.Sha256Hash(email)
+		key         = storage.ComposeKey(id, emailDigest, "-upload.cryp")
 	)
-	fmt.Println(id)
-	fmt.Println(key)
-	location, err := svc.storageSrv.Write(svc.blobBucketName, key, reader)
+	_, err := svc.storageSrv.Write(svc.blobBucketName, key, reader)
+	s3Pointer := &AWSS3PointerJSONB{Key: key}
+	s3PointerJSON, err := json.Marshal(s3Pointer)
 	if err != nil {
-		log.Printf("Failed to create blob when writing to storage: %v\n", err)
+		return nil, err
+	}
+	_, err = svc.dbSrv.DB.Exec(`
+		INSERT INTO blobs (id, title, email_digest, size_bytes, aws_s3)
+		VALUES ($1, $2, $3, $4, $5)
+		`, id, title, emailDigest, size, s3PointerJSON)
+	if err != nil {
+		log.Printf("Failed to create blob: %v\n", err)
 		return nil, errors.ErrDataCreationFailure
 	}
-	blob, err := svc.AddBlobPointer(location, key, title, email, int64(size))
+	blob, err := svc.FindBlobById(id)
+
 	if err != nil {
+		log.Printf("Failed to query blob: %v\n", err)
 		return nil, errors.ErrDataCreationFailure
 	}
 	return blob, nil
 }
 
-func (svc *BlobService) AddBlobPointer(url, key, title, email string, size int64) (*Blob, error) {
-	var (
-		now               = time.Now().Unix()
-		blobToAdd         = &Blob{Url: url, CreatedAt: now, UpdatedAt: now, Key: key, Title: title, SizeBytes: size}
-		blobPointers, err = svc.FindOrCreateBlobPointers(email)
-		nextBalance       = blobPointers.BalanceBytes - size
-	)
+func (svc *BlobService) FindBlobById(id string) (*BlobPGRow, error) {
+	blob := &BlobPGRow{}
+	query := "SELECT * FROM blobs WHERE id = $1"
+	err := svc.dbSrv.DB.Get(blob, query, id)
 	if err != nil {
 		return nil, err
 	}
-	if nextBalance < 0 {
-		return nil, errors.ErrBalanceLimitExceeded
-	}
-	// TODO: need to lock the s3 object to prevent concurrent writes to the same object resulting in data loss
-	blobPointers.Blobs = append(blobPointers.Blobs, *blobToAdd)
-	blobPointers.Count++
-	blobPointers.BalanceBytes = nextBalance
-	encodedPointers, err := json.Marshal(blobPointers)
-	if err != nil {
-		return nil, err
-	}
-	_, err = svc.storageSrv.Write(svc.blobPointerBucketName, email, strings.NewReader(string(encodedPointers)))
-	if err != nil {
-		return nil, err
-	}
-	return blobToAdd, nil
+	return blob, nil
 }
 
-func (svc *BlobService) FindOrCreateBlobPointers(email string) (*BlobPointers, error) {
-	var (
-		blobPointers = &BlobPointers{}
-		exists, err  = svc.storageSrv.Exists(svc.blobPointerBucketName, email)
-	)
+func (svc *BlobService) ListBlobs(email string, cursor int, limit int) ([]*BlobPGRow, error) {
+
+	emailDigest := utils.Sha256Hash(email)
+	blobs := []*BlobPGRow{}
+	query := `SELECT * FROM blobs WHERE email_digest = $1 AND created_at < to_timestamp($2) ORDER BY created_at DESC LIMIT $3`
+	err := svc.dbSrv.DB.Select(&blobs, query, emailDigest, int64(cursor), limit)
 	if err != nil {
 		return nil, err
 	}
-
-	if exists {
-		var existingJSONPointers string
-		// read directly and copy to blobPointers
-		existingJSONPointers, err = svc.storageSrv.ReadToString(svc.blobPointerBucketName, email)
-		if err != nil {
-			return nil, err
-		}
-		err = json.Unmarshal([]byte(existingJSONPointers), blobPointers)
-	}
-
-	if !exists {
-		// create initial blobPointers file
-		blobPointers.BalanceBytes = svc.freeBalanceBytes
-		var emptyPointersJSON []byte
-		// if doesn't exist, write the empty value to s3
-		emptyPointersJSON, err = json.Marshal(blobPointers)
-		if err != nil {
-			return nil, err
-		}
-		// write to db
-		_, err = svc.storageSrv.Write(svc.blobPointerBucketName, email, strings.NewReader(string(emptyPointersJSON)))
-	}
-	return blobPointers, err
+	return blobs, nil
 }
 
-func (svc *BlobService) ListBlobs(email string) (*BlobPointers, error) {
-	// TODO: pagination?
-	// pointersStr, err := svc.storageSrv.ReadToString(svc.blobPointerBucketName, email)
-	pointers, err := svc.FindOrCreateBlobPointers(email)
+func (svc *BlobService) CountBlobs(email string) (int, error) {
+	emailDigest := utils.Sha256Hash(email)
+	var count int
+	err := svc.dbSrv.DB.Get(&count, "SELECT COUNT(*) FROM blobs WHERE email_digest = $1", emailDigest)
 	if err != nil {
-		return nil, errors.ErrDataAccessFailure
+		return 0, err
 	}
-	return pointers, err
+	return count, nil
 }
 
 func (svc *BlobService) DestroyBlob(email, key string) error {
-	var (
-		keyComponents       = storage.DecomposeKey(key)
-		decryptedEmail, err = utils.DecryptMessage(svc.emailMaskSecret, keyComponents[1])
-		blobPointers        = &BlobPointers{}
-	)
-	if err != nil {
-		return errors.ErrInternalServerError
-	}
-	// check if it belongs to bearer
-	if decryptedEmail != email {
-		return errors.ErrForbidden
-	}
-	// first, remove it from the blob pointers
-	existingJSONPointers, err := svc.storageSrv.ReadToString(svc.blobPointerBucketName, email)
-	if err != nil {
-		return err
-	}
-	err = json.Unmarshal([]byte(existingJSONPointers), blobPointers)
-	if err != nil {
-		return err
-	}
-	var nextBlobs []Blob
-
-	for _, blob := range blobPointers.Blobs {
-		if blob.Key != key {
-			nextBlobs = append(nextBlobs, blob)
-		}
-	}
-	blobPointers.Blobs = nextBlobs
-	blobPointers.Count--
-	encodedPointers, err := json.Marshal(blobPointers)
-	if err != nil {
-		return err
-	}
-	_, err = svc.storageSrv.Write(svc.blobPointerBucketName, email, strings.NewReader(string(encodedPointers)))
-	if err != nil {
-		return err
-	}
-	// remove the blob, finally
-	err = svc.storageSrv.Delete(svc.blobBucketName, key)
-	return err
+	return errors.ErrNotImplemented
 }
 
-func InitBlobService(storageSrv *storage.StorageService, blobBucketName, blobPointerBucketName, emailMaskSecret string, freeBalanceBytes int64) *BlobService {
-	fmt.Printf("blobBucketName %s\n", blobBucketName)
-	fmt.Printf("blobBublobPointerBucketNamecketName %s\n", blobPointerBucketName)
+func (svc *BlobService) TransformBlobPGRowToBlobDTO(blob BlobPGRow) *BlobDTO {
+	s3Pointer := &S3PointerDTO{Key: blob.AwsS3Pointer.Key, URL: ""}
+	return &BlobDTO{
+		Id:        blob.Id,
+		Title:     blob.Title,
+		SizeBytes: blob.SizeBytes,
+		CreatedAt: blob.CreatedAt,
+		UpdatedAt: blob.UpdatedAt,
+		S3Pointer: *s3Pointer,
+	}
+}
+
+func InitBlobService(storageSrv *storage.StorageService, dbSrv *database.DatabaseService, blobBucketName string, emailMaskSecret string, freeBalanceBytes int64) *BlobService {
+
 	return &BlobService{
-		storageSrv:            storageSrv,
-		blobBucketName:        blobBucketName,
-		blobPointerBucketName: blobPointerBucketName,
-		emailMaskSecret:       emailMaskSecret,
-		freeBalanceBytes:      freeBalanceBytes,
+		storageSrv:       storageSrv,
+		dbSrv:            dbSrv,
+		blobBucketName:   blobBucketName,
+		emailMaskSecret:  emailMaskSecret,
+		freeBalanceBytes: freeBalanceBytes,
 	}
 }

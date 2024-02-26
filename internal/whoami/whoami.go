@@ -35,7 +35,7 @@ func (svc *WhoamiService) StartWhoamiChallenge(email string) error {
 	}
 	otp := utils.RandomSecret(OTP_LENGTH)
 	emailDigest := utils.Sha256Hash(strings.TrimSpace(email))
-	_, err := svc.dbSrv.DB.Exec("insert into whoami_challenges (email_digest, otp) values ($1, $2)", emailDigest, otp)
+	_, err := svc.dbSrv.DB.Exec("INSERT INTO whoami_challenges (email_digest, otp) VALUES ($1, $2)", emailDigest, otp)
 	if err != nil {
 		return errors.ErrDataCreationFailure
 	}
@@ -52,7 +52,7 @@ func (svc *WhoamiService) TryWhoamiChallenge(email string, otp string) (string, 
 	if email == "" || otp == "" {
 		return "", errors.ErrValidationFailure
 	}
-	challenge := &WhoamiChallengeRow{}
+	challenge := &WhoamiChallengePGRow{}
 	emailDigest := utils.Sha256Hash(email)
 	err := svc.dbSrv.DB.Get(challenge, "SELECT * FROM whoami_challenges WHERE otp=$1 AND email_digest=$2", strings.TrimSpace(otp), strings.TrimSpace(emailDigest))
 	if err != nil || otp != challenge.Otp || challenge.Otp == "" {
@@ -76,7 +76,7 @@ func (svc *WhoamiService) TryWhoamiChallenge(email string, otp string) (string, 
 }
 
 func (svc *WhoamiService) DestroyWhoamiChallenge(emailDigest string) {
-	_, err := svc.dbSrv.DB.Exec("delete from whoami_challenges where email = $1", emailDigest)
+	_, err := svc.dbSrv.DB.Exec("DELETE FROM whoami_challenges WHERE email = $1", emailDigest)
 	if err != nil {
 		log.Printf("failed to delete whoami challenge, key")
 	}

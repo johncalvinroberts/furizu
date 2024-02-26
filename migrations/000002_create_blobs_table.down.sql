@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS blobs;
+DROP TRIGGER IF EXISTS blobs_modtime ON blobs;

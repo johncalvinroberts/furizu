@@ -143,7 +143,7 @@ class APIClientStore extends BaseStore<APIClientState> {
 		const { isAuthenticated } = get(this.store);
 		if (!this.isTokenValid && isAuthenticated) {
 			this.reset();
-			display.enqueueMessage("Session has expired. Please authenticate again.");
+			display.enqueueMessage("Session has expired. Please authenticate again.", "error");
 		}
 	}
 
