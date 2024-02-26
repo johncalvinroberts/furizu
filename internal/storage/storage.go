@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
@@ -105,20 +104,6 @@ func (svc *StorageService) List(ctx context.Context, bucket string, cursor *stri
 	return keys, nil
 }
 
-func (svc *StorageService) Exists(bucket, key string) (bool, error) {
-	_, err := svc.client.HeadObject(&s3.HeadObjectInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(key),
-	})
-	if err != nil {
-		if IsNotFoundError(err) {
-			return false, nil
-		}
-		return false, err
-	}
-	return true, nil
-}
-
 func ComposeKey(comps ...string) string {
 	key := ""
 	for i, s := range comps {
@@ -133,20 +118,6 @@ func ComposeKey(comps ...string) string {
 
 func DecomposeKey(key string) []string {
 	return strings.Split(key, DELIMITER)
-}
-
-func IsNotFoundError(err error) bool {
-	if aerr, ok := err.(awserr.Error); ok {
-		switch aerr.Code() {
-		case "NotFound":
-			return true
-		case "NoSuchKey":
-			return true
-		default:
-			return false
-		}
-	}
-	return false
 }
 
 func InitStorageService(session *session.Session, timeout int) *StorageService {

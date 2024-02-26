@@ -1,5 +1,7 @@
 import type { BlobItem } from "./types";
 
+export type RawBlobItem = Omit<BlobItem, "publicURL">;
+
 export type RefreshTokenDTO = {
 	jwt: string;
 };
@@ -14,9 +16,8 @@ export type JWTPayload = {
 };
 
 export type ListBlobsResponseDTO = {
-	blobs: BlobItem[];
+	blobs: RawBlobItem[];
 	count: number;
-	balanceBytes: number;
 };
 
 export type UploadBlobRequestDTO = {

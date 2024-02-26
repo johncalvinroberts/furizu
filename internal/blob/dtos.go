@@ -13,7 +13,7 @@ type BlobDTO struct {
 	SizeBytes int64        `json:"sizeBytes"`
 	CreatedAt time.Time    `json:"createdAt"`
 	UpdatedAt time.Time    `json:"updatedAt"`
-	S3Pointer S3PointerDTO `json:"s3Pointer"`
+	S3        S3PointerDTO `json:"s3"`
 }
 
 type S3PointerDTO struct {
@@ -26,7 +26,7 @@ type BlobPGRow struct {
 	Title        string            `db:"title"`
 	SizeBytes    int64             `db:"size_bytes"`
 	EmailDigest  string            `db:"email_digest"`
-	AwsS3Pointer AWSS3PointerJSONB `db:"aws_s3"`
+	AwsS3Pointer AWSS3PointerJSONB `db:"s3"`
 	CreatedAt    time.Time         `db:"created_at"`
 	UpdatedAt    time.Time         `db:"updated_at"`
 }
@@ -47,8 +47,10 @@ type BlobPointersResponseDTO struct {
 
 type AWSS3PointerJSONB struct {
 	Key string `json:"key"`
+	URL string `json:"URL"`
 }
 
+// needed for sqlx to properly serialize the nested aws object
 func (p *AWSS3PointerJSONB) Scan(src interface{}) error {
 	if src == nil {
 		return nil

@@ -19,7 +19,6 @@ type AppConfig struct {
 	Debug              bool     `env:"DEBUG,required"`
 	JWTSecret          string   `env:"JWT_SECRET,required"`
 	JWTTokenTTL        int      `env:"JWT_TOKEN_TTL,default=10"`
-	EmailMaskSecret    string   `env:"EMAIL_MASK_SECRET,required"` // NOTE: This MUST be of 32 byte length
 	Port               string   `env:"PORT,default=9000"`
 	Timeout            int      `env:"TIMEOUT,default=8000"`
 	EmailTransportName string   `env:"EMAIL_TRANSPORT_NAME,default=fs"`
@@ -33,8 +32,7 @@ type AppConfig struct {
 		Token    string `env:"AWS_TOKEN"`
 	}
 	Storage struct {
-		BlobBucketName        string `env:"BLOB_BUCKET_NAME,required"`
-		BlobPointerBucketName string `env:"BLOB_POINTERS_BUCKET_NAME,required"`
+		BlobBucketName string `env:"BLOB_BUCKET_NAME,required"`
 	}
 	PostgresConnectionString string `env:"POSTGRES_CONNECTION_STRING"`
 	FreeBalanceBytes         int64  `env:"DEFAULT_FREE_BALANCE_BYTES"`

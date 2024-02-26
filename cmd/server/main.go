@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -22,7 +21,6 @@ func main() {
 	config := config.InitAppConfig()
 	e := echo.New()
 	e.Logger.Print("Starting Server")
-	fmt.Printf("config.PostgresConnectionString: %s\n", config.PostgresConnectionString)
 	dbSrv := database.InitDatabaseService(config.PostgresConnectionString)
 	defer dbSrv.Clean()
 	e.Use(middleware.Logger())
@@ -36,7 +34,7 @@ func main() {
 	storageSrv := storage.InitStorageService(config.AWSSession, config.Timeout)
 	emailSrv := email.InitEmailService(config)
 	whoamiSrv := whoami.InitWhoamiService(config.JWTSecret, config.JWTTokenTTL, dbSrv, emailSrv)
-	blobSrv := blob.InitBlobService(storageSrv, dbSrv, config.Storage.BlobBucketName, config.EmailMaskSecret, config.FreeBalanceBytes)
+	blobSrv := blob.InitBlobService(storageSrv, dbSrv, config.Storage.BlobBucketName, config.FreeBalanceBytes)
 	e.GET("/*", echo.WrapHandler(ui.GetHandler()))
 	e.GET("/api/health", health.HandleGetHealth)
 	// // whoami
@@ -50,5 +48,6 @@ func main() {
 	e.POST("/api/blobs", whoamiSrv.VerifyWhoamiMiddleware(blobSrv.HandleCreateBlob))
 	e.GET("/api/blobs", whoamiSrv.VerifyWhoamiMiddleware(blobSrv.HandleListBlobs))
 	e.DELETE("/api/blobs/:id", whoamiSrv.VerifyWhoamiMiddleware(blobSrv.HandleDeleteBlob))
+	e.GET("/api/blobs/:id", whoamiSrv.VerifyWhoamiMiddleware(blobSrv.HandleGetBlob))
 	e.Logger.Fatal(e.Start("localhost:" + config.Port))
 }

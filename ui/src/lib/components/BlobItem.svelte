@@ -6,10 +6,10 @@
 
 	export let file: BlobItem;
 	export let center = true;
-	$: url = file?.url;
+	$: url = file?.s3.URL;
 	$: publicURL = file?.publicURL;
 
-	const handleChangeInput = () => (url = file?.url);
+	const handleChangeInput = () => (url = file?.s3.URL);
 	const handleCopyRawURL = () => navigator.clipboard.writeText(url);
 	const handleCopyShareURL = () => {
 		navigator.clipboard.writeText(publicURL);
@@ -19,7 +19,7 @@
 <div class="blob-preview">
 	<slot />
 	<div class="vertical-center blob-details" class:not-center={!center}>
-		<Input name={file.key} bind:value={publicURL} on:change={handleChangeInput} />
+		<Input name={file.id} bind:value={publicURL} on:change={handleChangeInput} />
 		<Button
 			class="copy-button"
 			on:click={handleCopyShareURL}
@@ -33,7 +33,7 @@
 			/>
 		</div>
 		<div class="vertical-center" class:not-center={!center}>
-			<Input name={file.key} bind:value={url} on:change={handleChangeInput} />
+			<Input name={file.id} bind:value={url} on:change={handleChangeInput} />
 			<Button class="copy-button" on:click={handleCopyRawURL} title="Copy Raw URL to clipboard">
 				Copy Raw URL
 			</Button>
@@ -56,6 +56,7 @@
 	.blob-details {
 		flex: 0 0 100%;
 		justify-content: flex-start;
+		padding: 0 10px;
 	}
 
 	.not-center {

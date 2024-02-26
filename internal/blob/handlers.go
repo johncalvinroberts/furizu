@@ -66,12 +66,31 @@ func (svc *BlobService) HandleListBlobs(c echo.Context) error {
 	return utils.RespondOK(c, res)
 }
 
+func (svc *BlobService) HandleGetBlob(c echo.Context) error {
+	var (
+		id          = c.Param("id")
+		claims      = whoami.GetUserFromContext(c)
+		email       = claims.Email
+		emailDigest = utils.Sha256Hash(email)
+		blob, err   = svc.FindBlobById(id)
+	)
+
+	if blob.EmailDigest != emailDigest {
+		return utils.RespondError(c, 404, echo.ErrNotFound)
+	}
+
+	if err != nil {
+		return utils.RespondError(c, http.StatusBadRequest, err)
+	}
+	return utils.RespondOK(c, svc.TransformBlobPGRowToBlobDTO(*blob))
+}
+
 func (svc *BlobService) HandleDeleteBlob(c echo.Context) error {
 	var (
-		key    = c.Param("id")
+		id     = c.Param("id")
 		claims = whoami.GetUserFromContext(c)
 		email  = claims.Email
-		err    = svc.DestroyBlob(email, key)
+		err    = svc.DestroyBlob(email, id)
 	)
 	if err != nil {
 		return utils.RespondError(c, http.StatusBadRequest, err)

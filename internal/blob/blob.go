@@ -13,10 +13,10 @@ import (
 )
 
 type BlobService struct {
-	storageSrv                      *storage.StorageService
-	dbSrv                           *database.DatabaseService
-	blobBucketName, emailMaskSecret string
-	freeBalanceBytes                int64
+	storageSrv       *storage.StorageService
+	dbSrv            *database.DatabaseService
+	blobBucketName   string
+	freeBalanceBytes int64
 }
 
 func (svc *BlobService) CreateBlob(file, title, email string) (*BlobPGRow, error) {
@@ -28,14 +28,17 @@ func (svc *BlobService) CreateBlob(file, title, email string) (*BlobPGRow, error
 		emailDigest = utils.Sha256Hash(email)
 		key         = storage.ComposeKey(id, emailDigest, "-upload.cryp")
 	)
-	_, err := svc.storageSrv.Write(svc.blobBucketName, key, reader)
-	s3Pointer := &AWSS3PointerJSONB{Key: key}
+	s3URL, err := svc.storageSrv.Write(svc.blobBucketName, key, reader)
+	if err != nil {
+		return nil, err
+	}
+	s3Pointer := &AWSS3PointerJSONB{Key: key, URL: s3URL}
 	s3PointerJSON, err := json.Marshal(s3Pointer)
 	if err != nil {
 		return nil, err
 	}
 	_, err = svc.dbSrv.DB.Exec(`
-		INSERT INTO blobs (id, title, email_digest, size_bytes, aws_s3)
+		INSERT INTO blobs (id, title, email_digest, size_bytes, s3)
 		VALUES ($1, $2, $3, $4, $5)
 		`, id, title, emailDigest, size, s3PointerJSON)
 	if err != nil {
@@ -43,7 +46,6 @@ func (svc *BlobService) CreateBlob(file, title, email string) (*BlobPGRow, error
 		return nil, errors.ErrDataCreationFailure
 	}
 	blob, err := svc.FindBlobById(id)
-
 	if err != nil {
 		log.Printf("Failed to query blob: %v\n", err)
 		return nil, errors.ErrDataCreationFailure
@@ -62,7 +64,6 @@ func (svc *BlobService) FindBlobById(id string) (*BlobPGRow, error) {
 }
 
 func (svc *BlobService) ListBlobs(email string, cursor int, limit int) ([]*BlobPGRow, error) {
-
 	emailDigest := utils.Sha256Hash(email)
 	blobs := []*BlobPGRow{}
 	query := `SELECT * FROM blobs WHERE email_digest = $1 AND created_at < to_timestamp($2) ORDER BY created_at DESC LIMIT $3`
@@ -88,24 +89,22 @@ func (svc *BlobService) DestroyBlob(email, key string) error {
 }
 
 func (svc *BlobService) TransformBlobPGRowToBlobDTO(blob BlobPGRow) *BlobDTO {
-	s3Pointer := &S3PointerDTO{Key: blob.AwsS3Pointer.Key, URL: ""}
+	s3Pointer := &S3PointerDTO{Key: blob.AwsS3Pointer.Key, URL: blob.AwsS3Pointer.URL}
 	return &BlobDTO{
 		Id:        blob.Id,
 		Title:     blob.Title,
 		SizeBytes: blob.SizeBytes,
 		CreatedAt: blob.CreatedAt,
 		UpdatedAt: blob.UpdatedAt,
-		S3Pointer: *s3Pointer,
+		S3:        *s3Pointer,
 	}
 }
 
-func InitBlobService(storageSrv *storage.StorageService, dbSrv *database.DatabaseService, blobBucketName string, emailMaskSecret string, freeBalanceBytes int64) *BlobService {
-
+func InitBlobService(storageSrv *storage.StorageService, dbSrv *database.DatabaseService, blobBucketName string, freeBalanceBytes int64) *BlobService {
 	return &BlobService{
 		storageSrv:       storageSrv,
 		dbSrv:            dbSrv,
 		blobBucketName:   blobBucketName,
-		emailMaskSecret:  emailMaskSecret,
 		freeBalanceBytes: freeBalanceBytes,
 	}
 }

@@ -21,7 +21,7 @@
 			<Processing />
 		{:else}
 			{#each blobs as file}
-				<a class="list-item" href="/files/{file.key}">
+				<a class="list-item" href="/files/{file.id}">
 					<span class="blob-title">
 						<BlobItemTitle {file} center={false} />
 					</span>

@@ -1,7 +1,7 @@
 import { get } from "svelte/store";
 import type { BlobItem, BlobsState, BlobMap } from "../../types/types";
+import type { ListBlobsResponseDTO, UploadBlobRequestDTO, RawBlobItem } from "../../types/dtos";
 import { delay, extractErrorMessageString } from "../utils";
-import type { ListBlobsResponseDTO, UploadBlobRequestDTO } from "../../types/dtos";
 import BaseStore from "./base";
 import { apiClient } from "./api";
 import { display } from "./display";
@@ -36,19 +36,15 @@ class BlobsStore extends BaseStore<BlobsState> {
 				}
 			}
 			this.dispatch({ isLoadingBlobs: true });
-			let {
-				balanceBytes,
-				blobs: rawBlobs,
-				count,
-			} = await apiClient.get<ListBlobsResponseDTO>("api/blobs");
-			if (!rawBlobs) {
-				rawBlobs = [];
-			}
-			const blobs = rawBlobs.reduce((memo: BlobMap, current: BlobItem) => {
-				memo.set(current.key, current);
+			// TODO: paginate
+			const { blobs: rawBlobs = [], count } =
+				await apiClient.get<ListBlobsResponseDTO>("api/blobs");
+			const blobs = rawBlobs.reduce((memo: BlobMap, current) => {
+				const massaged = this.massageBlob(current);
+				memo.set(current.id, massaged);
 				return memo;
 			}, new Map<string, BlobItem>());
-			this.dispatch({ balanceBytes, count, blobs });
+			this.dispatch({ count, blobs });
 		} catch (error) {
 			display.enqueueMessage(extractErrorMessageString(error), "error");
 		} finally {
@@ -59,14 +55,31 @@ class BlobsStore extends BaseStore<BlobsState> {
 	public async createBlob(payload: UploadBlobRequestDTO): Promise<BlobItem> {
 		try {
 			this.dispatch({ isCreatingBlob: true });
-			const res = await apiClient.post<BlobItem>("api/blobs", payload);
+			const res = await apiClient.post<RawBlobItem>("api/blobs", payload);
 			const { blobs } = get(this.store);
-			blobs.set(res.key, res);
+			const massaged = this.massageBlob(res);
+			blobs.set(res.id, massaged);
 			this.dispatch({ blobs });
-			return res;
+			return massaged;
 		} finally {
 			this.dispatch({ isCreatingBlob: false });
 		}
+	}
+
+	public async getBlob(id: string): Promise<BlobItem> {
+		const res = await apiClient.get<RawBlobItem>(`api/blobs/${id}`);
+		const { blobs } = get(this.store);
+		const massaged = this.massageBlob(res);
+		blobs.set(res.id, massaged);
+		this.dispatch({ blobs });
+		return massaged;
+	}
+
+	public massageBlob(raw: RawBlobItem): BlobItem {
+		return {
+			...raw,
+			publicURL: `${window.location.host}/files/${raw.id}`,
+		};
 	}
 }
 

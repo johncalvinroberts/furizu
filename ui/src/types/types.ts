@@ -68,14 +68,18 @@ export type Theme = "dark" | "light";
 
 export type MaybeError = Error | string | unknown;
 
+// frontend/massaged version of a blob item
 export type BlobItem = {
-	url: string;
 	createdAt: number;
 	updatedAt: number;
 	title: string;
-	key: string;
+	id: string;
 	publicURL: string;
 	sizeBytes: number;
+	s3: {
+		key: string;
+		URL: string;
+	};
 };
 
 export type BlobMap = Map<string, BlobItem>;
