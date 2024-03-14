@@ -18,9 +18,13 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "paths": {
+      "~/*": ["./src/*"]
+    },
+    "baseUrl": ".",
   },
-  "include": ["src"],
+  "include": ["src", "styled-system"],
   "types": ["vite-plugin-pwa/client"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

@@ -2,6 +2,7 @@ import react from '@vitejs/plugin-react';
 import * as path from 'path';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
 import manifest from './manifest.json';
 
@@ -9,6 +10,7 @@ import manifest from './manifest.json';
 export default defineConfig({
   plugins: [
     react(),
+    tsconfigPaths({ root: './' }),
     VitePWA({
       manifest,
       includeAssets: ['favicon.svg', 'favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
@@ -23,7 +25,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '~': path.resolve(__dirname, './src'),
     },
   },
 });
