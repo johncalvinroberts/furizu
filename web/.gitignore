@@ -24,6 +24,3 @@ dist-ssr
 *.sw?
 
 .env
-## Panda
-styled-system
-styled-system-studio
