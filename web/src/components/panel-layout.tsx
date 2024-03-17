@@ -9,20 +9,14 @@ import { Separator } from './ui/separator';
 
 const defaultLayout = [310, 440, 655];
 
-type MailPanelProps = React.ComponentProps<typeof ResizablePanel> & {
+type PanelProps = React.ComponentProps<typeof ResizablePanel> & {
   top?: React.ReactNode;
   children?: React.ReactNode;
   classNames?: { root?: string; top?: string };
   withHandle?: boolean;
 };
 
-const MailLayoutPanel = ({
-  children,
-  top,
-  classNames = {},
-  withHandle,
-  ...props
-}: MailPanelProps) => {
+const Panel = ({ children, top, classNames = {}, withHandle, ...props }: PanelProps) => {
   return (
     <>
       <ResizablePanel className={classNames.root} {...props}>
@@ -39,7 +33,7 @@ const MailLayoutPanel = ({
   );
 };
 
-export const MailEsqueLayout = () => {
+export const PanelLayout = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const toggleCollapsed = () => {
     setIsCollapsed(!isCollapsed);
@@ -54,7 +48,7 @@ export const MailEsqueLayout = () => {
         }}
         className="flex-1 items-stretch"
       >
-        <MailLayoutPanel
+        <Panel
           defaultSize={defaultLayout[0]}
           collapsedSize={4}
           collapsible={true}
@@ -74,23 +68,18 @@ export const MailEsqueLayout = () => {
         >
           <div className="h-full flex flex-col space-between">
             <div className="flex-1 p-4">folder tree view here</div>
-            <div className="border-t grow-0 shrink-0 basis-[120px] flex justify-between p-2">
+            <div className="border-t flex-none h-[120px] flex justify-between p-2">
               <AccountPreview variant={isCollapsed ? 'compact' : 'full'} />
             </div>
           </div>
-        </MailLayoutPanel>
-        <MailLayoutPanel
-          defaultSize={defaultLayout[1]}
-          minSize={30}
-          top={<>stuff here</>}
-          withHandle
-        >
+        </Panel>
+        <Panel defaultSize={defaultLayout[1]} minSize={30} top={<>stuff here</>} withHandle>
           <div>file list for current folder here</div>
-        </MailLayoutPanel>
+        </Panel>
 
-        <MailLayoutPanel defaultSize={defaultLayout[1]} minSize={30}>
+        <Panel defaultSize={defaultLayout[1]} minSize={30}>
           <div>detail view here</div>
-        </MailLayoutPanel>
+        </Panel>
       </ResizablePanelGroup>
     </div>
   );

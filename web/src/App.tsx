@@ -1,4 +1,4 @@
-import { MailEsqueLayout } from '@/components/mail-esque-layout';
+import { PanelLayout } from '@/components/panel-layout';
 import { ThemeProvider } from '@/components/theme-provider';
 
 function App() {
@@ -6,7 +6,7 @@ function App() {
     <ThemeProvider>
       <div className="w-full flex min-h-screen flex-col bg-background">
         <main className="flex-1 flex flex-col">
-          <MailEsqueLayout />
+          <PanelLayout />
         </main>
       </div>
     </ThemeProvider>

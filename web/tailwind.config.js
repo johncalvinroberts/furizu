@@ -18,6 +18,11 @@ module.exports = {
       },
     },
     extend: {
+      flexGrow: {
+        2: '2',
+        3: '3',
+        4: '4',
+      },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
