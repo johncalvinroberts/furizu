@@ -1,16 +1,13 @@
+import { MailEsqueLayout } from '@/components/mail-esque-layout';
 import { ThemeProvider } from '@/components/theme-provider';
-
-import { ModeToggle } from './components/mode-toggle';
-import { API_URL } from './config';
 
 function App() {
   return (
     <ThemeProvider>
-      <div className="w-full min-h-[100vh] flex items-center justify-center">
-        <div>
-          <p>API_URL: {API_URL}</p>
-          <ModeToggle />
-        </div>
+      <div className="w-full flex min-h-screen flex-col bg-background">
+        <main className="flex-1 flex flex-col">
+          <MailEsqueLayout />
+        </main>
       </div>
     </ThemeProvider>
   );
