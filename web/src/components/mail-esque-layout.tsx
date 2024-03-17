@@ -2,10 +2,12 @@ import { useState } from 'react';
 
 import { cn } from '@/lib/utils';
 
+import { AccountPreview } from './account-preview';
+import { Lockup } from './lockup';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from './ui/resizable';
 import { Separator } from './ui/separator';
 
-const defaultLayout = [265, 440, 655];
+const defaultLayout = [310, 440, 655];
 
 type MailPanelProps = React.ComponentProps<typeof ResizablePanel> & {
   top?: React.ReactNode;
@@ -30,7 +32,6 @@ const MailLayoutPanel = ({
             <Separator />
           </>
         )}
-
         {children}
       </ResizablePanel>
       {withHandle && <ResizableHandle withHandle />}
@@ -40,6 +41,10 @@ const MailLayoutPanel = ({
 
 export const MailEsqueLayout = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const toggleCollapsed = () => {
+    setIsCollapsed(!isCollapsed);
+    document.cookie = `react-resizable-panels:collapsed=${JSON.stringify(!isCollapsed)}`;
+  };
   return (
     <div className="flex flex-col flex-1">
       <ResizablePanelGroup
@@ -54,19 +59,25 @@ export const MailEsqueLayout = () => {
           collapsedSize={4}
           collapsible={true}
           minSize={15}
-          maxSize={20}
-          onCollapse={() => {
-            setIsCollapsed(!isCollapsed);
-            document.cookie = `react-resizable-panels:collapsed=${JSON.stringify(!isCollapsed)}`;
-          }}
+          maxSize={30}
+          onCollapse={toggleCollapsed}
           classNames={{
             root: cn(isCollapsed && 'min-w-[50px] transition-all duration-300 ease-in-out'),
-            top: 'items-center justify-center',
+            top: 'items-center justify-between',
           }}
           withHandle
-          top={<>Logo here </>}
+          top={
+            <>
+              <Lockup variant={isCollapsed ? 'compact' : 'full'} />
+            </>
+          }
         >
-          <div>nav links here.</div>
+          <div className="h-full flex flex-col space-between">
+            <div className="flex-1 p-4">folder tree view here</div>
+            <div className="border-t grow-0 shrink-0 basis-[120px] flex justify-between p-2">
+              <AccountPreview variant={isCollapsed ? 'compact' : 'full'} />
+            </div>
+          </div>
         </MailLayoutPanel>
         <MailLayoutPanel
           defaultSize={defaultLayout[1]}
@@ -74,7 +85,7 @@ export const MailEsqueLayout = () => {
           top={<>stuff here</>}
           withHandle
         >
-          <div>file list here</div>
+          <div>file list for current folder here</div>
         </MailLayoutPanel>
 
         <MailLayoutPanel defaultSize={defaultLayout[1]} minSize={30}>
