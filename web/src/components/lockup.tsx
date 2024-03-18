@@ -1,16 +1,23 @@
+import { Link } from 'wouter';
 type Props = {
   variant?: 'compact' | 'full';
 };
 export const Lockup = ({ variant = 'full' }: Props) => {
-  if (variant === 'full') {
-    return (
-      <div>
-        <span className="mr-2">❄️</span>
-        furizu.
-      </div>
-    );
-  }
-  if (variant === 'compact') {
-    return <div>❄️.</div>;
-  }
+  return (
+    <Link href="/">
+      {variant === 'full' && (
+        <>
+          <div className="font-semibold hover:font-bold">
+            <span className="mr-2">❄️</span>
+            furizu.
+          </div>
+        </>
+      )}
+      {variant === 'compact' && (
+        <>
+          <div>❄️.</div>
+        </>
+      )}
+    </Link>
+  );
 };

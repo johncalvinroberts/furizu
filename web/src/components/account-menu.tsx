@@ -1,4 +1,5 @@
 import { LogIn, Settings, Settings2 } from 'lucide-react';
+import { Link } from 'wouter';
 
 import {
   DropdownMenu,
@@ -24,9 +25,11 @@ export const AccountMenu = ({ size = 'tiny', variant = 'outline', className }: P
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem>
-          <LogIn className="mr-2 h-4 w-4" />
-          Login/Signup
+        <DropdownMenuItem asChild>
+          <Link href="/auth/signup">
+            <LogIn className="mr-2 h-4 w-4" />
+            Login/Signup
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuItem>
           <Settings2 className="mr-2 h-4 w-4" />

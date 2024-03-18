@@ -1,13 +1,12 @@
-import { useState } from 'react';
+import { PropsWithChildren, useState } from 'react';
 
+import { DEFAULT_LAYOUT } from '@/config';
 import { cn } from '@/lib/utils';
 
 import { AccountPreview } from './account-preview';
 import { Lockup } from './lockup';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from './ui/resizable';
 import { Separator } from './ui/separator';
-
-const defaultLayout = [310, 440, 655];
 
 type PanelProps = React.ComponentProps<typeof ResizablePanel> & {
   top?: React.ReactNode;
@@ -16,7 +15,7 @@ type PanelProps = React.ComponentProps<typeof ResizablePanel> & {
   withHandle?: boolean;
 };
 
-const Panel = ({ children, top, classNames = {}, withHandle, ...props }: PanelProps) => {
+export const Panel = ({ children, top, classNames = {}, withHandle, ...props }: PanelProps) => {
   return (
     <>
       <ResizablePanel className={classNames.root} {...props}>
@@ -33,7 +32,7 @@ const Panel = ({ children, top, classNames = {}, withHandle, ...props }: PanelPr
   );
 };
 
-export const PanelLayout = () => {
+export const PanelLayout = ({ children }: PropsWithChildren) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const toggleCollapsed = () => {
     setIsCollapsed(!isCollapsed);
@@ -49,7 +48,7 @@ export const PanelLayout = () => {
         className="flex-1 items-stretch"
       >
         <Panel
-          defaultSize={defaultLayout[0]}
+          defaultSize={DEFAULT_LAYOUT[0]}
           collapsedSize={4}
           collapsible={true}
           minSize={15}
@@ -73,13 +72,7 @@ export const PanelLayout = () => {
             </div>
           </div>
         </Panel>
-        <Panel defaultSize={defaultLayout[1]} minSize={30} top={<>stuff here</>} withHandle>
-          <div>file list for current folder here</div>
-        </Panel>
-
-        <Panel defaultSize={defaultLayout[1]} minSize={30}>
-          <div>detail view here</div>
-        </Panel>
+        {children}
       </ResizablePanelGroup>
     </div>
   );
