@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "strict": true,
+    "preserveConstEnums": true,
+    "sourceMap": false,
+    "module": "es2015",
+    "moduleResolution": "node",
+    "baseUrl": "../",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "@furizu-types/*": ["furizu-types/src/*"]
+    }
+  },
+  "exclude": ["node_modules"]
+}

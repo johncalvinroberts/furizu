@@ -7,26 +7,28 @@
     "skipLibCheck": true,
 
     /* Bundler mode */
-    "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "moduleResolution": "Bundler",
 
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
+    "baseUrl": "../",
     "paths": {
       "@/*": [
-        "./src/*"
-      ]
+        "./web/src/*"
+      ],
+      "@furizu-types/*": ["furizu-types/src/*"]
     },
-    "baseUrl": ".",
   },
-  "include": ["src", "styled-system"],
+  "include": ["src"],
   "types": ["vite-plugin-pwa/client"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

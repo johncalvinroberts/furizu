@@ -1,4 +1,5 @@
-import { LogIn, Settings, Settings2 } from 'lucide-react';
+import { LogIn, LogOut, Settings, Settings2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { Link } from 'wouter';
 
 import {
@@ -7,6 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useHttpClient } from '@/hooks/useHttp';
 
 import { Button } from './ui/button';
 
@@ -17,6 +19,11 @@ type Props = {
 };
 
 export const AccountMenu = ({ size = 'tiny', variant = 'outline', className }: Props) => {
+  const http = useHttpClient();
+  const handleLogOut = () => {
+    http.removeToken();
+    toast.success('Logged out');
+  };
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -25,15 +32,27 @@ export const AccountMenu = ({ size = 'tiny', variant = 'outline', className }: P
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
+        {!http.isAuthenticated && (
+          <DropdownMenuItem asChild>
+            <Link href="/auth/signup">
+              <LogIn className="mr-2 h-4 w-4" />
+              Login/Signup
+            </Link>
+          </DropdownMenuItem>
+        )}
+        {http.isAuthenticated && (
+          <DropdownMenuItem asChild>
+            <button onClick={handleLogOut} className="w-full">
+              <LogOut className="mr-2 h-4 w-4" />
+              Log Out
+            </button>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem asChild>
-          <Link href="/auth/signup">
-            <LogIn className="mr-2 h-4 w-4" />
-            Login/Signup
+          <Link href="/preferences">
+            <Settings2 className="mr-2 h-4 w-4" />
+            Preferences
           </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <Settings2 className="mr-2 h-4 w-4" />
-          Preferences
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

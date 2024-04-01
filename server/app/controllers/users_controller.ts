@@ -12,9 +12,10 @@ import {
   destroyUserValidator,
 } from '#validators/user'
 import type { HttpContext } from '@adonisjs/core/http'
+import { RegisterResponse } from '@furizu-types/users'
 
 export default class UsersController {
-  async register(ctx: HttpContext) {
+  async register(ctx: HttpContext): Promise<RegisterResponse> {
     const data = await registerValidator.validate(ctx.request.all())
     const exists = await User.findBy('email', data.email)
     if (exists) {
@@ -22,7 +23,8 @@ export default class UsersController {
     }
     const user = await User.create({ email: data.email, password: data.password })
     const token = await User.accessTokens.create(user)
-    return { token }
+    // this will get serialized to this typedef after getting toJSON'd in json serialize step
+    return { token } as unknown as RegisterResponse
   }
 
   async login(ctx: HttpContext) {
