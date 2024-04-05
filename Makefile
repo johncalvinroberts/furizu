@@ -22,3 +22,5 @@ build-fe: ## run frontend dev vite server with hot reload
 build-be: ## run frontend dev vite server with hot reload
 	cd $(BE_DIR); npm run build;
 
+up:
+	docker compose up -d

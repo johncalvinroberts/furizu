@@ -1,15 +1,18 @@
+import env from '#start/env'
 import { defineConfig } from '@adonisjs/lucid'
 
 const dbConfig = defineConfig({
-  connection: 'sqlite',
+  connection: 'postgres',
   connections: {
-    sqlite: {
-      client: 'better-sqlite3',
+    postgres: {
+      client: 'pg',
       connection: {
-        // filename: app.tmpPath('furizu.db'),
-        filename: 'furizu.db',
+        host: env.get('DB_HOST'),
+        port: env.get('DB_PORT'),
+        user: env.get('DB_USER'),
+        password: env.get('DB_PASSWORD'),
+        database: env.get('DB_DATABASE'),
       },
-      useNullAsDefault: true,
       migrations: {
         naturalSort: true,
         paths: ['database/migrations'],
