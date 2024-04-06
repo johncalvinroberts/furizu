@@ -1,0 +1,20 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1712443016429,
+      "tag": "0000_light_synch",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1712445546900,
+      "tag": "0001_nebulous_bucky",
+      "breakpoints": true
+    }
+  ]
+}

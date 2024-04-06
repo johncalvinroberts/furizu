@@ -26,12 +26,10 @@ up:
 	docker compose up -d
 down: 
 	docker compose down && docker volume rm furizu_postgres_data
-db-reset: 
-	cd $(BE_DIR); node ace migration:reset;
+db-generate-migrations:
+	cd $(BE_DIR); npm run generate-migrations;
 db-migrate:
-	cd $(BE_DIR); node ace migration:run;
+	cd $(BE_DIR); npm run migrate;
 generate:
 	cd $(FE_DIR); npm run generate;
 
-
-# export ELECTRIC_PROXY=postgresql://postgres:proxy_password@localhost:65432/furizu_local

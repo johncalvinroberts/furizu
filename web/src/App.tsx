@@ -12,7 +12,7 @@ import { DEBUG } from '@/config';
 import { dbName, ElectricProvider, initElectric } from '@/lib/electric';
 
 import { Electric } from './generated/client';
-import { useBearer } from './hooks/useBearer';
+import { userId } from './hooks/useUser';
 
 function deleteDB() {
   console.log("Deleting DB as schema doesn't match server's");
@@ -28,11 +28,10 @@ function deleteDB() {
 
 function App() {
   const [electric, setElectric] = useState<Electric>();
-  const { userId } = useBearer();
   useEffect(() => {
     const init = async () => {
       try {
-        const client = await initElectric(userId);
+        const client = await initElectric(userId as string);
         setElectric(client);
 
         const { synced } = await client.db.folders.sync({
@@ -54,7 +53,7 @@ function App() {
     };
 
     init();
-  }, [userId]);
+  }, []);
 
   if (electric === undefined) {
     return null;

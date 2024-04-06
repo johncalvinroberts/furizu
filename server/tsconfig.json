@@ -1,33 +1,12 @@
 {
-  "extends": "@adonisjs/tsconfig/tsconfig.app.json",
   "compilerOptions": {
-    // "esModuleInterop": true,
-    // "target": "ES2020",
-    // "useDefineForClassFields": true,
-    // "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    // "module": "ESNext",
-    // "skipLibCheck": true,
-    // "rootDir": "./",
-    "outDir": "./build",
-    "baseUrl": "../",
-    "paths": {
-      "#controllers/*": ["./server/app/controllers/*.js"],
-      "#exceptions/*": ["./server/app/exceptions/*.js"],
-      "#models/*": ["./server/app/models/*.js"],
-      "#mails/*": ["./server/app/mails/*.js"],
-      "#services/*": ["./server/app/services/*.js"],
-      "#listeners/*": ["./server/app/listeners/*.js"],
-      "#events/*": ["./server/app/events/*.js"],
-      "#middleware/*": ["./server/app/middleware/*.js"],
-      "#validators/*": ["./server/app/validators/*.js"],
-      "#providers/*": ["./server/providers/*.js"],
-      "#policies/*": ["./server/app/policies/*.js"],
-      "#abilities/*": ["./server/app/abilities/*.js"],
-      "#database/*": ["./server/database/*.js"],
-      "#tests/*": ["./server/tests/*.js"],
-      "#start/*": ["./server/start/*.js"],
-      "#config/*": ["./server/config/*.js"],
-      "@furizu-types/*": ["furizu-types/src/*.ts"]
-    },
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "target": "ES2020",
+    "jsx": "react",
+    "strictNullChecks": true,
+    "strictFunctionTypes": true
   },
+  "exclude": ["node_modules", "**/node_modules/*"]
 }

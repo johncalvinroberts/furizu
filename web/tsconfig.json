@@ -20,12 +20,11 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "baseUrl": "../",
+    "baseUrl": ".",
     "paths": {
       "@/*": [
-        "./web/src/*"
+        "./src/*"
       ],
-      "@furizu-types/*": ["furizu-types/src/*"]
     },
   },
   "include": ["src"],

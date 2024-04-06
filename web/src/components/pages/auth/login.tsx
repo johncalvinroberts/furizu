@@ -1,4 +1,3 @@
-import { LoginResponse } from '@furizu-types/users';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -15,7 +14,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useBearer } from '@/hooks/useBearer';
 import { useLocation } from '@/hooks/useLocation';
 import { getErrorMessageString } from '@/lib/utils';
 
@@ -28,7 +26,6 @@ const formSchema = z.object({
 
 export const Login = () => {
   const { setAbsoluteLocation } = useLocation();
-  const http = useBearer();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -39,11 +36,8 @@ export const Login = () => {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const res = await http.httpClient.post<LoginResponse>('api/v1/users/login', {
-        password: values.password,
-        email: values.email,
-      });
-      http.setToken(res.token.token, res.id);
+      // TODO: set user id + reset electric
+      console.log('values', values);
       setAbsoluteLocation('/');
       toast.success('Logged in - Welcome back');
     } catch (error) {

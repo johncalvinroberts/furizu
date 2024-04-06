@@ -8,7 +8,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useBearer } from '@/hooks/useBearer';
 
 import { Button } from './ui/button';
 
@@ -19,9 +18,9 @@ type Props = {
 };
 
 export const AccountMenu = ({ size = 'tiny', variant = 'outline', className }: Props) => {
-  const http = useBearer();
+  const isAuthenticated = false;
   const handleLogOut = () => {
-    http.removeToken();
+    console.log('TODO: remove token');
     toast.success('Logged out');
   };
   return (
@@ -32,7 +31,7 @@ export const AccountMenu = ({ size = 'tiny', variant = 'outline', className }: P
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        {!http.isAuthenticated && (
+        {!isAuthenticated && (
           <DropdownMenuItem asChild>
             <Link href="/auth/signup">
               <LogIn className="mr-2 h-4 w-4" />
@@ -40,7 +39,7 @@ export const AccountMenu = ({ size = 'tiny', variant = 'outline', className }: P
             </Link>
           </DropdownMenuItem>
         )}
-        {http.isAuthenticated && (
+        {isAuthenticated && (
           <DropdownMenuItem asChild>
             <button onClick={handleLogOut} className="w-full">
               <LogOut className="mr-2 h-4 w-4" />
