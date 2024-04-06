@@ -21,10 +21,10 @@ export default class UsersController {
     if (exists) {
       throw new EmailTakenException()
     }
-    const user = await User.create({ email: data.email, password: data.password })
+    const user = await User.create({ email: data.email, password: data.password, id: data.id })
     const token = await User.accessTokens.create(user)
     // this will get serialized to this typedef after getting toJSON'd in json serialize step
-    return { token } as unknown as RegisterResponse
+    return { token, id: user.id } as unknown as RegisterResponse
   }
 
   async login(ctx: HttpContext) {
@@ -32,7 +32,7 @@ export default class UsersController {
     ctx.logger.info('checking user credentials')
     const user = await User.verifyCredentials(email, password)
     const token = await User.accessTokens.create(user)
-    return { token }
+    return { token, id: user.id }
   }
 
   async me(ctx: HttpContext) {

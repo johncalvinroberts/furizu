@@ -15,7 +15,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useHttpClient } from '@/hooks/useHttp';
+import { useBearer } from '@/hooks/useBearer';
 import { useLocation } from '@/hooks/useLocation';
 import { getErrorMessageString } from '@/lib/utils';
 
@@ -43,10 +43,10 @@ export const Signup = () => {
     },
   });
   const { setAbsoluteLocation } = useLocation();
-  const http = useHttpClient();
+  const http = useBearer();
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const res = await http.client.post<RegisterResponse>('api/v1/users/register', {
+      const res = await http.httpClient.post<RegisterResponse>('api/v1/users/register', {
         password: values.password,
         email: values.email,
       });

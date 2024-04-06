@@ -1,14 +1,17 @@
 {
-  "name": "web",
+  "name": "furizu",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "npm run generate -d furizu",
+    "generate": "npx electric-sql generate",
     "build": "tsc && vite build",
     "lint": "eslint . --fix --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit --skipLibCheck"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
@@ -24,6 +27,7 @@
     "@radix-ui/react-tabs": "^1.0.4",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "electric-sql": "^0.9.6",
     "lucide-react": "^0.358.0",
     "next-themes": "^0.3.0",
     "react": "^18.2.0",
@@ -33,6 +37,7 @@
     "sonner": "^1.4.41",
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
+    "wa-sqlite": "github:rhashimoto/wa-sqlite#semver:^0.9.8",
     "wouter": "^3.1.0",
     "zod": "^3.22.4",
     "zustand": "^4.5.2"

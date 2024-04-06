@@ -12,7 +12,7 @@ export default class VerificationToken extends BaseModel {
   declare codeHash: string
 
   @column()
-  declare userId: number
+  declare userId: string
 
   @belongsTo(() => User)
   declare user: BelongsTo<typeof User>

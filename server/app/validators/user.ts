@@ -6,6 +6,7 @@ export const registerValidator = vine.compile(
   vine.object({
     email: vine.string().email().trim(),
     password: vine.string().minLength(8).maxLength(64).trim().regex(PASSWORD_REGEX),
+    id: vine.string().uuid(),
   })
 )
 

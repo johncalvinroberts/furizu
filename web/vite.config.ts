@@ -8,6 +8,9 @@ import manifest from './manifest.json';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  optimizeDeps: {
+    exclude: ['wa-sqlite'],
+  },
   plugins: [
     react(),
     tsconfigPaths({ root: './' }),

@@ -7,10 +7,31 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: some_secret_password
-      POSTGRES_DB: furizu_local
+      POSTGRES_DB: furizu
+    command:
+      - -c
+      - wal_level=logical
+    restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+  electric:
+    container_name: electric
+    image: electricsql/electric
+    init: true
+    depends_on:
+      - postgres
+    environment:
+      # known as "postgres" hostname in this 
+      DATABASE_URL: postgresql://postgres:some_secret_password@postgres:5432/furizu
+      DATABASE_REQUIRE_SSL: false
+      LOGICAL_PUBLISHER_HOST: electric
+      PG_PROXY_PASSWORD: proxy_password
+      AUTH_MODE: insecure
+    ports:
+      - 5133:5133
+      - 65432:65432
+    restart: always
 volumes:
   postgres_data:

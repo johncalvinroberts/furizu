@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useHttpClient } from '@/hooks/useHttp';
+import { useBearer } from '@/hooks/useBearer';
 
 import { Button } from './ui/button';
 
@@ -19,7 +19,7 @@ type Props = {
 };
 
 export const AccountMenu = ({ size = 'tiny', variant = 'outline', className }: Props) => {
-  const http = useHttpClient();
+  const http = useBearer();
   const handleLogOut = () => {
     http.removeToken();
     toast.success('Logged out');

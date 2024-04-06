@@ -12,7 +12,7 @@ const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
 
 export default class User extends compose(BaseModel, AuthFinder) {
   @column({ isPrimary: true })
-  declare id: number
+  declare id: string
 
   @column()
   declare fullName: string | null
@@ -21,7 +21,10 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare email: string
 
   @column()
-  declare email_verified: boolean
+  declare email_verified_at: DateTime | null
+
+  @column()
+  declare unprovisional_at: DateTime | null
 
   @column()
   declare password: string

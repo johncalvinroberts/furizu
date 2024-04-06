@@ -1,4 +1,5 @@
 export type RegisterResponse = {
+  id: string;
   token: {
     token: string;
     abilities: string[];

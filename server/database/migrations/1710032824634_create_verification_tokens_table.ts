@@ -11,7 +11,7 @@ export default class extends BaseSchema {
       table.timestamp('updated_at')
       table.string('code_hash').notNullable()
       table.timestamp('expires_at').nullable()
-      table.integer('user_id').unsigned().references('users.id').onDelete('CASCADE')
+      table.uuid('user_id').references('users.id').onDelete('CASCADE')
     })
   }
 
