@@ -22,7 +22,6 @@ export const initElectric = async (userId: string) => {
     url: electricUrl,
     debug: DEBUG,
   };
-
   const authToken = insecureAuthToken({ sub: userId });
 
   const conn = await ElectricDatabase.init(dbName);

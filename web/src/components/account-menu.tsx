@@ -1,4 +1,5 @@
 import { LogIn, LogOut, Settings, Settings2 } from 'lucide-react';
+import { useEffect } from 'react';
 import { toast } from 'sonner';
 import { Link } from 'wouter';
 
@@ -8,6 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useUser } from '@/hooks/useUser';
 
 import { Button } from './ui/button';
 
@@ -18,11 +20,18 @@ type Props = {
 };
 
 export const AccountMenu = ({ size = 'tiny', variant = 'outline', className }: Props) => {
-  const isAuthenticated = false;
+  const { id, user, updatedAt, isUnprovisional, createInitialUser } = useUser();
   const handleLogOut = () => {
     console.log('TODO: remove token');
     toast.success('Logged out');
   };
+
+  useEffect(() => {
+    if (!user && updatedAt != null && id) {
+      createInitialUser(id);
+    }
+  }, [user, updatedAt, id, createInitialUser]);
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -31,7 +40,7 @@ export const AccountMenu = ({ size = 'tiny', variant = 'outline', className }: P
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        {!isAuthenticated && (
+        {!isUnprovisional && (
           <DropdownMenuItem asChild>
             <Link href="/auth/signup">
               <LogIn className="mr-2 h-4 w-4" />
@@ -39,7 +48,7 @@ export const AccountMenu = ({ size = 'tiny', variant = 'outline', className }: P
             </Link>
           </DropdownMenuItem>
         )}
-        {isAuthenticated && (
+        {isUnprovisional && (
           <DropdownMenuItem asChild>
             <button onClick={handleLogOut} className="w-full">
               <LogOut className="mr-2 h-4 w-4" />

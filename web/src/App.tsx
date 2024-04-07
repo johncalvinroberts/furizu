@@ -9,10 +9,10 @@ import { PanelLayout } from '@/components/panel-layout';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { DEBUG } from '@/config';
+import { useUserId } from '@/hooks/useUser';
 import { dbName, ElectricProvider, initElectric } from '@/lib/electric';
 
 import { Electric } from './generated/client';
-import { userId } from './hooks/useUser';
 
 function deleteDB() {
   console.log("Deleting DB as schema doesn't match server's");
@@ -28,24 +28,27 @@ function deleteDB() {
 
 function App() {
   const [electric, setElectric] = useState<Electric>();
+  const { id: userId } = useUserId();
   useEffect(() => {
     const init = async () => {
       try {
         const client = await initElectric(userId as string);
         setElectric(client);
-
         const { synced } = await client.db.folders.sync({
           include: {
             files: true,
           },
         });
+        await client.db.users.sync();
+
         await synced;
         const timeToSync = performance.now();
         if (DEBUG) {
           console.log(`Synced in ${timeToSync}ms from page load`);
         }
       } catch (error) {
-        if ((error as Error).message.startsWith("Local schema doesn't match server's")) {
+        console.error(error);
+        if ((error as Error).message?.startsWith("Local schema doesn't match server's")) {
           deleteDB();
         }
         throw error;
@@ -53,7 +56,7 @@ function App() {
     };
 
     init();
-  }, []);
+  }, [userId]);
 
   if (electric === undefined) {
     return null;
