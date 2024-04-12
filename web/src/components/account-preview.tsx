@@ -21,7 +21,7 @@ export const AccountPreview = ({ variant = 'full' }: Props) => {
   if (variant === 'full') {
     return (
       <>
-        <div className="w-full">
+        <div className="w-full mr-2">
           <div className="text-xs font-medium w-full">
             {quota && (
               <>

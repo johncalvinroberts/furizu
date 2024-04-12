@@ -4,6 +4,7 @@ import { DEFAULT_LAYOUT } from '@/config';
 import { cn } from '@/lib/utils';
 
 import { AccountPreview } from './account-preview';
+import { FolderTreeRoot } from './folder-tree';
 import { Lockup } from './lockup';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from './ui/resizable';
 import { Separator } from './ui/separator';
@@ -66,7 +67,9 @@ export const PanelLayout = ({ children }: PropsWithChildren) => {
           }
         >
           <div className="h-full flex flex-col space-between">
-            <div className="flex-1 p-4">folder tree view here</div>
+            <div className="flex-1 p-4">
+              <FolderTreeRoot />
+            </div>
             <div className="border-t flex-none h-[120px] flex justify-between p-2">
               <AccountPreview variant={isCollapsed ? 'compact' : 'full'} />
             </div>

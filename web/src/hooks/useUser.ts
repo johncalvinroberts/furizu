@@ -45,7 +45,7 @@ export const useUser = () => {
   const { results: quota } = useLiveQuery(
     db.quotas.liveFirst({ where: { electric_user_id: id as string } }),
   );
-  console.log({ quota });
+
   const isUnprovisional = Boolean(user?.unprovisional_at);
 
   const createProvisionalUser = useCallback(
