@@ -1,6 +1,8 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
+import { dbName } from './electric';
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -36,3 +38,49 @@ export function getErrorMessageString(error: unknown): string {
   // For numbers or boolean types, or if all else fails, return a generic message
   return 'An unknown error occurred.';
 }
+
+export function deleteDB() {
+  console.log("Deleting DB as schema doesn't match server's");
+  const DBDeleteRequest = window.indexedDB.deleteDatabase(dbName);
+  DBDeleteRequest.onsuccess = function () {
+    console.log('Database deleted successfully');
+  };
+  // the indexedDB cannot be deleted if the database connection is still open,
+  // so we need to reload the page to close any open connections.
+  // On reload, the database will be recreated.
+  window.location.reload();
+}
+export const formatFileSize = (
+  size: number | bigint,
+  format: 'long' | 'short' | 'none',
+): string => {
+  const unitsLong = [
+    'Bytes',
+    'Kilobytes',
+    'Megabytes',
+    'Gigabytes',
+    'Terabytes',
+    'Petabytes',
+    'Exabytes',
+    'Zettabytes',
+    'Yottabytes',
+  ];
+  const unitsShort = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+  let units;
+  if (format === 'long') {
+    units = unitsLong;
+  } else if (format === 'short') {
+    units = unitsShort;
+  }
+
+  const bytes: number = typeof size === 'bigint' ? Number(size) : size; // Convert BigInt to number if necessary
+  if (bytes === 0) {
+    if (format === 'none') return '0';
+    return `0 ${format === 'long' ? 'Bytes' : 'B'}`; // Handle the 0 case
+  }
+  const k = 1024;
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const suffix = format === 'none' ? '' : units?.[i] || '';
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${suffix}`;
+};

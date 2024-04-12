@@ -10,21 +10,11 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { DEBUG } from '@/config';
 import { useUserId } from '@/hooks/useUser';
-import { dbName, ElectricProvider, initElectric } from '@/lib/electric';
+import { ElectricProvider, initElectric } from '@/lib/electric';
 
+import DebugMode from './components/debug';
 import { Electric } from './generated/client';
-
-function deleteDB() {
-  console.log("Deleting DB as schema doesn't match server's");
-  const DBDeleteRequest = window.indexedDB.deleteDatabase(dbName);
-  DBDeleteRequest.onsuccess = function () {
-    console.log('Database deleted successfully');
-  };
-  // the indexedDB cannot be deleted if the database connection is still open,
-  // so we need to reload the page to close any open connections.
-  // On reload, the database will be recreated.
-  window.location.reload();
-}
+import { deleteDB } from './lib/utils';
 
 function App() {
   const [electric, setElectric] = useState<Electric>();
@@ -40,6 +30,7 @@ function App() {
           },
         });
         await client.db.users.sync();
+        await client.db.quotas.sync();
 
         await synced;
         const timeToSync = performance.now();
@@ -87,6 +78,7 @@ function App() {
             </Switch>
           </main>
         </div>
+        <DebugMode />
         <Toaster />
       </ElectricProvider>
     </ThemeProvider>

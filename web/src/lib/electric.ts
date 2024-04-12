@@ -15,11 +15,10 @@ export let dbName: string;
 
 export const initElectric = async (userId: string) => {
   const { tabId } = uniqueTabId();
-  const electricUrl = ELECTRIC_URL;
   dbName = `${discriminator}-${LIB_VERSION}-${tabId}.db`;
 
   const config = {
-    url: electricUrl,
+    url: ELECTRIC_URL,
     debug: DEBUG,
   };
   const authToken = insecureAuthToken({ sub: userId });

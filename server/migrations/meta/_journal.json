@@ -15,6 +15,27 @@
       "when": 1712445546900,
       "tag": "0001_nebulous_bucky",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1712557346587,
+      "tag": "0002_short_warstar",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1712632344877,
+      "tag": "0003_kind_raza",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1712884804007,
+      "tag": "0004_light_chameleon",
+      "breakpoints": true
     }
   ]
 }

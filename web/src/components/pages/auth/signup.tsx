@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -15,6 +16,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useLocation } from '@/hooks/useLocation';
+import { useUser } from '@/hooks/useUser';
 import { getErrorMessageString } from '@/lib/utils';
 
 const PASSWORD_REGEX = new RegExp('^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^\\da-zA-Z]).{8,}$');
@@ -33,6 +35,7 @@ const formSchema = z.object({
 });
 
 export const Signup = () => {
+  const { isUnprovisional, signup } = useUser();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -41,17 +44,22 @@ export const Signup = () => {
     },
   });
   const { setAbsoluteLocation } = useLocation();
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      // TODO: update user in db as non provisional
-      console.log('values', values);
-      setAbsoluteLocation('/');
-      toast.success('Successfully signed up');
+      await signup(values.email, values.password);
     } catch (error) {
       toast.error(`Sign up failed: ${getErrorMessageString(error)}`);
       console.error(error);
     }
   }
+
+  useEffect(() => {
+    if (isUnprovisional) {
+      setAbsoluteLocation('/');
+      toast.success('Successfully signed up');
+    }
+  }, [isUnprovisional, setAbsoluteLocation]);
 
   return (
     <>

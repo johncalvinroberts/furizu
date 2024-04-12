@@ -20,17 +20,17 @@ type Props = {
 };
 
 export const AccountMenu = ({ size = 'tiny', variant = 'outline', className }: Props) => {
-  const { id, user, updatedAt, isUnprovisional, createInitialUser } = useUser();
+  const { id, user, updatedAt, isUnprovisional, createProvisionalUser, logout } = useUser();
   const handleLogOut = () => {
-    console.log('TODO: remove token');
+    logout();
     toast.success('Logged out');
   };
 
   useEffect(() => {
     if (!user && updatedAt != null && id) {
-      createInitialUser(id);
+      createProvisionalUser(id);
     }
-  }, [user, updatedAt, id, createInitialUser]);
+  }, [user, updatedAt, id, createProvisionalUser]);
 
   return (
     <DropdownMenu>

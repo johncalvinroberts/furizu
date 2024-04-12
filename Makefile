@@ -26,10 +26,11 @@ up:
 	docker compose up -d
 down: 
 	docker compose down && docker volume rm furizu_postgres_data
-db-generate-migrations:
-	cd $(BE_DIR); npm run generate-migrations;
-db-migrate:
+
+generate-migration:
+	cd $(BE_DIR); npm run generate-migration;
+migrate:
 	cd $(BE_DIR); npm run migrate;
-generate:
+generate-client:
 	cd $(FE_DIR); npm run generate;
 
