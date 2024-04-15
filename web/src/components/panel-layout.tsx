@@ -66,10 +66,12 @@ export const PanelLayout = ({ children }: PropsWithChildren) => {
             </>
           }
         >
-          <div className="h-full flex flex-col space-between">
-            <div className="flex-1 p-4">
-              <FolderTreeRoot />
+          <div className="min-h-full flex flex-col space-between">
+            <div className="flex-1">
+              <FolderTreeRoot className="flex-shrink-0 w-full h-[460px]" />
             </div>
+            {/* <div className="flex-1 p-4 h-full">
+            </div> */}
             <div className="border-t flex-none h-[120px] flex justify-between p-2">
               <AccountPreview variant={isCollapsed ? 'compact' : 'full'} />
             </div>

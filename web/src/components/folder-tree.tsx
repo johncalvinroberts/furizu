@@ -1,21 +1,10 @@
-import { FolderNode, useFolders } from '@/hooks/useFolders';
+import { Folder, Workflow } from 'lucide-react';
 
-export const FolderTree = ({ folders = [] }: { folders: FolderNode[] | undefined }) => {
-  return (
-    <ul className="list-none ml-4">
-      {folders.map((folder) => (
-        <li key={folder.id}>
-          <div className="cursor-pointer py-1">{folder.name}</div>
-          {folder.children && folder.children.length > 0 && (
-            <FolderTree folders={folder.children} />
-          )}
-        </li>
-      ))}
-    </ul>
-  );
-};
+import { useFolders } from '@/hooks/useFolders';
 
-export const FolderTreeRoot = () => {
+import { Tree } from './ui/tree';
+
+export const FolderTreeRoot = ({ className }: { className?: string }) => {
   const { folderTree } = useFolders();
-  return <FolderTree folders={folderTree} />;
+  return <Tree data={folderTree} className={className} folderIcon={Folder} itemIcon={Workflow} />;
 };

@@ -14,7 +14,7 @@
   "dependencies": {
     "bcrypt": "^5.1.1",
     "drizzle-orm": "^0.30.7",
-    "electric-sql": "^0.9.6",
+    "electric-sql": "^0.10.1",
     "fastify": "^4.26.2",
     "postgres": "^3.4.4",
     "tsx": "^4.7.2"

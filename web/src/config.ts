@@ -11,4 +11,16 @@ const searchParams = new URLSearchParams(window.location.search);
 const debugParam = searchParams.get('debug');
 
 // DEBUG defaults to true in dev mode, false in prod mode
-export const DEBUG = debugParam === 'true'
+export const DEBUG = debugParam === 'true';
+
+export const WELCOME_FOLDER = 'welcome';
+
+// Create a File from the Blob
+export const WELCOME_FILE = new File(
+  [new Blob(['hello world'], { type: 'text/plain' })],
+  'hello-world.txt',
+  {
+    type: 'text/plain',
+    lastModified: new Date().getTime(),
+  },
+);

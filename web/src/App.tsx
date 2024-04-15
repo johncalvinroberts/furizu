@@ -24,15 +24,18 @@ function App() {
       try {
         const client = await initElectric(userId as string);
         setElectric(client);
-        const { synced } = await client.db.folders.sync({
-          include: {
-            files: true,
-          },
-        });
-        await client.db.users.sync();
-        await client.db.quotas.sync();
+        const works = await Promise.all([
+          client.db.folders.sync({
+            include: {
+              files: true,
+            },
+          }),
+          client.db.users.sync(),
+          client.db.quotas.sync(),
+        ]);
 
-        await synced;
+        const synceds = works.map((item) => item.synced);
+        await Promise.all(synceds);
         const timeToSync = performance.now();
         if (DEBUG) {
           console.log(`Synced in ${timeToSync}ms from page load`);

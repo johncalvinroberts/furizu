@@ -4,9 +4,10 @@ import { genUUID } from 'electric-sql/util';
 import { useCallback } from 'react';
 import { create } from 'zustand';
 
-import { USER_ID_LOCALSTORAGE_KEY } from '@/config';
+import { USER_ID_LOCALSTORAGE_KEY, WELCOME_FILE, WELCOME_FOLDER } from '@/config';
 import { useElectric } from '@/lib/electric';
 
+import { useFiles } from './useFiles';
 import { useFolders } from './useFolders';
 import { useJobs } from './useJobs';
 
@@ -39,6 +40,7 @@ export const useUser = () => {
   const { db } = electric;
   const { createJob } = useJobs();
   const { createFolder } = useFolders();
+  const { createFile } = useFiles();
   const { results: user, updatedAt } = useLiveQuery(
     db.users.liveFirst({ where: { id: id as string } }),
   );
@@ -57,11 +59,12 @@ export const useUser = () => {
           updated_at: new Date(),
         },
       });
-      await createFolder('welcome', id);
+      await createFolder(WELCOME_FOLDER, id);
+      await createFile(WELCOME_FILE, id);
       await createJob({ userId: id, command: 'provisional_user_created', payload: {} });
       setId(id);
     },
-    [db, setId, createJob, createFolder],
+    [db, setId, createJob, createFolder, createFile],
   );
 
   const signup = useCallback(
