@@ -3,7 +3,6 @@ CREATE TABLE IF NOT EXISTS "files" (
 	"folder_id" uuid NOT NULL,
 	"name" varchar NOT NULL,
 	"type" varchar NOT NULL,
-	"s3_key" varchar NOT NULL,
 	"size" bigint NOT NULL,
 	"created_at" timestamp NOT NULL,
 	"updated_at" timestamp NOT NULL

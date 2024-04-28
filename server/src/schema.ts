@@ -7,10 +7,17 @@ import {
   bigint,
   jsonb,
   real,
-  serial,
+  customType,
+  integer,
 } from 'drizzle-orm/pg-core';
 
-export const JobCommands = ['provisional_user_created', 'signup'] as const;
+const bytea = customType<{ data: Buffer; notNull: false; default: false }>({
+  dataType() {
+    return 'bytea';
+  },
+});
+
+export const JobCommands = ['provisional_user_created', 'signup', 'file_created'] as const;
 
 export const users = pgTable('users', {
   id: uuid('id').primaryKey(),
@@ -20,9 +27,7 @@ export const users = pgTable('users', {
   email_verified_at: timestamp('email_verified_at'),
   unprovisional_at: timestamp('unprovisional_at'),
   created_at: timestamp('created_at').notNull(),
-  updated_at: timestamp('updated_at')
-    .notNull()
-    .$onUpdate(() => new Date()),
+  updated_at: timestamp('updated_at').notNull(),
 });
 
 export const folders = pgTable('folders', {
@@ -33,9 +38,7 @@ export const folders = pgTable('folders', {
   electric_user_id: uuid('electric_user_id').notNull(),
   name: varchar('name').notNull(),
   created_at: timestamp('created_at').notNull(),
-  updated_at: timestamp('updated_at')
-    .notNull()
-    .$onUpdate(() => new Date()),
+  updated_at: timestamp('updated_at').notNull(),
 });
 
 export const files = pgTable('files', {
@@ -45,12 +48,12 @@ export const files = pgTable('files', {
     .references(() => folders.id, { onDelete: 'cascade' }),
   name: varchar('name').notNull(),
   type: varchar('type').notNull(),
-  s3_key: varchar('s3_key').notNull(),
+  origin_storage_key: varchar('origin_storage_key'),
+  origin_storage_provider: varchar('origin_storage_provider'),
   size: bigint('size', { mode: 'bigint' }).notNull(),
   created_at: timestamp('created_at').notNull(),
-  updated_at: timestamp('updated_at')
-    .notNull()
-    .$onUpdate(() => new Date()),
+  updated_at: timestamp('updated_at').notNull(),
+  electric_user_id: uuid('electric_user_id').notNull(),
 });
 
 export const jobs = pgTable('jobs', {
@@ -65,9 +68,7 @@ export const jobs = pgTable('jobs', {
   cancelled_at: timestamp('cancelled_at'),
   errored_at: timestamp('errored_at'),
   errored_reason: varchar('errored_reason'),
-  updated_at: timestamp('updated_at')
-    .notNull()
-    .$onUpdate(() => new Date()),
+  updated_at: timestamp('updated_at').notNull(),
 });
 
 export const quotas = pgTable('quotas', {
@@ -76,7 +77,20 @@ export const quotas = pgTable('quotas', {
   bytes_used: bigint('bytes_used', { mode: 'bigint' }).notNull(),
   electric_user_id: uuid('electric_user_id').notNull(),
   created_at: timestamp('created_at').notNull(),
-  updated_at: timestamp('updated_at')
+  updated_at: timestamp('updated_at').notNull(),
+});
+
+export const file_chunks = pgTable('file_chunks', {
+  id: uuid('id').primaryKey(),
+  file_id: uuid('file_id')
     .notNull()
-    .$onUpdate(() => new Date()),
+    .references(() => files.id, {
+      onDelete: 'cascade',
+    }),
+  electric_user_id: uuid('electric_user_id').notNull(),
+  size: bigint('size', { mode: 'bigint' }).notNull(),
+  data: bytea('data').notNull(),
+  created_at: timestamp('created_at').notNull(),
+  updated_at: timestamp('updated_at').notNull(),
+  chunk_index: integer('chunk_index').notNull(),
 });

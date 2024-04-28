@@ -1,10 +1,13 @@
 import { useLiveQuery } from 'electric-sql/react';
 import { genUUID } from 'electric-sql/util';
+import { Logger } from 'guu';
 import { useCallback } from 'react';
 
 import { useElectric } from '@/lib/electric';
 
 import { Folders } from '../generated/client';
+
+const logger = new Logger('useFolders', 'goldenrod');
 
 export type FolderNode = Folders & { children: FolderNode[] };
 
@@ -44,11 +47,12 @@ export const useFolders = () => {
           id,
           name,
           electric_user_id: userId,
-          parent_id: null,
+          parent_id: null, // TODO: pass in parentId
           created_at: new Date(),
           updated_at: new Date(),
         },
       });
+      logger.log([`created folder with name: ${name}, id: ${id}`]);
       return id;
     },
     [db],

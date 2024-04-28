@@ -1,10 +1,19 @@
-import { eq } from 'drizzle-orm';
+import { eq, count, and } from 'drizzle-orm';
 import { db } from './db';
-import { jobs, quotas, users } from './schema';
+import { file_chunks, jobs, files, quotas, users } from './schema';
 import bcrypt from 'bcrypt';
-import { Job, SignupJob } from './types';
+import { Job, SignupJob, FileCreatedJob } from './types';
 import { env } from './env';
 import { genUUID } from 'electric-sql/util';
+import { initS3LikeClient } from './s3';
+import { server } from './server';
+
+const tigrisClient = initS3LikeClient({
+  region: env.TIGRIS.REGION,
+  accessKeyId: env.TIGRIS.ACCESS_KEY_ID,
+  secretAccessKey: env.TIGRIS.SECRET_ACCESS_KEY,
+  endpoint: env.TIGRIS.ENDPOINT_URL_S3,
+});
 
 const handleSignUp = async (job: SignupJob) => {
   const { password, email, id } = job.payload;
@@ -52,19 +61,58 @@ const handleProvisionalUserCreated = async (job: Job) => {
   });
 };
 
+const handleFileCreated = async (job: FileCreatedJob) => {
+  const fileId = job.payload.id;
+  const [file] = await db.select().from(files).where(eq(files.id, fileId));
+  server.log.info('fetched file from db', file);
+  const [{ count: chunkCount }] = await db
+    .select({ count: count() })
+    .from(file_chunks)
+    .where(eq(file_chunks.file_id, fileId));
+  const bucketName = env.TIGRIS.BUCKET_NAME;
+  server.log.info(
+    `initializing iterative multipart chunk upload: ${JSON.stringify({
+      file_id: file.id,
+      chunkCount,
+    })}`,
+  );
+  const uploadId = await tigrisClient.initiateMultipartUpload(bucketName, file.name);
+  server.log.info(`created multipart upload: ${uploadId}`);
+  const parts = await tigrisClient.uploadChunks({
+    bucketName,
+    key: fileId,
+    uploadId,
+    totalChunks: chunkCount,
+    getChunkData: async (index: number) => {
+      const [chunk] = await db
+        .select()
+        .from(file_chunks)
+        .where(and(eq(file_chunks.file_id, fileId), eq(file_chunks.chunk_index, index)));
+      if (!chunk) throw new Error('chunk not found');
+      return { data: chunk.data };
+    },
+  });
+  await tigrisClient.completeMultipartUpload({ parts, uploadId, bucketName, key: file.name });
+  // TODO: delete chunks? or upload to other clouds?
+};
+
 export const processJob = async (rawJobString: string) => {
   const job = JSON.parse(rawJobString) as Job;
+  server.log.info(`received ${job.command} job`);
   job.payload = JSON.parse(job.payload as string);
+  server.log.info(job);
   try {
     switch (job.command) {
       case 'provisional_user_created':
         await handleProvisionalUserCreated(job);
         break;
       case 'signup':
-        console.log('user signed up');
         await handleSignUp(job as SignupJob);
         break;
+      case 'file_created':
+        await handleFileCreated(job as FileCreatedJob);
       default:
+        throw new Error('unknown job type crated');
         break;
     }
   } catch (error) {

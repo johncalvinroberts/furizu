@@ -1,9 +1,15 @@
 import fastify, { type FastifyInstance } from 'fastify';
 import { env } from './env';
-import { db, sql } from './db';
+import { sql } from './db';
 import { processJob } from './jobs';
 
 const API_VERSION = 'v1';
+
+export const server = fastify({
+  bodyLimit: 1_000_000,
+  trustProxy: true,
+  logger: true,
+});
 
 export const healthRoutes = (fastify: FastifyInstance, _: unknown, done: () => void) => {
   fastify.get('/', async (_, response) => {
@@ -15,11 +21,6 @@ export const healthRoutes = (fastify: FastifyInstance, _: unknown, done: () => v
 };
 
 export const main = async () => {
-  const server = fastify({
-    bodyLimit: 1_000_000,
-    trustProxy: true,
-  });
-
   server.register(healthRoutes, {
     prefix: `/${API_VERSION}/health`,
   });

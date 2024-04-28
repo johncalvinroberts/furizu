@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 
 import { useElectric } from '@/lib/electric';
 
-const JobCommands = ['provisional_user_created', 'signup'] as const;
+const JobCommands = ['provisional_user_created', 'signup', 'file_created'] as const;
 
 export type JobCommand = (typeof JobCommands)[number];
 
@@ -14,6 +14,8 @@ export const useJobs = () => {
     async (cmd: { command: JobCommand; payload: unknown; userId: string }) => {
       const { command, payload, userId } = cmd;
       const id = genUUID();
+      console.log('@@@@@@@@@@@@@@@@@@@@@@@@@');
+      console.log(JSON.stringify(payload));
       await db.jobs.create({
         data: {
           id,

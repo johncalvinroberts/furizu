@@ -40,10 +40,10 @@ export const useUser = () => {
   const { db } = electric;
   const { createJob } = useJobs();
   const { createFolder } = useFolders();
-  const { createFile } = useFiles();
   const { results: user, updatedAt } = useLiveQuery(
     db.users.liveFirst({ where: { id: id as string } }),
   );
+  const { createFile } = useFiles();
   const { results: quota } = useLiveQuery(
     db.quotas.liveFirst({ where: { electric_user_id: id as string } }),
   );
@@ -59,9 +59,9 @@ export const useUser = () => {
           updated_at: new Date(),
         },
       });
-      await createFolder(WELCOME_FOLDER, id);
-      await createFile(WELCOME_FILE, id);
+      const folderId = await createFolder(WELCOME_FOLDER, id);
       await createJob({ userId: id, command: 'provisional_user_created', payload: {} });
+      await createFile(WELCOME_FILE, folderId);
       setId(id);
     },
     [db, setId, createJob, createFolder, createFile],

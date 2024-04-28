@@ -14,3 +14,5 @@ export type SignupJob = Job<
   { password: string; email: string; id: string },
   { accepted: boolean }
 >;
+
+export type FileCreatedJob = Job<'file_created', { id: string }>;

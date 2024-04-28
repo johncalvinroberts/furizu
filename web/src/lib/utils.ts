@@ -84,3 +84,7 @@ export const formatFileSize = (
   const suffix = format === 'none' ? '' : units?.[i] || '';
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${suffix}`;
 };
+
+export const sleep = async (ms: number) => {
+  return new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
+};

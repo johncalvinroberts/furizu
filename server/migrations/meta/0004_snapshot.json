@@ -32,12 +32,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "s3_key": {
-          "name": "s3_key",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
         "size": {
           "name": "size",
           "type": "bigint",
