@@ -76,7 +76,7 @@ const handleFileCreated = async (job: FileCreatedJob) => {
       chunkCount,
     })}`,
   );
-  const uploadId = await tigrisClient.initiateMultipartUpload(bucketName, file.name);
+  const uploadId = await tigrisClient.initiateMultipartUpload(bucketName, fileId);
   server.log.info(`created multipart upload: ${uploadId}`);
   const parts = await tigrisClient.uploadChunks({
     bucketName,
@@ -92,7 +92,8 @@ const handleFileCreated = async (job: FileCreatedJob) => {
       return { data: chunk.data };
     },
   });
-  await tigrisClient.completeMultipartUpload({ parts, uploadId, bucketName, key: file.name });
+  server.log.info(`finished uploading chunks: ${parts}`);
+  await tigrisClient.completeMultipartUpload({ parts, uploadId, bucketName, key: file.id });
   // TODO: delete chunks? or upload to other clouds?
 };
 
@@ -111,9 +112,9 @@ export const processJob = async (rawJobString: string) => {
         break;
       case 'file_created':
         await handleFileCreated(job as FileCreatedJob);
-      default:
-        throw new Error('unknown job type crated');
         break;
+      default:
+        throw new Error('unknown job type created');
     }
   } catch (error) {
     console.error(error);

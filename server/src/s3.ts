@@ -7,6 +7,7 @@ import {
   Part,
   PutObjectCommand,
 } from '@aws-sdk/client-s3';
+import { server } from './server';
 
 type PutObjectParams = {
   Bucket: string;
@@ -66,6 +67,7 @@ export const initS3LikeClient = (params: InitS3LikeClientParams) => {
       Key: key,
     });
     const response = await client.send(command);
+    console.dir(response);
     return response.UploadId as string;
   };
 
@@ -86,19 +88,17 @@ export const initS3LikeClient = (params: InitS3LikeClientParams) => {
     const parts: Part[] = [];
     try {
       for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
-        console.log('gwetting fchunk :)');
         const chunk = await getChunkData(chunkIndex);
-        console.log('gpot chuuuuuunk', chunk);
-        console.log({ uploadId });
+        server.log.info(`got chunk data: ${uploadId}, index: ${chunkIndex}`);
         const command = new UploadPartCommand({
           Bucket: bucketName,
           Key: key,
-          PartNumber: chunkIndex,
-          // UploadId: uploadId,
-          UploadId: 'boogaboga',
+          PartNumber: chunkIndex + 1,
+          UploadId: uploadId,
           Body: chunk.data,
         });
         const output = await client.send(command);
+        server.log.info(`successfully uploaded part: ${output}`);
         parts.push({
           PartNumber: chunkIndex + 1,
           ETag: output.ETag!,
