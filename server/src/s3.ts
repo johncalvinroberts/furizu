@@ -67,7 +67,6 @@ export const initS3LikeClient = (params: InitS3LikeClientParams) => {
       Key: key,
     });
     const response = await client.send(command);
-    console.dir(response);
     return response.UploadId as string;
   };
 
@@ -98,7 +97,7 @@ export const initS3LikeClient = (params: InitS3LikeClientParams) => {
           Body: chunk.data,
         });
         const output = await client.send(command);
-        server.log.info(`successfully uploaded part: ${output}`);
+        server.log.info(`successfully uploaded part: ${chunkIndex}, ${key}`);
         parts.push({
           PartNumber: chunkIndex + 1,
           ETag: output.ETag!,

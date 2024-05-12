@@ -63,9 +63,16 @@ function App() {
           <main className="flex-1 flex flex-col">
             <Switch>
               <PanelLayout>
-                {/* TODO: this should be /folder/:id */}
                 <Route path="/" nest>
-                  <FolderDetailPage />
+                  <Route path="/">
+                    <FolderDetailPage root />
+                  </Route>
+                  <Route path="/folder/:id" nest>
+                    <FolderDetailPage root={false} />
+                    <Route path="/file/:id">
+                      <FileDetailPage />
+                    </Route>
+                  </Route>
                   <Route path="/file/:id">
                     <FileDetailPage />
                   </Route>

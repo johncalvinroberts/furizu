@@ -28,6 +28,7 @@ export const users = pgTable('users', {
   unprovisional_at: timestamp('unprovisional_at'),
   created_at: timestamp('created_at').notNull(),
   updated_at: timestamp('updated_at').notNull(),
+  default_folder_id: uuid('default_folder_id'),
 });
 
 export const folders = pgTable('folders', {

@@ -59,10 +59,16 @@ export const useUser = () => {
           updated_at: new Date(),
         },
       });
-      const folderId = await createFolder(WELCOME_FOLDER, id);
-      await createJob({ userId: id, command: 'provisional_user_created', payload: {} });
-      await createFile(WELCOME_FILE, folderId);
       setId(id);
+      await createJob({ userId: id, command: 'provisional_user_created', payload: {} });
+      const folderId = await createFolder(WELCOME_FOLDER, id, null);
+      await createFile(WELCOME_FILE, folderId);
+      await db.users.update({
+        where: { id },
+        data: {
+          default_folder_id: folderId,
+        },
+      });
     },
     [db, setId, createJob, createFolder, createFile],
   );

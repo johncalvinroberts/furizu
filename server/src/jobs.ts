@@ -92,9 +92,9 @@ const handleFileCreated = async (job: FileCreatedJob) => {
       return { data: chunk.data };
     },
   });
-  server.log.info(`finished uploading chunks: ${parts}`);
+  server.log.info(`finished uploading chunks: ${fileId}`);
   await tigrisClient.completeMultipartUpload({ parts, uploadId, bucketName, key: file.id });
-  // TODO: delete chunks? or upload to other clouds?
+  server.log.info(`completed multipart upload: ${fileId}`);
 };
 
 export const processJob = async (rawJobString: string) => {

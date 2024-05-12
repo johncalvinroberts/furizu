@@ -1,3 +1,4 @@
+import { useLiveQuery } from 'electric-sql/react';
 import { genUUID } from 'electric-sql/util';
 import { Logger, TimerFactory } from 'guu';
 import pMap from 'p-map';
@@ -85,4 +86,12 @@ export const useFiles = () => {
   );
 
   return { createFile };
+};
+
+export const useFilesByFolderId = (folder_id: string) => {
+  const { db } = useElectric()!;
+  const results = useLiveQuery(
+    db.files.liveMany({ where: { folder_id }, orderBy: { updated_at: 'desc' } }),
+  );
+  return results;
 };

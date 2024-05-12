@@ -14,8 +14,6 @@ export const useJobs = () => {
     async (cmd: { command: JobCommand; payload: unknown; userId: string }) => {
       const { command, payload, userId } = cmd;
       const id = genUUID();
-      console.log('@@@@@@@@@@@@@@@@@@@@@@@@@');
-      console.log(JSON.stringify(payload));
       await db.jobs.create({
         data: {
           id,
