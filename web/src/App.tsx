@@ -8,6 +8,7 @@ import { Preferences } from '@/components/pages/preferences';
 import { PanelLayout } from '@/components/panel-layout';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { DEBUG } from '@/config';
 import { useUserId } from '@/hooks/useUser';
 import { ElectricProvider, initElectric } from '@/lib/electric';
@@ -59,37 +60,39 @@ function App() {
   return (
     <ThemeProvider>
       <ElectricProvider db={electric}>
-        <div className="w-full flex min-h-screen flex-col bg-background">
-          <main className="flex-1 flex flex-col">
-            <Switch>
-              <PanelLayout>
-                <Route path="/" nest>
-                  <Route path="/">
-                    <FolderDetailPage root />
-                  </Route>
-                  <Route path="/folder/:id" nest>
-                    <FolderDetailPage root={false} />
+        <TooltipProvider>
+          <div className="w-full flex min-h-screen flex-col bg-background">
+            <main className="flex-1 flex flex-col">
+              <Switch>
+                <PanelLayout>
+                  <Route path="/" nest>
+                    <Route path="/">
+                      <FolderDetailPage root />
+                    </Route>
+                    <Route path="/folder/:id" nest>
+                      <FolderDetailPage root={false} />
+                      <Route path="/file/:id">
+                        <FileDetailPage />
+                      </Route>
+                    </Route>
                     <Route path="/file/:id">
                       <FileDetailPage />
                     </Route>
+                    <Route path="/auth" nest>
+                      <Auth />
+                    </Route>
+                    <Route path="/preferences">
+                      <Preferences />
+                    </Route>
                   </Route>
-                  <Route path="/file/:id">
-                    <FileDetailPage />
-                  </Route>
-                  <Route path="/auth" nest>
-                    <Auth />
-                  </Route>
-                  <Route path="/preferences">
-                    <Preferences />
-                  </Route>
-                </Route>
-              </PanelLayout>
-              <Route path="*">404</Route>
-            </Switch>
-          </main>
-        </div>
-        <DebugMode />
-        <Toaster />
+                </PanelLayout>
+                <Route path="*">404</Route>
+              </Switch>
+            </main>
+          </div>
+          <DebugMode />
+          <Toaster />
+        </TooltipProvider>
       </ElectricProvider>
     </ThemeProvider>
   );

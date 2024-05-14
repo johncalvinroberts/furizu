@@ -62,16 +62,14 @@ export const PanelLayout = ({ children }: PropsWithChildren) => {
           withHandle
           top={
             <>
-              <Lockup variant={isCollapsed ? 'compact' : 'full'} />
+              <Lockup variant={isCollapsed ? 'compact' : 'full'} className="w-full" />
             </>
           }
         >
           <div className="min-h-full flex flex-col space-between">
             <div className="flex-1">
-              <FolderTreeRoot className="flex-shrink-0 w-full h-[460px]" />
+              <FolderTreeRoot className="flex-shrink-0 w-full h-[calc(100vh-52px-120px)]" />
             </div>
-            {/* <div className="flex-1 p-4 h-full">
-            </div> */}
             <div className="border-t flex-none h-[120px] flex justify-between p-2">
               <AccountPreview variant={isCollapsed ? 'compact' : 'full'} />
             </div>

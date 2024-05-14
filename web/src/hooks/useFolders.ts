@@ -6,6 +6,7 @@ import { useCallback } from 'react';
 import { useElectric } from '@/lib/electric';
 
 import { Folders } from '../generated/client';
+import { useActiveFolder } from './useActiveFolder';
 
 const logger = new Logger('useFolders', 'goldenrod');
 
@@ -38,6 +39,7 @@ const massageFolders = (folders: Folders[] | undefined): FolderNode[] => {
 
 export const useFolders = () => {
   const { db } = useElectric()!;
+  const { id: activeFolderId } = useActiveFolder();
 
   const createFolder = useCallback(
     async (name: string, userId: string, parent_id: string | null) => {
@@ -58,8 +60,26 @@ export const useFolders = () => {
     [db],
   );
 
-  const { results: folders } = useLiveQuery(db.folders.liveMany());
+  const updateFolder = useCallback(
+    async (id: string, args: Partial<Folders>) => {
+      const res = await db.folders.update({ data: args, where: { id } });
+      return res;
+    },
+    [db],
+  );
+
+  const deleteFolder = useCallback(
+    async (id: string) => {
+      const res = await db.folders.delete({ where: { id } });
+      return res;
+    },
+    [db],
+  );
+
+  const { results: folders } = useLiveQuery(
+    db.folders.liveMany({ orderBy: { created_at: 'asc' } }),
+  );
   const folderTree = massageFolders(folders);
 
-  return { createFolder, folders, folderTree };
+  return { createFolder, folders, folderTree, activeFolderId, deleteFolder, updateFolder };
 };

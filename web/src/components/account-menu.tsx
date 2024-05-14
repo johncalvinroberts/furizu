@@ -1,7 +1,6 @@
 import { LogIn, LogOut, Settings, Settings2 } from 'lucide-react';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
-import { Link } from 'wouter';
 
 import {
   DropdownMenu,
@@ -11,6 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useUser } from '@/hooks/useUser';
 
+import { Link } from './link';
 import { Button } from './ui/button';
 
 type Props = {
