@@ -14,6 +14,7 @@ import { useUserId } from '@/hooks/useUser';
 import { ElectricProvider, initElectric } from '@/lib/electric';
 
 import DebugMode from './components/debug';
+import LogoPage from './components/pages/logo';
 import { Electric } from './generated/client';
 import { deleteDB } from './lib/utils';
 
@@ -83,6 +84,9 @@ function App() {
                     </Route>
                     <Route path="/preferences">
                       <Preferences />
+                    </Route>
+                    <Route path="/logo">
+                      <LogoPage />
                     </Route>
                   </Route>
                 </PanelLayout>
