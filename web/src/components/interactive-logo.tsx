@@ -1,5 +1,5 @@
 import { useLoader } from '@react-three/fiber';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 export function Scene() {
   const gltf = useLoader(GLTFLoader, '/assets/.gltf');
