@@ -42,7 +42,7 @@
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.51.1",
     "react-hotkeys-hook": "^3.2.1",
-    "react-resizable-panels": "^2.0.13",
+    "react-resizable-panels": "^0.0.55",
     "sonner": "^1.4.41",
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",

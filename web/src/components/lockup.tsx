@@ -6,28 +6,30 @@ import { InteractiveLogo } from './interactive-logo';
 type Props = {
   variant?: 'compact' | 'full';
   className?: string;
+  staticLogo?: boolean;
 };
-export const Lockup = ({ variant = 'full', className }: Props) => {
+export const Lockup = ({ variant = 'full', className, staticLogo = false }: Props) => {
   return (
-    <Link href="/" className={className}>
+    <div className={className}>
       {variant === 'full' && (
         <>
           <div className="font-semibold hover:font-bold w-full flex items-center">
             <span className="mr-2">
-              {/* <img src={Logo} alt="" className="w-[20px] h-[20px]" /> */}
-              <InteractiveLogo size="50px" />
+              {staticLogo && <img src={Logo} alt="" className="w-[50px] h-[50px]" />}
+              {!staticLogo && <InteractiveLogo size="50px" />}
             </span>
-            furizu.
+            <Link href="/">furizu.</Link>
           </div>
         </>
       )}
       {variant === 'compact' && (
         <>
-          <div>
-            <img src={Logo} alt="" className="w-[10px] h-[10px]" />.
-          </div>
+          <Link href="/">
+            {staticLogo && <img src={Logo} alt="" className="w-[10px] h-[10px]" />}
+            {!staticLogo && <InteractiveLogo size="40px" />}
+          </Link>
         </>
       )}
-    </Link>
+    </div>
   );
 };
