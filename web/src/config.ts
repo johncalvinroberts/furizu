@@ -1,4 +1,4 @@
-export const DEFAULT_LAYOUT = [310, 440, 655];
+export const DEFAULT_LAYOUT = [25, 65, 655];
 export const API_URL = import.meta.env.VITE_API_URL;
 export const TOKEN_LOCALSTORAGE_KEY = 'furizu_token';
 export const USER_ID_LOCALSTORAGE_KEY = 'furizu_user_id';

@@ -40,17 +40,10 @@ export const PanelLayout = ({ children }: PropsWithChildren) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const toggleCollapsed = (collapsed: boolean) => {
     setIsCollapsed(collapsed);
-    document.cookie = `react-resizable-panels:collapsed=${JSON.stringify(collapsed)}`;
   };
   return (
     <div className="flex flex-col flex-1">
-      <ResizablePanelGroup
-        direction="horizontal"
-        onLayout={(sizes: number[]) => {
-          document.cookie = `react-resizable-panels:layout=${JSON.stringify(sizes)}`;
-        }}
-        className="flex-1 items-stretch"
-      >
+      <ResizablePanelGroup direction="horizontal" className="flex-1 items-stretch">
         <Panel
           defaultSize={DEFAULT_LAYOUT[0]}
           collapsedSize={4}

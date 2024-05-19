@@ -1,16 +1,19 @@
+import { Plus } from 'lucide-react';
 import { useEffect } from 'react';
+import { useDropzone } from 'react-dropzone';
 import { useParams } from 'wouter';
 
 import { Panel } from '@/components/panel-layout';
 import { DEFAULT_LAYOUT } from '@/config';
 import { useActiveFolder } from '@/hooks/useActiveFolder';
-import { useFilesByFolderId } from '@/hooks/useFiles';
+import { useFiles, useFilesByFolderId } from '@/hooks/useFiles';
 import { useLocation } from '@/hooks/useLocation';
 import { useUser } from '@/hooks/useUser';
 
-import { Empty } from '../empty-tip';
+import { Dropzone } from '../dropzone';
 import { FolderBreadCrumbs } from '../folder-bread-crumbs';
 import { Link } from '../link';
+import { Button } from '../ui/button';
 
 type Props = {
   root: boolean;
@@ -20,10 +23,34 @@ type InnerProps = {
   id: string;
 };
 
+const UploadButton = ({ onDrop }: { onDrop: (files: File[]) => void }) => {
+  const { open, getInputProps } = useDropzone({ onDrop });
+  return (
+    <Button
+      tooltip="Upload a file"
+      size="tiny"
+      variant="ghost"
+      className="w-full text-accent-foreground/50"
+      onClick={open}
+    >
+      <Plus size={20} /> <input {...getInputProps()} accept="audio/*" />
+    </Button>
+  );
+};
+
 export const FolderDetailPageInner = ({ id }: InnerProps) => {
   const { location } = useLocation();
   const isFileDetailPage = location !== '/';
   const files = useFilesByFolderId(id);
+  const { createFile } = useFiles();
+
+  const handleDrop = async (files: File[]) => {
+    for (const file of files) {
+      await createFile(file, id);
+    }
+  };
+
+  const isEmpty = files.results && files.results.length < 1;
 
   return (
     <Panel
@@ -32,14 +59,22 @@ export const FolderDetailPageInner = ({ id }: InnerProps) => {
       top={<FolderBreadCrumbs id={id} />}
       withHandle={isFileDetailPage}
     >
-      <ul>
-        {files?.results?.map((item) => (
-          <li key={item.id}>
-            <Link href={`/folder/${id}/file/${item.id}`}>{item.name}</Link>
-          </li>
-        ))}
-      </ul>
-      {files.results && files.results.length < 1 && <Empty className="w-full p-10" />}
+      <div className="h-full">
+        <Dropzone isEmpty={isEmpty} onDrop={handleDrop}>
+          <ul>
+            {files?.results?.map((item) => (
+              <li key={item.id}>
+                <Link href={`/folder/${id}/file/${item.id}`}>{item.name}</Link>
+              </li>
+            ))}
+            {!isEmpty && (
+              <li>
+                <UploadButton onDrop={handleDrop} />
+              </li>
+            )}
+          </ul>
+        </Dropzone>
+      </div>
     </Panel>
   );
 };
