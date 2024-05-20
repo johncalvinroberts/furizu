@@ -30,7 +30,7 @@ interface TimeDisplayProps {
 }
 
 const TimeDisplay: React.FC<TimeDisplayProps> = ({ date, className }) => {
-  const [, setNow] = useState(dayjs());
+  const [now, setNow] = useState(dayjs());
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -43,7 +43,7 @@ const TimeDisplay: React.FC<TimeDisplayProps> = ({ date, className }) => {
   }, []);
 
   const formatDate = (date: dayjs.Dayjs) => {
-    const now = dayjs();
+    // const now = dayjs();
     const diffDays = now.diff(date, 'day');
     const withinLast24Hours = now.diff(date, 'hour') < 24;
 

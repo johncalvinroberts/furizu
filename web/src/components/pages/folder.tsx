@@ -63,7 +63,7 @@ export const FolderDetailPageInner = ({ id }: InnerProps) => {
     >
       <div className="h-full">
         <Dropzone isEmpty={isEmpty} onDrop={handleDrop}>
-          <div className="px-2 py-1 flex w-full bg-accent border-b border-border sticky">
+          <div className="px-2 py-1 flex w-full bg-accent border-b border-border sticky text-sm">
             <div className="flex-none w-[200px] font-bold">Name</div>
             <div className="flex-none w-[130px] font-bold">Created At</div>
             <div className="flex-none w-[130px] font-bold">Updated At</div>
