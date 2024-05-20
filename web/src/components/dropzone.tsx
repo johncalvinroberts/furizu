@@ -24,7 +24,7 @@ export const Dropzone = ({ className, isEmpty, onDrop, children }: PropsWithChil
             'flex items-center justify-center opacity-0 transition-opacity w-full h-full relative',
             {
               'opacity-[0.8] cursor-pointer z-10': isDragActive,
-              'opacity-[0.5] cursor-pointer hover-opacity-[0.6]': isEmpty,
+              'opacity-[0.5] cursor-pointer hover:opacity-[0.6]': isEmpty,
             },
           )}
         >

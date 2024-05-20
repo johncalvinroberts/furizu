@@ -62,7 +62,7 @@ const FolderTreeItem = ({ data, parent_id }: { data: FolderNode[]; parent_id: st
         onClick={createNewFolder}
         size="tiny"
         variant="ghost"
-        className="w-full text-accent-foreground/50"
+        className="w-full text-accent-foreground/50 rounded-none"
         tooltip="Add a folder"
       >
         <Plus size={15} />
