@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Route, Switch } from 'wouter';
 
 import { Auth } from '@/components/pages/auth/root';
@@ -20,10 +20,16 @@ import { deleteDB } from './lib/utils';
 
 function App() {
   const [electric, setElectric] = useState<Electric>();
+  const initializing = useRef(false);
+
   const { id: userId } = useUserId();
   useEffect(() => {
     const init = async () => {
+      if (initializing.current) {
+        return;
+      }
       try {
+        initializing.current = true;
         const client = await initElectric(userId as string);
         setElectric(client);
         const works = await Promise.all([
@@ -48,6 +54,8 @@ function App() {
           deleteDB();
         }
         throw error;
+      } finally {
+        initializing.current = false;
       }
     };
 

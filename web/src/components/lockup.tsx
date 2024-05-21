@@ -1,6 +1,5 @@
 import { Link } from 'wouter';
 
-import Logo from '../../public/favicon.svg';
 import { InteractiveLogo } from './interactive-logo';
 
 type Props = {
@@ -15,7 +14,7 @@ export const Lockup = ({ variant = 'full', className, staticLogo = false }: Prop
         <>
           <div className="font-semibold hover:font-bold w-full flex items-center">
             <span className="mr-2">
-              {staticLogo && <img src={Logo} alt="" className="w-[50px] h-[50px]" />}
+              {staticLogo && <img src="/favicon.svg" alt="" className="w-[50px] h-[50px]" />}
               {!staticLogo && <InteractiveLogo size="50px" />}
             </span>
             <Link href="/">furizu.</Link>
@@ -25,7 +24,7 @@ export const Lockup = ({ variant = 'full', className, staticLogo = false }: Prop
       {variant === 'compact' && (
         <>
           <Link href="/">
-            {staticLogo && <img src={Logo} alt="" className="w-[10px] h-[10px]" />}
+            {staticLogo && <img src="/favicon.svg" alt="" className="w-[10px] h-[10px]" />}
             {!staticLogo && <InteractiveLogo size="40px" />}
           </Link>
         </>

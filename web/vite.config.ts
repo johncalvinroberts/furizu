@@ -9,7 +9,7 @@ import manifest from './manifest.json';
 // https://vitejs.dev/config/
 export default defineConfig({
   optimizeDeps: {
-    exclude: ['wa-sqlite'],
+    exclude: ['wa-sqlite', '@electric-sql/pglite', 'xxxelectric-sql/wa-sqlite'],
   },
   plugins: [
     react(),

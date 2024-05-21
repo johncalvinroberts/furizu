@@ -5,6 +5,8 @@ export const USER_ID_LOCALSTORAGE_KEY = 'furizu_user_id';
 
 export const DEV_MODE = import.meta.env.DEV;
 export const ELECTRIC_URL = import.meta.env.VITE_ELECTRIC_URL || 'ws://localhost:5133';
+export const CLIENT_DB: 'wa-sqlite' | 'pglite' =
+  import.meta.env.VITE_ELECTRIC_CLIENT_DB || 'wa-sqlite';
 
 // We can override the debug mode with a query param: ?debug=true or ?debug=false
 const searchParams = new URLSearchParams(window.location.search);
