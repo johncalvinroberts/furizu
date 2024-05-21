@@ -43,8 +43,8 @@ const UploadButton = ({ onDrop }: { onDrop: (files: File[]) => void }) => {
 export const FolderDetailPageInner = ({ id }: InnerProps) => {
   const { location } = useLocation();
   const isFileDetailPage = location !== '/';
-  const files = useFilesByFolderId(id);
   const { createFile } = useFiles();
+  const { files } = useFilesByFolderId(id);
 
   const handleDrop = async (files: File[]) => {
     for (const file of files) {
@@ -61,35 +61,35 @@ export const FolderDetailPageInner = ({ id }: InnerProps) => {
       top={<FolderBreadCrumbs id={id} />}
       withHandle={isFileDetailPage}
     >
-      <div className="h-full">
-        <Dropzone isEmpty={isEmpty} onDrop={handleDrop}>
-          <div className="px-2 py-1 flex w-full bg-accent border-b border-border sticky text-sm">
-            <div className="flex-none w-[200px] font-bold">Name</div>
-            <div className="flex-none w-[130px] font-bold">Created At</div>
-            <div className="flex-none w-[130px] font-bold">Updated At</div>
+      <div className="h-full min-w-[400px] overflow-scroll">
+        <Dropzone isEmpty={isEmpty} onDrop={handleDrop} className="h-full min-w-full w-fit">
+          <div className="px-2 py-1 flex w-full bg-muted border-b border-border sticky text-xs">
+            <div className="flex-none w-[35%] min-w-[200px] font-normal">Name</div>
+            <div className="flex-none w-[200px] font-normal">Created At</div>
+            <div className="flex-none w-[200px] font-normal">Updated At</div>
           </div>
-          <ul>
+          <ul className="min-w-full">
             {files?.results?.map((item, index) => (
               <li
                 key={item.id}
-                className={cn('group px-2 py-1 text-sm', {
+                className={cn('group px-2 py-1 text-sm w-full block', {
                   'hover:bg-accent/30': index % 2 == 0,
                   'bg-accent hover:bg-accent/80': index % 2 != 0,
                 })}
               >
                 <Link href={`/folder/${id}/file/${item.id}`} className="flex w-full">
-                  <span className="flex-none w-[200px]">
+                  <span className="flex-none w-[35%]">
                     <span
-                      className="block text-ellipsis overflow-hidden text-nowrap w-full"
+                      className="block text-ellipsis overflow-hidden text-nowrap w-full font-medium"
                       title={item.name}
                     >
                       {item.name}
                     </span>
                   </span>
-                  <span className="flex-none w-[130px]">
+                  <span className="flex-none w-[200px]">
                     <TimeDisplay date={item.created_at} />
                   </span>
-                  <span className="flex-none w-[130px]">
+                  <span className="flex-none w-[200px]">
                     <TimeDisplay date={item.updated_at} />
                   </span>
                 </Link>

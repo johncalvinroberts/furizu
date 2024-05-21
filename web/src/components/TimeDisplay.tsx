@@ -3,6 +3,8 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import updateLocale from 'dayjs/plugin/updateLocale';
 import React, { useEffect, useState } from 'react';
 
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+
 dayjs.extend(relativeTime);
 dayjs.extend(updateLocale);
 
@@ -43,19 +45,34 @@ const TimeDisplay: React.FC<TimeDisplayProps> = ({ date, className }) => {
   }, []);
 
   const formatDate = (date: dayjs.Dayjs) => {
-    // const now = dayjs();
     const diffDays = now.diff(date, 'day');
     const withinLast24Hours = now.diff(date, 'hour') < 24;
 
     if (withinLast24Hours) {
       return date.from(now);
     } else {
-      return `${date.format('DD/MM/YYYY')} (${diffDays} days ago)`;
+      return (
+        <span className="flex justify-start items-center">
+          {date.format('MM/DD/YYYY')}{' '}
+          <span className="text-xs ml-[2px]">({diffDays} days ago)</span>
+        </span>
+      );
     }
   };
 
+  const formatTooltip = (date: dayjs.Dayjs) => {
+    return date.format('ddd MMM D, YYYY, hh:mmA');
+  };
+
   const inputDate = dayjs(date);
-  return <div className={className}>{formatDate(inputDate)}</div>;
+  return (
+    <div className={className}>
+      <Tooltip>
+        <TooltipTrigger>{formatDate(inputDate)}</TooltipTrigger>
+        <TooltipContent>{formatTooltip(inputDate)}</TooltipContent>
+      </Tooltip>
+    </div>
+  );
 };
 
 export default TimeDisplay;

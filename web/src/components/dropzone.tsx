@@ -17,7 +17,7 @@ export const Dropzone = ({ className, isEmpty, onDrop, children }: PropsWithChil
   });
 
   return (
-    <div className={cn('relative h-full w-full', className)}>
+    <div className={cn('relative', className)}>
       <div className="absolute w-full h-full inset-0" {...getRootProps()}>
         <div
           className={cn(

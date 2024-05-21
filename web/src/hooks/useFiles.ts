@@ -20,9 +20,11 @@ export const useFiles = () => {
   const { db } = useElectric()!;
 
   const createFile = useCallback(
-    async (rawFile: File, folderId: string) => {
+    async (rawFile: File, folderId: string, fileId?: string) => {
       timer.start();
-      const fileId = genUUID();
+      if (!fileId) {
+        fileId = genUUID();
+      }
       try {
         logger.log(['starting to create file', { fileId, folderId }]);
         const fileInstance = await db.files.create({
@@ -76,7 +78,7 @@ export const useFiles = () => {
         // break file into chunks + save
         const time = timer.stop();
         logger.log(['Finished creating file + chunks', { time }]);
-        console.log({ fileInstance });
+        logger.log(['fileInstance', fileInstance]);
         createJob({ command: 'file_created', payload: fileInstance, userId: userId as string });
       } catch (error) {
         logger.error(['Failed to create file', error]);
@@ -90,8 +92,9 @@ export const useFiles = () => {
 
 export const useFilesByFolderId = (folder_id: string) => {
   const { db } = useElectric()!;
+
   const results = useLiveQuery(
     db.files.liveMany({ where: { folder_id }, orderBy: { updated_at: 'desc' } }),
   );
-  return results;
+  return { files: results };
 };
