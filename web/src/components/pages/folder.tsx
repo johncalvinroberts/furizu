@@ -5,11 +5,12 @@ import { useParams } from 'wouter';
 
 import { Panel } from '@/components/panel-layout';
 import { DEFAULT_LAYOUT } from '@/config';
+import { Files } from '@/generated/client';
 import { useActiveFolder } from '@/hooks/useActiveFolder';
 import { useFiles, useFilesByFolderId } from '@/hooks/useFiles';
 import { useLocation } from '@/hooks/useLocation';
 import { useUser } from '@/hooks/useUser';
-import { cn } from '@/lib/utils';
+import { cn, formatFileSize } from '@/lib/utils';
 
 import { Dropzone } from '../dropzone';
 import { FolderBreadCrumbs } from '../folder-bread-crumbs';
@@ -37,6 +38,34 @@ const UploadButton = ({ onDrop }: { onDrop: (files: File[]) => void }) => {
     >
       <Plus size={20} /> <input {...getInputProps()} accept="audio/*" />
     </Button>
+  );
+};
+
+const FileListItem = ({ file, index }: { file: Files; index: number }) => {
+  return (
+    <li
+      className={cn('group px-2 py-1 text-sm w-full block', {
+        'hover:bg-accent/30': index % 2 == 0,
+        'bg-accent hover:bg-accent/80': index % 2 != 0,
+      })}
+    >
+      <Link href={`/folder/${file.folder_id}/file/${file.id}`} className="flex w-full">
+        <span className="flex-none w-[35%] flex space-between gap-1 px-2">
+          <span className="block text-ellipsis overflow-hidden text-nowrap w-full font-medium">
+            {file.name}
+          </span>
+          <span className="text-xs text-nowrap flex items-center">
+            {formatFileSize(file.size, 'short')}
+          </span>
+        </span>
+        <span className="flex-none w-[200px]">
+          <TimeDisplay date={file.created_at} />
+        </span>
+        <span className="flex-none w-[200px]">
+          <TimeDisplay date={file.updated_at} />
+        </span>
+      </Link>
+    </li>
   );
 };
 
@@ -70,30 +99,7 @@ export const FolderDetailPageInner = ({ id }: InnerProps) => {
           </div>
           <ul className="min-w-full">
             {files?.results?.map((item, index) => (
-              <li
-                key={item.id}
-                className={cn('group px-2 py-1 text-sm w-full block', {
-                  'hover:bg-accent/30': index % 2 == 0,
-                  'bg-accent hover:bg-accent/80': index % 2 != 0,
-                })}
-              >
-                <Link href={`/folder/${id}/file/${item.id}`} className="flex w-full">
-                  <span className="flex-none w-[35%]">
-                    <span
-                      className="block text-ellipsis overflow-hidden text-nowrap w-full font-medium"
-                      title={item.name}
-                    >
-                      {item.name}
-                    </span>
-                  </span>
-                  <span className="flex-none w-[200px]">
-                    <TimeDisplay date={item.created_at} />
-                  </span>
-                  <span className="flex-none w-[200px]">
-                    <TimeDisplay date={item.updated_at} />
-                  </span>
-                </Link>
-              </li>
+              <FileListItem key={item.id} file={item} index={index} />
             ))}
             {!isEmpty && (
               <li>
