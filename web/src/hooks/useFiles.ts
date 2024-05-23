@@ -4,6 +4,7 @@ import { Logger, TimerFactory } from 'guu';
 import pMap from 'p-map';
 import { useCallback } from 'react';
 
+import { Files } from '@/generated/client';
 import { useElectric } from '@/lib/electric';
 
 import { useJobs } from './useJobs';
@@ -87,7 +88,29 @@ export const useFiles = () => {
     [userId, db.file_chunks, db.files, createJob],
   );
 
-  return { createFile };
+  const updateFile = useCallback(
+    async (id: string, args: Partial<Files>) => {
+      const res = await db.files.update({ data: args, where: { id } });
+      return res;
+    },
+    [db],
+  );
+
+  const deleteFile = useCallback(
+    async (id: string) => {
+      const res = await db.files.delete({ where: { id } });
+      return res;
+    },
+    [db],
+  );
+
+  return { createFile, updateFile, deleteFile };
+};
+
+export const useFileById = (id: string) => {
+  const { db } = useElectric()!;
+  const results = useLiveQuery(db.files.liveFirst({ where: { id } }));
+  return { file: results.results };
 };
 
 export const useFilesByFolderId = (folder_id: string) => {

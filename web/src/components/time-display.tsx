@@ -68,7 +68,9 @@ const TimeDisplay: React.FC<TimeDisplayProps> = ({ date, className }) => {
   return (
     <div className={className}>
       <Tooltip>
-        <TooltipTrigger>{formatDate(inputDate)}</TooltipTrigger>
+        <TooltipTrigger asChild>
+          <div className="flex items-center">{formatDate(inputDate)}</div>
+        </TooltipTrigger>
         <TooltipContent>{formatTooltip(inputDate)}</TooltipContent>
       </Tooltip>
     </div>

@@ -16,15 +16,13 @@ import { getErrorMessageString } from '@/lib/utils';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogFooter } from './ui/dialog';
 
-export const FolderContextMenu = ({
-  folder,
-  className,
-  onClickRename,
-}: {
+type Props = {
   folder: Folders;
   className?: string;
   onClickRename: () => void;
-}) => {
+};
+
+export const FolderContextMenu = ({ folder, className, onClickRename }: Props) => {
   const { isOpen, toggle } = useToggle(false);
   const { deleteFolder } = useFolders();
   const { setAbsoluteLocation } = useLocation();
@@ -37,6 +35,7 @@ export const FolderContextMenu = ({
       await deleteFolder(folder.id);
       toggle();
       setAbsoluteLocation(folder.parent_id ? `/folder/${folder.parent_id}` : '/');
+      toast.success(`Deleted folder "${folder.name}"`);
     } catch (error) {
       console.error(error);
       toast.error(`Failed to delete: ${getErrorMessageString(error)}`);

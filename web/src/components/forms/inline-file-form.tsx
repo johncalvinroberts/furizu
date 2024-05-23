@@ -6,15 +6,15 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
-import { Folders } from '@/generated/client';
-import { useFolders } from '@/hooks/useFolders';
+import { Files } from '@/generated/client';
+import { useFiles } from '@/hooks/useFiles';
 import { getErrorMessageString } from '@/lib/utils';
 
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 
-type InlineFolderFormProps = {
-  folder: Folders;
+type InlineFileFormProps = {
+  file: Files;
   onSuccess?: () => void;
 };
 
@@ -22,8 +22,8 @@ const formSchema = z.object({
   name: z.string().min(1).regex(/\S/),
 });
 
-export const InlineFolderForm = ({ folder, onSuccess }: InlineFolderFormProps) => {
-  const { updateFolder } = useFolders();
+export const InlineFileForm = ({ file, onSuccess }: InlineFileFormProps) => {
+  const { updateFile } = useFiles();
 
   useHotkeys('esc', () => {
     onSuccess?.();
@@ -32,20 +32,20 @@ export const InlineFolderForm = ({ folder, onSuccess }: InlineFolderFormProps) =
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: folder.name,
+      name: file.name,
     },
   });
 
   const onSubmit = useCallback(
     async (values: z.infer<typeof formSchema>) => {
       try {
-        await updateFolder(folder.id, values);
+        await updateFile(file.id, values);
         onSuccess?.();
       } catch (error) {
         toast.error(`Failed to update: ${getErrorMessageString(error)}`);
       }
     },
-    [updateFolder, folder, onSuccess],
+    [updateFile, file, onSuccess],
   );
 
   const handleKeyDown = useCallback(
@@ -68,7 +68,7 @@ export const InlineFolderForm = ({ folder, onSuccess }: InlineFolderFormProps) =
               <FormControl>
                 <div className="flex justify-center">
                   <Input
-                    placeholder="folder..."
+                    placeholder="file..."
                     type="text"
                     autoFocus
                     className="mr-2"

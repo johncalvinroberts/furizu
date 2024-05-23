@@ -62,39 +62,43 @@ const handleProvisionalUserCreated = async (job: Job) => {
 };
 
 const handleFileCreated = async (job: FileCreatedJob) => {
-  const fileId = job.payload.id;
-  const [file] = await db.select().from(files).where(eq(files.id, fileId));
-  server.log.info('fetched file from db', file);
-  const [{ count: chunkCount }] = await db
-    .select({ count: count() })
-    .from(file_chunks)
-    .where(eq(file_chunks.file_id, fileId));
-  const bucketName = env.TIGRIS.BUCKET_NAME;
-  server.log.info(
-    `initializing iterative multipart chunk upload: ${JSON.stringify({
-      file_id: file.id,
-      chunkCount,
-    })}`,
-  );
-  const uploadId = await tigrisClient.initiateMultipartUpload(bucketName, fileId);
-  server.log.info(`created multipart upload: ${uploadId}`);
-  const parts = await tigrisClient.uploadChunks({
-    bucketName,
-    key: fileId,
-    uploadId,
-    totalChunks: chunkCount,
-    getChunkData: async (index: number) => {
-      const [chunk] = await db
-        .select()
-        .from(file_chunks)
-        .where(and(eq(file_chunks.file_id, fileId), eq(file_chunks.chunk_index, index)));
-      if (!chunk) throw new Error('chunk not found');
-      return { data: chunk.data };
-    },
-  });
-  server.log.info(`finished uploading chunks: ${fileId}`);
-  await tigrisClient.completeMultipartUpload({ parts, uploadId, bucketName, key: file.id });
-  server.log.info(`completed multipart upload: ${fileId}`);
+  try {
+    const fileId = job.payload.id;
+    const [file] = await db.select().from(files).where(eq(files.id, fileId));
+    server.log.info('fetched file from db', file);
+    const [{ count: chunkCount }] = await db
+      .select({ count: count() })
+      .from(file_chunks)
+      .where(eq(file_chunks.file_id, fileId));
+    const bucketName = env.TIGRIS.BUCKET_NAME;
+    server.log.info(
+      `initializing iterative multipart chunk upload: ${JSON.stringify({
+        file_id: file.id,
+        chunkCount,
+      })}`,
+    );
+    const uploadId = await tigrisClient.initiateMultipartUpload(bucketName, fileId);
+    server.log.info(`created multipart upload: ${uploadId}`);
+    const parts = await tigrisClient.uploadChunks({
+      bucketName,
+      key: fileId,
+      uploadId,
+      totalChunks: chunkCount,
+      getChunkData: async (index: number) => {
+        const [chunk] = await db
+          .select()
+          .from(file_chunks)
+          .where(and(eq(file_chunks.file_id, fileId), eq(file_chunks.chunk_index, index)));
+        if (!chunk) throw new Error('chunk not found');
+        return { data: chunk.data };
+      },
+    });
+    server.log.info(`finished uploading chunks: ${fileId}`);
+    await tigrisClient.completeMultipartUpload({ parts, uploadId, bucketName, key: file.id });
+    server.log.info(`completed multipart upload: ${fileId}`);
+  } catch (error) {
+    server.log.error(error);
+  }
 };
 
 export const processJob = async (rawJobString: string) => {

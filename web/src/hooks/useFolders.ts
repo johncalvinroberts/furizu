@@ -17,20 +17,24 @@ const massageFolders = (folders: Folders[] | undefined): FolderNode[] => {
     return [];
   }
   // Create a map of all folders by their IDs for easy lookup
-  const folderMap: Record<string, FolderNode> = {};
+  const folderMap = new Map<string, FolderNode>();
   folders.forEach((folder) => {
-    folderMap[folder.id] = { ...folder, children: [] };
+    folderMap.set(folder.id, { ...folder, children: [] });
   });
 
   // Populate children arrays
   const rootFolders: FolderNode[] = [];
   folders.forEach((folder) => {
+    const item = folderMap.get(folder.id);
     if (folder.parent_id) {
       // If a folder has a parent_id, find the parent and add this folder to its children
-      folderMap[folder.parent_id]?.children.push(folderMap[folder.id]);
+      const parent = folderMap.get(folder.parent_id);
+      if (parent) {
+        parent.children.push(item as FolderNode);
+      }
     } else {
       // If a folder doesn't have a parent_id, it is a root folder
-      rootFolders.push(folderMap[folder.id]);
+      rootFolders.push(item as FolderNode);
     }
   });
 

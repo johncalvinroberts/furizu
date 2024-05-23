@@ -18,6 +18,7 @@ const bytea = customType<{ data: Buffer; notNull: false; default: false }>({
 });
 
 export const JobCommands = ['provisional_user_created', 'signup', 'file_created'] as const;
+export const FileStates = ['created', 'chunking', 'propagating', 'done'] as const;
 
 export const users = pgTable('users', {
   id: uuid('id').primaryKey(),
@@ -55,6 +56,7 @@ export const files = pgTable('files', {
   created_at: timestamp('created_at').notNull(),
   updated_at: timestamp('updated_at').notNull(),
   electric_user_id: uuid('electric_user_id').notNull(),
+  state: varchar('state', { enum: FileStates }),
 });
 
 export const jobs = pgTable('jobs', {
