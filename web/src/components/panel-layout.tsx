@@ -19,6 +19,10 @@ type PanelProps = React.ComponentProps<typeof ResizablePanel> & {
   withHandle?: boolean;
 };
 
+type Props = {
+  initialized: boolean;
+};
+
 export const Panel = ({ children, top, classNames = {}, withHandle, ...props }: PanelProps) => {
   return (
     <>
@@ -36,7 +40,7 @@ export const Panel = ({ children, top, classNames = {}, withHandle, ...props }: 
   );
 };
 
-export const PanelLayout = ({ children }: PropsWithChildren) => {
+export const PanelLayout = ({ children, initialized }: PropsWithChildren<Props>) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const toggleCollapsed = (collapsed: boolean) => {
     setIsCollapsed(collapsed);
@@ -64,7 +68,7 @@ export const PanelLayout = ({ children }: PropsWithChildren) => {
         >
           <div className="min-h-full flex flex-col space-between">
             <div className="flex-1">
-              {!isCollapsed && (
+              {!isCollapsed && initialized && (
                 <FolderTreeRoot className="flex-shrink-0 w-full h-[calc(100vh-52px-120px)]" />
               )}
               {isCollapsed && (
@@ -98,7 +102,7 @@ export const PanelLayout = ({ children }: PropsWithChildren) => {
               )}
             </div>
             <div className="border-t flex-none h-[120px] flex justify-between p-2">
-              <AccountPreview variant={isCollapsed ? 'compact' : 'full'} />
+              {initialized && <AccountPreview variant={isCollapsed ? 'compact' : 'full'} />}
             </div>
           </div>
         </Panel>

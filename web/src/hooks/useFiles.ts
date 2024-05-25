@@ -15,6 +15,15 @@ const timer = new TimerFactory('useFiles');
 
 const CHUNK_SIZE = 250 * 1024 * 1024;
 
+export const FileStates = [
+  'created',
+  'encrypting',
+  'chunking',
+  'propagating',
+  'done',
+  'error',
+] as const;
+
 export const useFiles = () => {
   const { createJob } = useJobs();
   const { id: userId } = useUserId();
@@ -38,6 +47,8 @@ export const useFiles = () => {
             created_at: new Date(),
             updated_at: new Date(),
             electric_user_id: userId as string,
+            state: 'created',
+            locations: [],
           },
         });
         logger.log(['created file in files table', fileId]);
@@ -50,6 +61,7 @@ export const useFiles = () => {
         // index = which chunk index we're at
         let index = 0;
         // loop through the file by chunk size
+        await db.files.update({ data: { state: 'chunking' }, where: { id: fileId } });
         while (start < rawFile.size) {
           const chunk = rawFile.slice(start, end);
           start = end + 1;
@@ -83,6 +95,7 @@ export const useFiles = () => {
         createJob({ command: 'file_created', payload: fileInstance, userId: userId as string });
       } catch (error) {
         logger.error(['Failed to create file', error]);
+        await db.files.update({ data: { state: 'error' }, where: { id: fileId } });
       }
     },
     [userId, db.file_chunks, db.files, createJob],

@@ -6,6 +6,7 @@ import {
   AbortMultipartUploadCommand,
   Part,
   PutObjectCommand,
+  CompleteMultipartUploadCommandOutput,
 } from '@aws-sdk/client-s3';
 import { server } from './server';
 
@@ -20,6 +21,7 @@ type InitS3LikeClientParams = {
   accessKeyId: string;
   secretAccessKey: string;
   endpoint: string;
+  name: string;
 };
 
 type Chunk = {
@@ -41,8 +43,19 @@ type CompleteMultipartUploadParams = {
   parts: Part[];
 };
 
-export const initS3LikeClient = (params: InitS3LikeClientParams) => {
-  const { region, accessKeyId, secretAccessKey, endpoint } = params;
+export type S3LikeClient = {
+  client: S3Client;
+  putFile: (params: PutObjectParams) => Promise<void>;
+  initiateMultipartUpload: (bucketName: string, key: string) => Promise<string>;
+  completeMultipartUpload: (
+    params: CompleteMultipartUploadParams,
+  ) => Promise<CompleteMultipartUploadCommandOutput>;
+  uploadChunks: (params: UploadChunksParams) => Promise<Part[]>;
+  name: string;
+};
+
+export const initS3LikeClient = (params: InitS3LikeClientParams): S3LikeClient => {
+  const { region, accessKeyId, secretAccessKey, endpoint, name } = params;
   const client = new S3Client({
     region,
     endpoint,
@@ -116,5 +129,5 @@ export const initS3LikeClient = (params: InitS3LikeClientParams) => {
     return parts;
   }
 
-  return { client, putFile, initiateMultipartUpload, completeMultipartUpload, uploadChunks };
+  return { client, putFile, initiateMultipartUpload, completeMultipartUpload, uploadChunks, name };
 };

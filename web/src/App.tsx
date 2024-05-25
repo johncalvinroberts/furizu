@@ -21,6 +21,7 @@ import { deleteDB } from './lib/utils';
 function App() {
   const [electric, setElectric] = useState<Electric>();
   const initializing = useRef(false);
+  const [initialized, setInitialized] = useState(false);
 
   const { id: userId } = useUserId();
   useEffect(() => {
@@ -44,6 +45,7 @@ function App() {
 
         const synceds = works.map((item) => item.synced);
         await Promise.all(synceds);
+        setInitialized(true);
         const timeToSync = performance.now();
         if (DEBUG) {
           console.log(`Synced in ${timeToSync}ms from page load`);
@@ -73,7 +75,7 @@ function App() {
           <div className="w-full flex min-h-screen flex-col bg-background">
             <main className="flex-1 flex flex-col">
               <Switch>
-                <PanelLayout>
+                <PanelLayout initialized={initialized}>
                   <Route path="/" nest>
                     <Route path="/">
                       <FolderDetailPage root />

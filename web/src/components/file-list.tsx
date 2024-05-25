@@ -47,14 +47,14 @@ const FileListItem = ({ file, index }: { file: Files; index: number }) => {
           <span className="block text-ellipsis overflow-hidden text-nowrap w-full font-medium">
             {file.name}
           </span>
-          <span className="text-xs text-nowrap flex items-center">
-            {formatFileSize(file.size, 'short')}
-          </span>
         </span>
-        <span className="flex-none w-[180px] flex items-center">
+        <span className="flex-none w-[100px] text-xs text-nowrap flex items-center">
+          {formatFileSize(file.size, 'short')}
+        </span>
+        <span className="flex-none w-[180px] text-xs flex items-center">
           <TimeDisplay date={file.created_at} />
         </span>
-        <span className="flex-none w-[180px] flex items-center">
+        <span className="flex-none w-[180px] text-xs flex items-center">
           <TimeDisplay date={file.updated_at} />
         </span>
       </Link>
@@ -89,6 +89,7 @@ export const FolderFileList = ({ folder_id }: Props) => {
           <div className="w-fit max-w-full min-w-full overflow-scroll">
             <div className="px-2 py-1 flex bg-muted border-b border-border sticky text-xs min-w-full w-fit">
               <div className="flex-none w-[220px] min-w-[180px] font-normal">Name</div>
+              <div className="flex-none w-[100px] font-normal">Size</div>
               <div className="flex-none w-[180px] font-normal">Created At</div>
               <div className="flex-none w-[180px] font-normal">Last Modified</div>
             </div>

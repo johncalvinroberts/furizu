@@ -1,5 +1,6 @@
 import { InferSelectModel } from 'drizzle-orm';
-import { jobs, JobCommands } from './schema';
+import { jobs } from './schema';
+import { JobCommands } from '@shared/types';
 
 export type JobCommand = (typeof JobCommands)[number];
 

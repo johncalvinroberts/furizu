@@ -1,9 +1,8 @@
+import { JobCommands } from '@shared/types';
 import { genUUID } from 'electric-sql/util';
 import { useCallback } from 'react';
 
 import { useElectric } from '@/lib/electric';
-
-const JobCommands = ['provisional_user_created', 'signup', 'file_created'] as const;
 
 export type JobCommand = (typeof JobCommands)[number];
 

@@ -16,7 +16,7 @@ export const AccountPreview = ({ variant = 'full' }: Props) => {
 
   const bytes_remaining = bytesTotal - bytesUsed;
   const percentageUsed = bytesTotal > 0 ? (bytesUsed / bytesTotal) * 100 : 0;
-  const percentageRemaining = 100 - percentageUsed;
+  const percentageRemaining = (100 - percentageUsed).toFixed(2);
 
   if (variant === 'full') {
     return (
@@ -32,7 +32,7 @@ export const AccountPreview = ({ variant = 'full' }: Props) => {
             )}
           </div>
           <div className="px-0 py-1">
-            <Progress value={percentageRemaining} />
+            <Progress value={Number(percentageRemaining)} />
           </div>
           <div className="line-clamp-2 text-xs text-muted-foreground italic">Learn more</div>
         </div>

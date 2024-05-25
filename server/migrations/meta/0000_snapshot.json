@@ -1,10 +1,8 @@
 {
-  "id": "7763d9d4-9f34-4e49-97e6-973203d2938d",
-  "prevId": "00000000-0000-0000-0000-000000000000",
-  "version": "5",
-  "dialect": "pg",
+  "version": "6",
+  "dialect": "postgresql",
   "tables": {
-    "users": {
+    "public.users": {
       "name": "users",
       "schema": "",
       "columns": {
@@ -66,8 +64,10 @@
   "enums": {},
   "schemas": {},
   "_meta": {
-    "columns": {},
     "schemas": {},
-    "tables": {}
-  }
+    "tables": {},
+    "columns": {}
+  },
+  "id": "7763d9d4-9f34-4e49-97e6-973203d2938d",
+  "prevId": "00000000-0000-0000-0000-000000000000"
 }

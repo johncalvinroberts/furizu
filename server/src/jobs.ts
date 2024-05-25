@@ -1,18 +1,20 @@
-import { eq, count, and } from 'drizzle-orm';
+import { eq, count, sql } from 'drizzle-orm';
+import { genUUID } from 'electric-sql/util';
+import bcrypt from 'bcrypt';
 import { db } from './db';
 import { file_chunks, jobs, files, quotas, users } from './schema';
-import bcrypt from 'bcrypt';
 import { Job, SignupJob, FileCreatedJob } from './types';
 import { env } from './env';
-import { genUUID } from 'electric-sql/util';
 import { initS3LikeClient } from './s3';
 import { server } from './server';
+import { propagateToS3likeObjectStore } from './files';
 
 const tigrisClient = initS3LikeClient({
   region: env.TIGRIS.REGION,
   accessKeyId: env.TIGRIS.ACCESS_KEY_ID,
   secretAccessKey: env.TIGRIS.SECRET_ACCESS_KEY,
   endpoint: env.TIGRIS.ENDPOINT_URL_S3,
+  name: 'tigris',
 });
 
 const handleSignUp = async (job: SignupJob) => {
@@ -64,40 +66,39 @@ const handleProvisionalUserCreated = async (job: Job) => {
 const handleFileCreated = async (job: FileCreatedJob) => {
   try {
     const fileId = job.payload.id;
+    const [quota] = await db
+      .select()
+      .from(quotas)
+      .where(eq(quotas.electric_user_id, job.electric_user_id));
     const [file] = await db.select().from(files).where(eq(files.id, fileId));
+    const bytes_remaining = quota.bytes_total - quota.bytes_used;
+    if (file.size > bytes_remaining) {
+      server.log.error('cannot propagate file, user quota no space left');
+      db.update(files).set({ state: 'propagation_backlogged' });
+      return;
+    }
+    await db.update(files).set({ state: 'propagating' });
     server.log.info('fetched file from db', file);
     const [{ count: chunkCount }] = await db
       .select({ count: count() })
       .from(file_chunks)
       .where(eq(file_chunks.file_id, fileId));
-    const bucketName = env.TIGRIS.BUCKET_NAME;
-    server.log.info(
-      `initializing iterative multipart chunk upload: ${JSON.stringify({
-        file_id: file.id,
-        chunkCount,
-      })}`,
-    );
-    const uploadId = await tigrisClient.initiateMultipartUpload(bucketName, fileId);
-    server.log.info(`created multipart upload: ${uploadId}`);
-    const parts = await tigrisClient.uploadChunks({
-      bucketName,
-      key: fileId,
-      uploadId,
-      totalChunks: chunkCount,
-      getChunkData: async (index: number) => {
-        const [chunk] = await db
-          .select()
-          .from(file_chunks)
-          .where(and(eq(file_chunks.file_id, fileId), eq(file_chunks.chunk_index, index)));
-        if (!chunk) throw new Error('chunk not found');
-        return { data: chunk.data };
-      },
+    // start with tigris
+    await propagateToS3likeObjectStore({
+      client: tigrisClient,
+      bucketName: env.TIGRIS.BUCKET_NAME,
+      fileId,
+      chunkCount,
     });
-    server.log.info(`finished uploading chunks: ${fileId}`);
-    await tigrisClient.completeMultipartUpload({ parts, uploadId, bucketName, key: file.id });
-    server.log.info(`completed multipart upload: ${fileId}`);
+    await Promise.all([
+      db.update(quotas).set({ bytes_used: sql`${quotas.bytes_used} + ${file.size}` }),
+      db.update(files).set({ state: 'done' }),
+      db.delete(file_chunks).where(eq(file_chunks.file_id, fileId)),
+    ]);
+    server.log.info('completed propagation and deleting file chunks');
   } catch (error) {
     server.log.error(error);
+    await db.update(files).set({ state: 'error' });
   }
 };
 

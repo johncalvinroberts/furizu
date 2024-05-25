@@ -52,6 +52,11 @@ export const useUser = () => {
 
   const createProvisionalUser = useCallback(
     async (id: string) => {
+      const previousUser = await db.users.findFirst({ where: { id } });
+      if (previousUser) {
+        console.log('user already exists');
+        return;
+      }
       await db.users.create({
         data: {
           id,

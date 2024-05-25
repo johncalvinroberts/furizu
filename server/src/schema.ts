@@ -10,15 +10,14 @@ import {
   customType,
   integer,
 } from 'drizzle-orm/pg-core';
+import { JobCommands, FileStates } from '@shared/types';
+import { boolean } from 'drizzle-orm/mysql-core';
 
 const bytea = customType<{ data: Buffer; notNull: false; default: false }>({
   dataType() {
     return 'bytea';
   },
 });
-
-export const JobCommands = ['provisional_user_created', 'signup', 'file_created'] as const;
-export const FileStates = ['created', 'chunking', 'propagating', 'done'] as const;
 
 export const users = pgTable('users', {
   id: uuid('id').primaryKey(),
@@ -50,13 +49,12 @@ export const files = pgTable('files', {
     .references(() => folders.id, { onDelete: 'cascade' }),
   name: varchar('name').notNull(),
   type: varchar('type').notNull(),
-  origin_storage_key: varchar('origin_storage_key'),
-  origin_storage_provider: varchar('origin_storage_provider'),
   size: bigint('size', { mode: 'bigint' }).notNull(),
   created_at: timestamp('created_at').notNull(),
   updated_at: timestamp('updated_at').notNull(),
   electric_user_id: uuid('electric_user_id').notNull(),
   state: varchar('state', { enum: FileStates }),
+  locations: jsonb('locations'),
 });
 
 export const jobs = pgTable('jobs', {

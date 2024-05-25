@@ -1,10 +1,8 @@
 {
-  "id": "86d1eabe-7c0f-4123-94be-a56e61a255dd",
-  "prevId": "b544c9d3-cddb-433c-98ef-9caad522f458",
-  "version": "5",
-  "dialect": "pg",
+  "version": "6",
+  "dialect": "postgresql",
   "tables": {
-    "files": {
+    "public.files": {
       "name": "files",
       "schema": "",
       "columns": {
@@ -56,21 +54,21 @@
         "files_folder_id_folders_id_fk": {
           "name": "files_folder_id_folders_id_fk",
           "tableFrom": "files",
-          "tableTo": "folders",
           "columnsFrom": [
             "folder_id"
           ],
+          "tableTo": "folders",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "folders": {
+    "public.folders": {
       "name": "folders",
       "schema": "",
       "columns": {
@@ -116,21 +114,21 @@
         "folders_parent_id_folders_id_fk": {
           "name": "folders_parent_id_folders_id_fk",
           "tableFrom": "folders",
-          "tableTo": "folders",
           "columnsFrom": [
             "parent_id"
           ],
+          "tableTo": "folders",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "jobs": {
+    "public.jobs": {
       "name": "jobs",
       "schema": "",
       "columns": {
@@ -206,7 +204,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "users": {
+    "public.users": {
       "name": "users",
       "schema": "",
       "columns": {
@@ -268,8 +266,10 @@
   "enums": {},
   "schemas": {},
   "_meta": {
-    "columns": {},
     "schemas": {},
-    "tables": {}
-  }
+    "tables": {},
+    "columns": {}
+  },
+  "id": "86d1eabe-7c0f-4123-94be-a56e61a255dd",
+  "prevId": "b544c9d3-cddb-433c-98ef-9caad522f458"
 }

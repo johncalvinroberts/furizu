@@ -1,10 +1,8 @@
 {
-  "id": "d27c352e-db4d-4559-84cf-465b80b6c484",
-  "prevId": "c1b58849-53cc-472c-87dc-5eebec957597",
-  "version": "5",
-  "dialect": "pg",
+  "version": "6",
+  "dialect": "postgresql",
   "tables": {
-    "file_chunks": {
+    "public.file_chunks": {
       "name": "file_chunks",
       "schema": "",
       "columns": {
@@ -62,21 +60,21 @@
         "file_chunks_file_id_files_id_fk": {
           "name": "file_chunks_file_id_files_id_fk",
           "tableFrom": "file_chunks",
-          "tableTo": "files",
           "columnsFrom": [
             "file_id"
           ],
+          "tableTo": "files",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "files": {
+    "public.files": {
       "name": "files",
       "schema": "",
       "columns": {
@@ -103,18 +101,6 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": true
-        },
-        "origin_storage_key": {
-          "name": "origin_storage_key",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "origin_storage_provider": {
-          "name": "origin_storage_provider",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
         },
         "size": {
           "name": "size",
@@ -146,21 +132,21 @@
         "files_folder_id_folders_id_fk": {
           "name": "files_folder_id_folders_id_fk",
           "tableFrom": "files",
-          "tableTo": "folders",
           "columnsFrom": [
             "folder_id"
           ],
+          "tableTo": "folders",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "folders": {
+    "public.folders": {
       "name": "folders",
       "schema": "",
       "columns": {
@@ -206,21 +192,21 @@
         "folders_parent_id_folders_id_fk": {
           "name": "folders_parent_id_folders_id_fk",
           "tableFrom": "folders",
-          "tableTo": "folders",
           "columnsFrom": [
             "parent_id"
           ],
+          "tableTo": "folders",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "jobs": {
+    "public.jobs": {
       "name": "jobs",
       "schema": "",
       "columns": {
@@ -302,7 +288,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "quotas": {
+    "public.quotas": {
       "name": "quotas",
       "schema": "",
       "columns": {
@@ -348,7 +334,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "users": {
+    "public.users": {
       "name": "users",
       "schema": "",
       "columns": {
@@ -410,8 +396,10 @@
   "enums": {},
   "schemas": {},
   "_meta": {
-    "columns": {},
     "schemas": {},
-    "tables": {}
-  }
+    "tables": {},
+    "columns": {}
+  },
+  "id": "d27c352e-db4d-4559-84cf-465b80b6c484",
+  "prevId": "c1b58849-53cc-472c-87dc-5eebec957597"
 }

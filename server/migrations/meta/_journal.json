@@ -50,6 +50,20 @@
       "when": 1714327706624,
       "tag": "0006_condemned_nico_minoru",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1716439141054,
+      "tag": "0007_busy_psynapse",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1716441401578,
+      "tag": "0008_omniscient_the_hand",
+      "breakpoints": true
     }
   ]
 }

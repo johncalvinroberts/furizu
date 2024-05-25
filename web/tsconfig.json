@@ -20,11 +20,14 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "baseUrl": ".",
+    "baseUrl": "../",
     "paths": {
       "@/*": [
-        "./src/*"
+        "./web/src/*"
       ],
+      "@shared/*": [
+        "./shared/*"
+      ]
     },
   },
   "include": ["src"],

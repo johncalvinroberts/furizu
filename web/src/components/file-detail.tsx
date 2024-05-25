@@ -7,6 +7,7 @@ import { useToggle } from '@/hooks/useToggle';
 import { formatFileSize, getErrorMessageString } from '@/lib/utils';
 
 import { Empty } from './empty-tip';
+import { InlineFileForm } from './forms/inline-file-form';
 import TimeDisplay from './time-display';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogFooter } from './ui/dialog';
@@ -19,6 +20,7 @@ const FileDetail = ({ id }: Props) => {
   const { isOpen: isDeleteOpen, toggle: toggleDelete } = useToggle(false);
   const { deleteFile } = useFiles();
   const { setAbsoluteLocation } = useLocation();
+  const { toggle: toggleInlineForm, isOpen: isInlineFormOpen } = useToggle();
 
   const { file } = useFileById(id);
 
@@ -64,19 +66,26 @@ const FileDetail = ({ id }: Props) => {
           </div>
         </div>
       </div>
-      <div className="flex w-full space-between gap-1">
-        <div className="text-primary text-xs pt-1 w-[100px] border-border border-r">Name:</div>
-        <h3 className="font-bold flex-1">{file?.name}</h3>
-        <div>
-          <Button size="icon" variant="ghost" tooltip="Edit this file">
-            <Edit size={12} />
-          </Button>
-          <Button size="icon" variant="ghost" tooltip="Delete this file" onClick={toggleDelete}>
-            <Trash size={12} />
-          </Button>
+      {!isInlineFormOpen && (
+        <div className="flex w-full space-between gap-1">
+          <div className="text-primary text-xs pt-1 w-[100px] border-border border-r">Name:</div>
+          <h3 className="font-bold flex-1">{file?.name}</h3>
+          <div>
+            <Button size="icon" variant="ghost" tooltip="Edit this file" onClick={toggleInlineForm}>
+              <Edit size={12} />
+            </Button>
+            <Button size="icon" variant="ghost" tooltip="Delete this file" onClick={toggleDelete}>
+              <Trash size={12} />
+            </Button>
+          </div>
         </div>
-      </div>
-      <div></div>
+      )}
+      {isInlineFormOpen && (
+        <div className="flex w-full space-between gap-1">
+          <div className="text-primary text-xs pt-1 w-[100px] border-border border-r">Name:</div>
+          <InlineFileForm onSuccess={toggleInlineForm} file={file} />
+        </div>
+      )}
       <Dialog open={isDeleteOpen} onOpenChange={toggleDelete}>
         <DialogContent className="sm:max-w-[425px] pt-10">
           Are you sure you want to delete {file?.name}?
