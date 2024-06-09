@@ -22,10 +22,13 @@ build-fe: ## run frontend dev vite server with hot reload
 build-be: ## run frontend dev vite server with hot reload
 	cd $(BE_DIR); npm run build;
 
-up:
+up: ## Start docker backing services for local dev
 	docker compose up -d
 down: 
 	docker compose down && docker volume rm furizu_postgres_data
+
+yolo: 
+	cd $(FE_DIR); npm run yolo; cd $(BE_DIR); npm run yolo;
 
 generate-migration:
 	cd $(BE_DIR); npm run generate-migration;
