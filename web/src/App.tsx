@@ -41,8 +41,8 @@ function App() {
           }),
           client.db.users.sync(),
           client.db.quotas.sync(),
+          client.db.public_keys.sync(),
         ]);
-
         const synceds = works.map((item) => item.synced);
         await Promise.all(synceds);
         setInitialized(true);

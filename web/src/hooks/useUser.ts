@@ -4,9 +4,15 @@ import { genUUID } from 'electric-sql/util';
 import { useCallback } from 'react';
 import { create } from 'zustand';
 
-import { USER_ID_LOCALSTORAGE_KEY, WELCOME_FILE, WELCOME_FOLDER } from '@/config';
+import {
+  ASYMMETRIC_KEYPAIR_LOCALSTORAGE_KEY,
+  USER_ID_LOCALSTORAGE_KEY,
+  WELCOME_FILE,
+  WELCOME_FOLDER,
+} from '@/config';
 import { useElectric } from '@/lib/electric';
 
+import { useAsymmetricCryptoKeys } from './useCryptoKeys';
 import { useFiles } from './useFiles';
 import { useFolders } from './useFolders';
 import { useJobs } from './useJobs';
@@ -37,6 +43,7 @@ export const useUserId = create<UserIdState>((set) => ({
 export const useUser = () => {
   const { id, setId } = useUserId();
   const electric = useElectric()!;
+  const { createAsymmetricKeypair } = useAsymmetricCryptoKeys();
   const { db } = electric;
   const { createJob } = useJobs();
   const { createFolder } = useFolders();
@@ -50,33 +57,37 @@ export const useUser = () => {
 
   const isUnprovisional = Boolean(user?.unprovisional_at);
 
-  const createProvisionalUser = useCallback(
-    async (id: string) => {
-      const previousUser = await db.users.findFirst({ where: { id } });
-      if (previousUser) {
-        console.log('user already exists');
-        return;
-      }
-      await db.users.create({
-        data: {
-          id,
-          created_at: new Date(),
-          updated_at: new Date(),
-        },
-      });
-      setId(id);
-      await createJob({ userId: id, command: 'provisional_user_created', payload: {} });
-      const folderId = await createFolder(WELCOME_FOLDER, id, null);
-      await createFile(WELCOME_FILE, folderId);
-      await db.users.update({
-        where: { id },
-        data: {
-          default_folder_id: folderId,
-        },
-      });
-    },
-    [db, setId, createJob, createFolder, createFile],
-  );
+  const createProvisionalUser = async (id: string) => {
+    const previousUser = await db.users.findFirst({ where: { id } });
+    if (previousUser) {
+      console.warn('user already exists, exiting init user createProvisionalUser');
+      return;
+    }
+    await db.users.create({
+      data: {
+        id,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+    });
+    console.log('created provisional user');
+    setId(id);
+    await createJob({ userId: id, command: 'provisional_user_created', payload: {} });
+    console.log('created job provisional_user_created');
+    await createAsymmetricKeypair(id);
+    console.log('created public key');
+    const folderId = await createFolder(WELCOME_FOLDER, id, null);
+    console.log('created folder', folderId);
+    await createFile(WELCOME_FILE, folderId);
+    console.log('created welcome file');
+    await db.users.update({
+      where: { id },
+      data: {
+        default_folder_id: folderId,
+      },
+    });
+    console.log('updated default_folder_id');
+  };
 
   const signup = useCallback(
     async (email: string, password: string) => {
@@ -100,6 +111,8 @@ export const useUser = () => {
     const nextId = setId(null);
     electric.disconnect();
     const token = insecureAuthToken({ sub: nextId });
+    localStorage.removeItem(USER_ID_LOCALSTORAGE_KEY);
+    localStorage.removeItem(ASYMMETRIC_KEYPAIR_LOCALSTORAGE_KEY);
     electric.connect(token);
   }, [setId, electric]);
 

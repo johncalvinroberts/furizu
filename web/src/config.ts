@@ -2,6 +2,7 @@ export const DEFAULT_LAYOUT = [25, 65, 655];
 export const API_URL = import.meta.env.VITE_API_URL;
 export const TOKEN_LOCALSTORAGE_KEY = 'furizu_token';
 export const USER_ID_LOCALSTORAGE_KEY = 'furizu_user_id';
+export const ASYMMETRIC_KEYPAIR_LOCALSTORAGE_KEY = 'furizu_keypair';
 
 export const DEV_MODE = import.meta.env.DEV;
 export const ELECTRIC_URL = import.meta.env.VITE_ELECTRIC_URL || 'ws://localhost:5133';

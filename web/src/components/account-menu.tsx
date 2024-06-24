@@ -8,6 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useAsymmetricCryptoKeys } from '@/hooks/useCryptoKeys';
 import { useUser } from '@/hooks/useUser';
 
 import { Link } from './link';
@@ -21,16 +22,26 @@ type Props = {
 
 export const AccountMenu = ({ size = 'tiny', variant = 'outline', className }: Props) => {
   const { id, user, updatedAt, isUnprovisional, createProvisionalUser, logout } = useUser();
+  const { initializePersistedKeypair } = useAsymmetricCryptoKeys();
   const handleLogOut = () => {
     logout();
     toast.success('Logged out');
   };
 
   useEffect(() => {
+    // this should ONLY happen if the user is visiting for the first time
     if (!user && updatedAt != null && id) {
       createProvisionalUser(id);
     }
-  }, [user, updatedAt, id, createProvisionalUser]);
+    // this should happen when the user has been defined,
+    // for both new users (AFTER createProvisionalUser)
+    // and for returning users
+    if (id && user) {
+      initializePersistedKeypair(id);
+    }
+
+    // eslint-disable-next-line
+  }, [user, updatedAt, id]);
 
   return (
     <DropdownMenu>

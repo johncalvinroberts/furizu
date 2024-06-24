@@ -7,7 +7,6 @@ export const JobCommands = [
 export const FileStates = [
   "created",
   "encrypting",
-  "chunking",
   "propagating",
   "done",
   "error",

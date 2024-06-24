@@ -88,3 +88,16 @@ export const formatFileSize = (
 export const sleep = async (ms: number) => {
   return new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
 };
+
+export const arrayBufferToBase64String = (buffer: ArrayBuffer): string => {
+  return btoa(String.fromCharCode(...new Uint8Array(buffer)));
+};
+
+export const base64StringToArrayBuffer = (base64String: string): ArrayBuffer => {
+  const binaryString = atob(base64String);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes.buffer;
+};

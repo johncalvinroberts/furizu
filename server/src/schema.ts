@@ -11,7 +11,6 @@ import {
   integer,
 } from 'drizzle-orm/pg-core';
 import { JobCommands, FileStates } from '@shared/types';
-import { boolean } from 'drizzle-orm/mysql-core';
 
 const bytea = customType<{ data: Buffer; notNull: false; default: false }>({
   dataType() {
@@ -55,6 +54,32 @@ export const files = pgTable('files', {
   electric_user_id: uuid('electric_user_id').notNull(),
   state: varchar('state', { enum: FileStates }),
   locations: jsonb('locations'),
+  iv: varchar('iv').notNull(),
+});
+
+export const file_keys = pgTable('file_keys', {
+  id: uuid('id').primaryKey(),
+  file_id: uuid('file_id')
+    .notNull()
+    .references(() => files.id, {
+      onDelete: 'cascade',
+    }),
+  electric_user_id: uuid('electric_user_id').notNull(),
+  encrypted_symmetric_key: varchar('encrypted_symmetric_key'),
+  iv: varchar('iv').notNull(),
+  public_key_id: uuid('public_key_id')
+    .notNull()
+    .references(() => public_keys.id, {
+      onDelete: 'cascade',
+    }),
+});
+
+export const public_keys = pgTable('public_keys', {
+  id: uuid('id').primaryKey(),
+  electric_user_id: uuid('electric_user_id').notNull(),
+  value: varchar('value').notNull(),
+  created_at: timestamp('created_at').notNull(),
+  updated_at: timestamp('updated_at').notNull(),
 });
 
 export const jobs = pgTable('jobs', {

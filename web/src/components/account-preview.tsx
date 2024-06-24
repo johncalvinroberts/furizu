@@ -27,7 +27,9 @@ export const AccountPreview = ({ variant = 'full' }: Props) => {
               <>
                 {formatFileSize(bytes_remaining, 'none')} /{' '}
                 {formatFileSize(quota?.bytes_total || 0, 'short')}
-                <span className="text-xxs text-border ml-2">({percentageRemaining}%)</span>
+                <span className="text-xxs text-muted-foreground ml-2">
+                  ({percentageRemaining}%)
+                </span>
               </>
             )}
           </div>

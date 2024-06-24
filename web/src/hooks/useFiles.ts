@@ -5,8 +5,17 @@ import pMap from 'p-map';
 import { useCallback } from 'react';
 
 import { Files } from '@/generated/client';
+import {
+  encryptAsymmetricallyWithPublicKey,
+  encryptSymmetrically,
+  exportSymmetricKey,
+  generateSymmetricKey,
+  getRandomBytes,
+} from '@/lib/crypto';
 import { useElectric } from '@/lib/electric';
+import { arrayBufferToBase64String } from '@/lib/utils';
 
+import { useAsymmetricCryptoKeysState } from './useCryptoKeys';
 import { useJobs } from './useJobs';
 import { useUserId } from './useUser';
 
@@ -15,15 +24,6 @@ const timer = new TimerFactory('useFiles');
 
 const CHUNK_SIZE = 250 * 1024 * 1024;
 
-export const FileStates = [
-  'created',
-  'encrypting',
-  'chunking',
-  'propagating',
-  'done',
-  'error',
-] as const;
-
 export const useFiles = () => {
   const { createJob } = useJobs();
   const { id: userId } = useUserId();
@@ -31,12 +31,25 @@ export const useFiles = () => {
 
   const createFile = useCallback(
     async (rawFile: File, folderId: string, fileId?: string) => {
+      const { keypair, id: public_key_id } = useAsymmetricCryptoKeysState.getState();
+      console.log({ keypair, public_key_id });
       timer.start();
       if (!fileId) {
         fileId = genUUID();
       }
+
       try {
+        if (!keypair) {
+          throw new Error(`expected public keypair to be initialized, got: ${keypair}`);
+        }
+        if (!userId) {
+          throw new Error(`expected userId to be defined, got: ${userId}`);
+        }
+        if (!public_key_id) {
+          throw new Error(`expected publicKeyId to be defined, got: ${public_key_id}`);
+        }
         logger.log(['starting to create file', { fileId, folderId }]);
+        const fileIv = getRandomBytes();
         const fileInstance = await db.files.create({
           data: {
             id: fileId,
@@ -46,12 +59,31 @@ export const useFiles = () => {
             type: rawFile.type,
             created_at: new Date(),
             updated_at: new Date(),
-            electric_user_id: userId as string,
+            electric_user_id: userId,
             state: 'created',
             locations: [],
+            iv: fileIv.toString(),
           },
         });
         logger.log(['created file in files table', fileId]);
+        const symmetricKey = await generateSymmetricKey();
+        const exportedSymmetricKey = await exportSymmetricKey(symmetricKey);
+        const keyIv = getRandomBytes();
+        const encryptedSymmetricKey = await encryptAsymmetricallyWithPublicKey(
+          exportedSymmetricKey,
+          keypair.publicKey,
+          keyIv,
+        );
+        await db.file_keys.create({
+          data: {
+            id: genUUID(),
+            file_id: fileId,
+            encrypted_symmetric_key: arrayBufferToBase64String(encryptedSymmetricKey),
+            electric_user_id: userId,
+            iv: keyIv.toString(),
+            public_key_id,
+          },
+        });
         // works is an array of awaitable functions
         const works: (() => Promise<void>)[] = [];
         // "start" at 0, "start" here is where the current chunk starts in the file
@@ -61,14 +93,19 @@ export const useFiles = () => {
         // index = which chunk index we're at
         let index = 0;
         // loop through the file by chunk size
-        await db.files.update({ data: { state: 'chunking' }, where: { id: fileId } });
+        await db.files.update({ data: { state: 'encrypting' }, where: { id: fileId } });
         while (start < rawFile.size) {
           const chunk = rawFile.slice(start, end);
           start = end + 1;
           end = Math.min(start + CHUNK_SIZE - 1, rawFile.size - 1);
           const work = async () => {
             const chunkId = genUUID();
-            const buffer = new Uint8Array(await chunk.arrayBuffer());
+            const encryptedData = await encryptSymmetrically(
+              await chunk.arrayBuffer(),
+              symmetricKey,
+              fileIv,
+            );
+            const data = new Uint8Array(encryptedData);
             const id = await db.file_chunks.create({
               data: {
                 id: chunkId,
@@ -76,7 +113,7 @@ export const useFiles = () => {
                 electric_user_id: userId as string,
                 created_at: new Date(),
                 updated_at: new Date(),
-                data: buffer,
+                data: data,
                 chunk_index: index,
                 size: chunk.size,
               },
@@ -87,7 +124,7 @@ export const useFiles = () => {
           works.push(work);
         }
 
-        await pMap(works, (work) => work(), { concurrency: 10 });
+        await pMap(works, (work) => work(), { concurrency: 100 });
         // break file into chunks + save
         const time = timer.stop();
         logger.log(['Finished creating file + chunks', { time }]);
@@ -98,7 +135,7 @@ export const useFiles = () => {
         await db.files.update({ data: { state: 'error' }, where: { id: fileId } });
       }
     },
-    [userId, db.file_chunks, db.files, createJob],
+    [userId, db.file_chunks, db.files, db.file_keys, createJob],
   );
 
   const updateFile = useCallback(
