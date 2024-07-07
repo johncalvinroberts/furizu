@@ -51,8 +51,8 @@ export const PanelLayout = ({ children, initialized }: PropsWithChildren<Props>)
         <Panel
           defaultSize={DEFAULT_LAYOUT[0]}
           collapsedSize={4}
-          collapsible={true}
-          minSize={15}
+          // collapsible={true}
+          minSize={22}
           maxSize={30}
           onCollapse={toggleCollapsed}
           classNames={{

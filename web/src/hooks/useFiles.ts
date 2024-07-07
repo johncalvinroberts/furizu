@@ -3,6 +3,7 @@ import { genUUID } from 'electric-sql/util';
 import { Logger, TimerFactory } from 'guu';
 import pMap from 'p-map';
 import { useCallback } from 'react';
+import { toast } from 'sonner';
 
 import { Files } from '@/generated/client';
 import {
@@ -22,7 +23,7 @@ import { useUserId } from './useUser';
 const logger = new Logger('useFiles', 'teal');
 const timer = new TimerFactory('useFiles');
 
-const CHUNK_SIZE = 250 * 1024 * 1024;
+const CHUNK_SIZE = 250 * 1024 * 1024; // 250mb chunk size
 
 export const useFiles = () => {
   const { createJob } = useJobs();
@@ -84,6 +85,7 @@ export const useFiles = () => {
             public_key_id,
           },
         });
+        toast.success(`Created file "${rawFile.name}"`);
         // works is an array of awaitable functions
         const works: (() => Promise<void>)[] = [];
         // "start" at 0, "start" here is where the current chunk starts in the file
@@ -123,7 +125,6 @@ export const useFiles = () => {
           };
           works.push(work);
         }
-
         await pMap(works, (work) => work(), { concurrency: 100 });
         // break file into chunks + save
         const time = timer.stop();
@@ -154,7 +155,22 @@ export const useFiles = () => {
     [db],
   );
 
-  return { createFile, updateFile, deleteFile };
+  const fetchDecryptDownloadFile = useCallback(
+    async (id: string) => {
+      /**
+       * TODO:
+       * - Create presigned URL
+       * - Download from object storage
+       * - Break into chunks (based on ???)
+       * - Decrypt chunk by chunk
+       * - Stream decrypted chunk to caller
+       */
+      console.log({ id });
+    },
+    [db],
+  );
+
+  return { createFile, fetchDecryptDownloadFile, updateFile, deleteFile };
 };
 
 export const useFileById = (id: string) => {

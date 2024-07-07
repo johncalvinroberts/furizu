@@ -1,6 +1,5 @@
 import { Plus } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
-import { toast } from 'sonner';
 
 import { Panel } from '@/components/panel-layout';
 import { DEFAULT_LAYOUT } from '@/config';
@@ -72,10 +71,9 @@ export const FolderFileList = ({ folder_id }: Props) => {
   const { files } = useFilesByFolderId(folder_id);
 
   const handleDrop = async (files: File[]) => {
-    for (const file of files) {
-      await createFile(file, folder_id);
-      toast.success(`Created file "${file.name}"`);
-    }
+    files.forEach((file) => {
+      createFile(file, folder_id);
+    });
   };
 
   const isEmpty = files.results && files.results.length < 1;

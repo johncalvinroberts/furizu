@@ -64,8 +64,8 @@ const handleProvisionalUserCreated = async (job: Job) => {
 };
 
 const handleFileCreated = async (job: FileCreatedJob) => {
+  const fileId = job.payload.id;
   try {
-    const fileId = job.payload.id;
     const [quota] = await db
       .select()
       .from(quotas)
@@ -74,10 +74,10 @@ const handleFileCreated = async (job: FileCreatedJob) => {
     const bytes_remaining = quota.bytes_total - quota.bytes_used;
     if (file.size > bytes_remaining) {
       server.log.error('cannot propagate file, user quota no space left');
-      db.update(files).set({ state: 'propagation_backlogged' });
+      db.update(files).set({ state: 'propagation_backlogged' }).where(eq(files.id, fileId));
       return;
     }
-    await db.update(files).set({ state: 'propagating' });
+    await db.update(files).set({ state: 'propagating' }).where(eq(files.id, fileId));
     server.log.info('fetched file from db', file);
     const [{ count: chunkCount }] = await db
       .select({ count: count() })
@@ -92,13 +92,13 @@ const handleFileCreated = async (job: FileCreatedJob) => {
     });
     await Promise.all([
       db.update(quotas).set({ bytes_used: sql`${quotas.bytes_used} + ${file.size}` }),
-      db.update(files).set({ state: 'done' }),
+      db.update(files).set({ state: 'done' }).where(eq(files.id, fileId)),
       db.delete(file_chunks).where(eq(file_chunks.file_id, fileId)),
     ]);
     server.log.info('completed propagation and deleting file chunks');
   } catch (error) {
     server.log.error(error);
-    await db.update(files).set({ state: 'error' });
+    await db.update(files).set({ state: 'error' }).where(eq(files.id, fileId));
   }
 };
 
