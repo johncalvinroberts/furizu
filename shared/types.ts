@@ -13,9 +13,6 @@ export const FileStates = [
   "propagation_backlogged",
 ] as const;
 
-export type LocationPointer = {
-  providerName: string;
-  providerType: "s3like_object_storage" | "opfs";
-  key: string;
-  bucketName: string;
-};
+export type FileState = (typeof FileStates)[number];
+
+export const ProviderTypes = ["s3like_object_storage", "opfs"] as const;

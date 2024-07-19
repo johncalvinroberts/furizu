@@ -71,6 +71,13 @@
       "when": 1718944077043,
       "tag": "0009_ancient_metal_master",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1720966611118,
+      "tag": "0010_deep_psylocke",
+      "breakpoints": true
     }
   ]
 }

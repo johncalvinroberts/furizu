@@ -10,7 +10,7 @@ import {
   customType,
   integer,
 } from 'drizzle-orm/pg-core';
-import { JobCommands, FileStates } from '@shared/types';
+import { JobCommands, FileStates, ProviderTypes } from '@shared/types';
 
 const bytea = customType<{ data: Buffer; notNull: false; default: false }>({
   dataType() {
@@ -53,7 +53,6 @@ export const files = pgTable('files', {
   updated_at: timestamp('updated_at').notNull(),
   electric_user_id: uuid('electric_user_id').notNull(),
   state: varchar('state', { enum: FileStates }),
-  locations: jsonb('locations'),
   iv: varchar('iv').notNull(),
 });
 
@@ -72,6 +71,37 @@ export const file_keys = pgTable('file_keys', {
     .references(() => public_keys.id, {
       onDelete: 'cascade',
     }),
+});
+
+export const file_locations = pgTable('file_locations', {
+  id: uuid('id').primaryKey(),
+  file_id: uuid('file_id')
+    .notNull()
+    .references(() => files.id, {
+      onDelete: 'cascade',
+    }),
+  electric_user_id: uuid('electric_user_id').notNull(),
+  provider_name: varchar('provider_name').notNull(),
+  provider_type: varchar('provider_type', { enum: ProviderTypes }),
+  key: varchar('key').notNull(),
+  bucket_name: varchar('bucket_name'),
+  size: bigint('size', { mode: 'bigint' }).notNull(),
+  chunk_sizes: jsonb('chunk_sizes'),
+});
+
+export const file_chunks = pgTable('file_chunks', {
+  id: uuid('id').primaryKey(),
+  file_id: uuid('file_id')
+    .notNull()
+    .references(() => files.id, {
+      onDelete: 'cascade',
+    }),
+  electric_user_id: uuid('electric_user_id').notNull(),
+  size: bigint('size', { mode: 'bigint' }).notNull(),
+  data: bytea('data').notNull(),
+  created_at: timestamp('created_at').notNull(),
+  updated_at: timestamp('updated_at').notNull(),
+  chunk_index: integer('chunk_index').notNull(),
 });
 
 export const public_keys = pgTable('public_keys', {
@@ -104,19 +134,4 @@ export const quotas = pgTable('quotas', {
   electric_user_id: uuid('electric_user_id').notNull(),
   created_at: timestamp('created_at').notNull(),
   updated_at: timestamp('updated_at').notNull(),
-});
-
-export const file_chunks = pgTable('file_chunks', {
-  id: uuid('id').primaryKey(),
-  file_id: uuid('file_id')
-    .notNull()
-    .references(() => files.id, {
-      onDelete: 'cascade',
-    }),
-  electric_user_id: uuid('electric_user_id').notNull(),
-  size: bigint('size', { mode: 'bigint' }).notNull(),
-  data: bytea('data').notNull(),
-  created_at: timestamp('created_at').notNull(),
-  updated_at: timestamp('updated_at').notNull(),
-  chunk_index: integer('chunk_index').notNull(),
 });

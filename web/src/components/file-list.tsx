@@ -1,3 +1,4 @@
+import { FileState } from '@shared/types';
 import { Plus } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 
@@ -9,6 +10,7 @@ import { useLocation } from '@/hooks/useLocation';
 import { cn, formatFileSize } from '@/lib/utils';
 
 import { Dropzone } from './dropzone';
+import FileStatus from './file-status';
 import { FolderBreadCrumbs } from './folder-bread-crumbs';
 import { Link } from './link';
 import TimeDisplay from './time-display';
@@ -51,7 +53,7 @@ const FileListItem = ({ file, index }: { file: Files; index: number }) => {
           {formatFileSize(file.size, 'short')}
         </span>
         <span className="flex-none w-[100px] text-xs text-nowrap flex items-center">
-          {file.state}
+          <FileStatus state={file.state as FileState} />
         </span>
         <span className="flex-none w-[180px] text-xs flex items-center">
           <TimeDisplay date={file.created_at} />

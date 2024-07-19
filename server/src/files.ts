@@ -2,18 +2,19 @@ import { S3LikeClient } from './s3';
 import { server } from './server';
 import { eq, and, sql } from 'drizzle-orm';
 import { db } from './db';
-import { file_chunks } from './schema';
-import { LocationPointer } from '@shared/types';
+import { file_chunks, file_locations } from './schema';
+import { genUUID } from 'electric-sql/util';
 
 type PropagateParams = {
   fileId: string;
   chunkCount: number;
   client: S3LikeClient;
   bucketName: string;
+  userId: string;
 };
 
 export const propagateToS3likeObjectStore = async (params: PropagateParams) => {
-  const { fileId, chunkCount, client, bucketName } = params;
+  const { fileId, chunkCount, client, bucketName, userId } = params;
   server.log.info(
     `initializing iterative multipart chunk upload: ${JSON.stringify({
       file_id: fileId,
@@ -38,17 +39,27 @@ export const propagateToS3likeObjectStore = async (params: PropagateParams) => {
   });
   server.log.info(`finished uploading chunks: ${fileId}`);
   await client.completeMultipartUpload({ parts, uploadId, bucketName, key: fileId });
-  const location: LocationPointer = {
-    providerName: client.name,
-    providerType: 's3like_object_storage',
-    key: fileId,
-    bucketName,
-  };
-  // let db concat the array of locations, for better concurrency safety of propagations
-  const statement = sql`UPDATE files
-                        SET locations = COALESCE(locations, '[]'::jsonb) || ${JSON.stringify([location])}::jsonb
-                        WHERE id = ${fileId}; `;
+  const { total_size, chunk_sizes } = parts.reduce(
+    (memo, current) => {
+      const guy = {
+        total_size: memo.total_size + (current.Size || 0),
+        chunk_sizes: [...memo.chunk_sizes, current.Size || 0],
+      };
+      return guy;
+    },
+    { total_size: 0, chunk_sizes: [] } as { total_size: number; chunk_sizes: number[] },
+  );
 
-  await db.execute(statement);
+  await db.insert(file_locations).values({
+    provider_name: client.name,
+    provider_type: 's3like_object_storage',
+    key: fileId,
+    id: genUUID(),
+    bucket_name: bucketName,
+    electric_user_id: userId,
+    file_id: fileId,
+    chunk_sizes,
+    size: BigInt(total_size),
+  });
   server.log.info(`completed multipart upload: ${fileId}`);
 };

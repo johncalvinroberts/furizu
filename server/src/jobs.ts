@@ -89,6 +89,7 @@ const handleFileCreated = async (job: FileCreatedJob) => {
       bucketName: env.TIGRIS.BUCKET_NAME,
       fileId,
       chunkCount,
+      userId: file.electric_user_id,
     });
     await Promise.all([
       db.update(quotas).set({ bytes_used: sql`${quotas.bytes_used} + ${file.size}` }),

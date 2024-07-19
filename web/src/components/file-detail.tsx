@@ -1,3 +1,4 @@
+import { FileState } from '@shared/types';
 import { Edit, Trash } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -8,6 +9,7 @@ import { formatFileSize, getErrorMessageString } from '@/lib/utils';
 
 import { DownloadComboButton } from './DownloadComboButton';
 import { Empty } from './empty-tip';
+import FileStatus from './file-status';
 import { InlineFileForm } from './forms/inline-file-form';
 import TimeDisplay from './time-display';
 import { Button } from './ui/button';
@@ -51,6 +53,9 @@ const FileDetail = ({ id }: Props) => {
         {!isInlineFormOpen && (
           <div className="flex w-full space-between gap-1">
             <h3 className="font-bold flex-1 mb-2">{file?.name}</h3>
+            <div className="pt-[5px]">
+              <FileStatus state={file.state as FileState} className="h-[20px]" />
+            </div>
             <div className="">
               <Button
                 size="icon"
@@ -90,7 +95,7 @@ const FileDetail = ({ id }: Props) => {
           </div>
         </div>
       </div>
-      <DownloadComboButton file={file} className="mb-2" />
+      <DownloadComboButton fileId={id} className="mb-2" />
       <Dialog open={isDeleteOpen} onOpenChange={toggleDelete}>
         <DialogContent className="sm:max-w-[425px] pt-10">
           Are you sure you want to delete {file?.name}?

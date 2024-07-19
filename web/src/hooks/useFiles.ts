@@ -5,7 +5,7 @@ import pMap from 'p-map';
 import { useCallback } from 'react';
 import { toast } from 'sonner';
 
-import { Files } from '@/generated/client';
+import { File_locations, Files } from '@/generated/client';
 import {
   encryptAsymmetricallyWithPublicKey,
   encryptSymmetrically,
@@ -173,9 +173,13 @@ export const useFiles = () => {
   return { createFile, fetchDecryptDownloadFile, updateFile, deleteFile };
 };
 
-export const useFileById = (id: string) => {
+export const useFileById = (
+  id: string,
+): { file: (Files & { file_locations?: File_locations[] }) | null | undefined } => {
   const { db } = useElectric()!;
-  const results = useLiveQuery(db.files.liveFirst({ where: { id } }));
+  const results = useLiveQuery(
+    db.files.liveFirst({ where: { id }, include: { file_locations: true } }),
+  );
   return { file: results.results };
 };
 
@@ -183,7 +187,11 @@ export const useFilesByFolderId = (folder_id: string) => {
   const { db } = useElectric()!;
 
   const results = useLiveQuery(
-    db.files.liveMany({ where: { folder_id }, orderBy: { updated_at: 'desc' } }),
+    db.files.liveMany({
+      where: { folder_id },
+      orderBy: { updated_at: 'desc' },
+    }),
   );
+
   return { files: results };
 };
