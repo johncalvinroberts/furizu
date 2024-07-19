@@ -1,5 +1,5 @@
 {
-  "id": "5c2a97dd-889f-4b93-8492-aef5b6020b0d",
+  "id": "04cc4a87-f49c-462f-b90d-41021ba517a5",
   "prevId": "10af7136-27bf-4e35-b609-ff5da2c45c70",
   "version": "6",
   "dialect": "postgresql",
@@ -192,6 +192,18 @@
         "bucket_name": {
           "name": "bucket_name",
           "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "size": {
+          "name": "size",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "chunk_sizes": {
+          "name": "chunk_sizes",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         }

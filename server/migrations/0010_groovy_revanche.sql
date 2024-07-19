@@ -5,7 +5,9 @@ CREATE TABLE IF NOT EXISTS "file_locations" (
 	"provider_name" varchar NOT NULL,
 	"provider_type" varchar,
 	"key" varchar NOT NULL,
-	"bucket_name" varchar
+	"bucket_name" varchar,
+	"size" bigint NOT NULL,
+	"chunk_sizes" jsonb
 );
 
 ALTER TABLE "file_locations" ADD CONSTRAINT "file_locations_file_id_files_id_fk" FOREIGN KEY ("file_id") REFERENCES "public"."files"("id") ON DELETE cascade ON UPDATE no action;
