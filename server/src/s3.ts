@@ -95,11 +95,11 @@ export const initS3LikeClient = (params: InitS3LikeClientParams): S3LikeClient =
     return response;
   }
 
-  async function uploadChunks(params: UploadChunksParams) {
+  async function uploadChunks(params: UploadChunksParams): Promise<Part[]> {
     const { bucketName, key, uploadId, totalChunks, getChunkData } = params;
-    const parts: Part[] = [];
     try {
-      for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+      const chunkIndexArray = Array.from({ length: totalChunks }, (_, i) => i);
+      const works = chunkIndexArray.map(async (chunkIndex) => {
         const chunk = await getChunkData(chunkIndex);
         server.log.info(`got chunk data: ${uploadId}, index: ${chunkIndex}`);
         const command = new UploadPartCommand({
@@ -111,11 +111,13 @@ export const initS3LikeClient = (params: InitS3LikeClientParams): S3LikeClient =
         });
         const output = await client.send(command);
         server.log.info(`successfully uploaded part: ${chunkIndex}, ${key}`);
-        parts.push({
+        return {
           PartNumber: chunkIndex + 1,
           ETag: output.ETag!,
-        });
-      }
+          Size: chunk.data.byteLength,
+        };
+      });
+      return Promise.all(works);
     } catch (error) {
       console.error(error);
       const abortCommand = new AbortMultipartUploadCommand({
@@ -126,7 +128,6 @@ export const initS3LikeClient = (params: InitS3LikeClientParams): S3LikeClient =
       await client.send(abortCommand);
       throw error;
     }
-    return parts;
   }
 
   return { client, putFile, initiateMultipartUpload, completeMultipartUpload, uploadChunks, name };

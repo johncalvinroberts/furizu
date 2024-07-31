@@ -41,11 +41,10 @@ export const propagateToS3likeObjectStore = async (params: PropagateParams) => {
   await client.completeMultipartUpload({ parts, uploadId, bucketName, key: fileId });
   const { total_size, chunk_sizes } = parts.reduce(
     (memo, current) => {
-      const guy = {
+      return {
         total_size: memo.total_size + (current.Size || 0),
         chunk_sizes: [...memo.chunk_sizes, current.Size || 0],
       };
-      return guy;
     },
     { total_size: 0, chunk_sizes: [] } as { total_size: number; chunk_sizes: number[] },
   );
