@@ -1,26 +1,46 @@
+import { genUUID } from 'electric-sql/util';
 import { S3LikeClient } from './s3';
 import { server } from './server';
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { db } from './db';
 import { file_chunks, file_locations } from './schema';
-import { genUUID } from 'electric-sql/util';
+import { initS3LikeClient } from './s3';
+import { env } from './env';
+
+const tigrisClient = initS3LikeClient({
+  region: env.TIGRIS.REGION,
+  accessKeyId: env.TIGRIS.ACCESS_KEY_ID,
+  secretAccessKey: env.TIGRIS.SECRET_ACCESS_KEY,
+  endpoint: env.TIGRIS.ENDPOINT_URL_S3,
+  name: 'tigris',
+});
 
 type PropagateParams = {
   fileId: string;
   chunkCount: number;
-  client: S3LikeClient;
   bucketName: string;
+  providerName: string;
   userId: string;
 };
 
+const getS3LikeClient = (providerName: string) => {
+  switch (providerName) {
+    case 'tigris':
+      return tigrisClient;
+    default:
+      throw new Error('unknown s3like storage provider');
+  }
+};
+
 export const propagateToS3likeObjectStore = async (params: PropagateParams) => {
-  const { fileId, chunkCount, client, bucketName, userId } = params;
+  const { fileId, chunkCount, bucketName, userId, providerName } = params;
   server.log.info(
     `initializing iterative multipart chunk upload: ${JSON.stringify({
       file_id: fileId,
       chunkCount,
     })}`,
   );
+  const client = getS3LikeClient(providerName);
   const uploadId = await client.initiateMultipartUpload(bucketName, fileId);
   server.log.info(`created multipart upload: ${uploadId}`);
   const parts = await client.uploadChunks({
@@ -61,4 +81,26 @@ export const propagateToS3likeObjectStore = async (params: PropagateParams) => {
     size: BigInt(total_size),
   });
   server.log.info(`completed multipart upload: ${fileId}`);
+};
+
+export const createDownloadURL = async (fileId: string, locationId: string): Promise<string> => {
+  const [location] = await db
+    .select()
+    .from(file_locations)
+    .where(eq(file_locations.id, locationId));
+  if (!location) throw new Error('location not found');
+  switch (location.provider_name) {
+    case 'tigris':
+      if (!location.bucket_name) {
+        throw new Error('expected bucket name to be defined for tigris object');
+      }
+      const url = await tigrisClient.createPresignedURL({
+        key: location.key,
+        bucketName: location.bucket_name,
+      });
+      return url;
+
+    default:
+      throw new Error('unknown s3like storage provider');
+  }
 };

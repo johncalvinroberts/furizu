@@ -17,3 +17,8 @@ export type SignupJob = Job<
 >;
 
 export type FileCreatedJob = Job<'file_created', { id: string }>;
+export type CreateDownloadJob = Job<
+  'create_download',
+  { fileId: string; locationId: string },
+  { downloadURL?: string }
+>;

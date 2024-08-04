@@ -3,19 +3,11 @@ import { genUUID } from 'electric-sql/util';
 import bcrypt from 'bcrypt';
 import { db } from './db';
 import { file_chunks, jobs, files, quotas, users } from './schema';
-import { Job, SignupJob, FileCreatedJob } from './types';
+import { Job, SignupJob, FileCreatedJob, CreateDownloadJob } from './types';
 import { env } from './env';
-import { initS3LikeClient } from './s3';
-import { server } from './server';
-import { propagateToS3likeObjectStore } from './files';
 
-const tigrisClient = initS3LikeClient({
-  region: env.TIGRIS.REGION,
-  accessKeyId: env.TIGRIS.ACCESS_KEY_ID,
-  secretAccessKey: env.TIGRIS.SECRET_ACCESS_KEY,
-  endpoint: env.TIGRIS.ENDPOINT_URL_S3,
-  name: 'tigris',
-});
+import { server } from './server';
+import { createDownloadURL, propagateToS3likeObjectStore } from './files';
 
 const handleSignUp = async (job: SignupJob) => {
   const { password, email, id } = job.payload;
@@ -51,6 +43,7 @@ const handleSignUp = async (job: SignupJob) => {
 };
 
 const handleProvisionalUserCreated = async (job: Job) => {
+  server.log.info('handleProvisionalUserCreated: inserting user quoats');
   const userId = job.electric_user_id;
   const id = genUUID();
   await db.insert(quotas).values({
@@ -61,6 +54,7 @@ const handleProvisionalUserCreated = async (job: Job) => {
     created_at: new Date(),
     updated_at: new Date(),
   });
+  server.log.info('handleProvisionalUserCreated: inserted user quota');
 };
 
 const handleFileCreated = async (job: FileCreatedJob) => {
@@ -85,7 +79,7 @@ const handleFileCreated = async (job: FileCreatedJob) => {
       .where(eq(file_chunks.file_id, fileId));
     // start with tigris
     await propagateToS3likeObjectStore({
-      client: tigrisClient,
+      providerName: env.TIGRIS.PROVIDER_NAME,
       bucketName: env.TIGRIS.BUCKET_NAME,
       fileId,
       chunkCount,
@@ -100,7 +94,28 @@ const handleFileCreated = async (job: FileCreatedJob) => {
   } catch (error) {
     server.log.error(error);
     await db.update(files).set({ state: 'error' }).where(eq(files.id, fileId));
+    throw error;
   }
+};
+
+const handleCreateDownload = async (job: CreateDownloadJob) => {
+  const { fileId, locationId } = job.payload;
+  server.log.info('handleCreateDownload: creating a signed download URL', { fileId, locationId });
+  const downloadURL = await createDownloadURL(fileId, locationId);
+  await db
+    .update(jobs)
+    .set({
+      progress: 100,
+      completed_at: new Date(),
+      result: {
+        downloadURL,
+      },
+    })
+    .where(eq(jobs.id, job.id));
+  server.log.info(
+    'handleCreateDownload: finished creating a signed download URL and updated job in db',
+    { fileId, locationId },
+  );
 };
 
 export const processJob = async (rawJobString: string) => {
@@ -119,11 +134,14 @@ export const processJob = async (rawJobString: string) => {
       case 'file_created':
         await handleFileCreated(job as FileCreatedJob);
         break;
+      case 'create_download':
+        await handleCreateDownload(job as CreateDownloadJob);
+        break;
       default:
         throw new Error('unknown job type created');
     }
   } catch (error) {
-    console.error(error);
+    server.log.error('processJob: failed to process job', error);
     const message = error.message as string;
     await db
       .update(jobs)

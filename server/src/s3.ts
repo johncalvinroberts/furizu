@@ -7,7 +7,9 @@ import {
   Part,
   PutObjectCommand,
   CompleteMultipartUploadCommandOutput,
+  GetObjectCommand,
 } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { server } from './server';
 
 type PutObjectParams = {
@@ -43,6 +45,12 @@ type CompleteMultipartUploadParams = {
   parts: Part[];
 };
 
+type CreatePresignedDownloadURLParams = {
+  key: string;
+  bucketName: string;
+  expirationSeconds?: number;
+};
+
 export type S3LikeClient = {
   client: S3Client;
   putFile: (params: PutObjectParams) => Promise<void>;
@@ -52,6 +60,7 @@ export type S3LikeClient = {
   ) => Promise<CompleteMultipartUploadCommandOutput>;
   uploadChunks: (params: UploadChunksParams) => Promise<Part[]>;
   name: string;
+  createPresignedURL: (params: CreatePresignedDownloadURLParams) => Promise<string>;
 };
 
 export const initS3LikeClient = (params: InitS3LikeClientParams): S3LikeClient => {
@@ -130,5 +139,23 @@ export const initS3LikeClient = (params: InitS3LikeClientParams): S3LikeClient =
     }
   }
 
-  return { client, putFile, initiateMultipartUpload, completeMultipartUpload, uploadChunks, name };
+  async function createPresignedURL(params: CreatePresignedDownloadURLParams): Promise<string> {
+    const { key, bucketName, expirationSeconds = 3600 } = params;
+    const command = new GetObjectCommand({
+      Bucket: bucketName,
+      Key: key,
+    });
+    const url = await getSignedUrl(client, command, { expiresIn: expirationSeconds });
+    return url;
+  }
+
+  return {
+    client,
+    putFile,
+    initiateMultipartUpload,
+    completeMultipartUpload,
+    uploadChunks,
+    name,
+    createPresignedURL,
+  };
 };

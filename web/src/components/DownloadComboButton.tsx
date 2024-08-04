@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { File_locations } from '@/generated/client';
-import { useFileById, useFiles } from '@/hooks/useFiles';
+import { useFileById, useFileFetchDecryptDownload } from '@/hooks/useFiles';
 import { cn } from '@/lib/utils';
 
 import { Button } from './ui/button';
@@ -19,12 +19,20 @@ type Props = {
 };
 
 export const DownloadComboButton = ({ fileId, className }: Props) => {
-  const { fetchDecryptDownloadFile } = useFiles();
   const [location, setLocation] = useState<File_locations>();
   const { file } = useFileById(fileId);
+  const { startDownloadAndDecrypt } = useFileFetchDecryptDownload(fileId, location);
 
-  const handleDownload = () => {
-    fetchDecryptDownloadFile(fileId);
+  const handleDownload = async () => {
+    if (!location) {
+      throw new Error('no location selected; select a file location');
+    }
+    if (location.provider_type === 'opfs') {
+      console.error('not implemented yet: add opfs file provider type');
+    }
+    if (location.provider_type == 's3like_object_storage') {
+      startDownloadAndDecrypt();
+    }
   };
 
   useEffect(() => {

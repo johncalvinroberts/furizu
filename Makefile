@@ -28,7 +28,7 @@ down:
 	docker compose down && docker volume rm furizu_postgres_data
 
 yolo: 
-	cd $(FE_DIR); npm run yolo; cd $(BE_DIR); npm run yolo;
+	cd $(FE_DIR); npm run yolo; cd ../$(BE_DIR); npm run yolo;
 
 generate-migration:
 	cd $(BE_DIR); npm run generate-migration;

@@ -43,6 +43,7 @@ function App() {
           client.db.quotas.sync(),
           client.db.public_keys.sync(),
           client.db.file_locations.sync(),
+          client.db.jobs.sync(),
         ]);
         const synceds = works.map((item) => item.synced);
         await Promise.all(synceds);

@@ -2,6 +2,7 @@ export const JobCommands = [
   "provisional_user_created",
   "signup",
   "file_created",
+  "create_download",
 ] as const;
 
 export const FileStates = [

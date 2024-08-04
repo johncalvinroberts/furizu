@@ -101,3 +101,18 @@ export const base64StringToArrayBuffer = (base64String: string): ArrayBuffer => 
   }
   return bytes.buffer;
 };
+
+export async function fetchByteRange(url: string, start: number, end: number) {
+  const response = await fetch(url, {
+    headers: {
+      Range: `bytes=${start}-${end}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch byte range: ${response.statusText}`);
+  }
+
+  const blob = await response.blob();
+  return blob;
+}

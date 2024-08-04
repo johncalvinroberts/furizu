@@ -24,6 +24,7 @@ const envSchema = z.object({
     REGION: z.string(),
     SECRET_ACCESS_KEY: z.string(),
     BUCKET_NAME: z.string(),
+    PROVIDER_NAME: z.string().default('tigris'),
   }),
 });
 

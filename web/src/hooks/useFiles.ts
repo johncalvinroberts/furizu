@@ -2,7 +2,7 @@ import { useLiveQuery } from 'electric-sql/react';
 import { genUUID } from 'electric-sql/util';
 import { Logger, TimerFactory } from 'guu';
 import pMap from 'p-map';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import { File_locations, Files } from '@/generated/client';
@@ -14,10 +14,10 @@ import {
   getRandomBytes,
 } from '@/lib/crypto';
 import { useElectric } from '@/lib/electric';
-import { arrayBufferToBase64String } from '@/lib/utils';
+import { arrayBufferToBase64String, fetchByteRange } from '@/lib/utils';
 
 import { useAsymmetricCryptoKeysState } from './useCryptoKeys';
-import { useJobs } from './useJobs';
+import { useJobById, useJobs } from './useJobs';
 import { useUserId } from './useUser';
 
 const logger = new Logger('useFiles', 'teal');
@@ -32,8 +32,8 @@ export const useFiles = () => {
 
   const createFile = useCallback(
     async (rawFile: File, folderId: string, fileId?: string) => {
+      logger.log(['createFile: starting']);
       const { keypair, id: public_key_id } = useAsymmetricCryptoKeysState.getState();
-      console.log({ keypair, public_key_id });
       timer.start();
       if (!fileId) {
         fileId = genUUID();
@@ -155,22 +155,7 @@ export const useFiles = () => {
     [db],
   );
 
-  const fetchDecryptDownloadFile = useCallback(
-    async (id: string) => {
-      /**
-       * TODO:
-       * - Create presigned URL
-       * - Download from object storage
-       * - Break into chunks (based on ???)
-       * - Decrypt chunk by chunk
-       * - Stream decrypted chunk to caller
-       */
-      console.log({ id });
-    },
-    [db],
-  );
-
-  return { createFile, fetchDecryptDownloadFile, updateFile, deleteFile };
+  return { createFile, updateFile, deleteFile };
 };
 
 export const useFileById = (
@@ -194,4 +179,74 @@ export const useFilesByFolderId = (folder_id: string) => {
   );
 
   return { files: results };
+};
+
+export const useFileFetchDecryptDownload = (
+  fileId: string,
+  location: File_locations | undefined | null,
+) => {
+  const [jobId, setJobId] = useState<string>();
+  const { id: userId } = useUserId();
+  const { createJob } = useJobs();
+  const { job } = useJobById(jobId);
+
+  const startDownloadAndDecrypt = useCallback(async () => {
+    logger.log(['startDownloadAndDecrypt: starting']);
+    if (!userId) {
+      throw new Error('user id not defined, expected it to be defined');
+    }
+    if (!location) {
+      throw new Error('locationid is not defined, expected it to be defined');
+    }
+    const jobId = await createJob({
+      command: 'create_download',
+      payload: { fileId, locationId: location.id },
+      userId,
+    });
+    setJobId(jobId);
+    logger.log([`startDownloadAndDecrypt: created job for generating download URL: ${jobId}`]);
+  }, [createJob, userId, fileId, location]);
+
+  const fetchChunksAndStreamToDownload = async (url: string) => {
+    const chunks = typeof location?.chunk_sizes === 'string' && JSON.parse(location.chunk_sizes);
+    if (!location || !chunks) {
+      throw new Error('fetchChunksAndStreamToDownload: expected file location to be defined');
+    }
+    let start = 0;
+    for (const chunkSize of chunks) {
+      const res = await fetchByteRange(url, start, chunkSize);
+      console.log({ res });
+      start += chunkSize + 1;
+    }
+  };
+
+  useEffect(() => {
+    logger.log([`job.progress: ${job?.progress}`]);
+    if (job && job.progress == 100 && typeof job.result === 'string') {
+      try {
+        const results: { downloadURL?: string } = JSON.parse(job.result);
+        if (!results.downloadURL) {
+          throw new Error('malformed download job: progress is 100 but no download URL');
+        }
+        fetchChunksAndStreamToDownload(results.downloadURL);
+      } catch (error) {
+        console.log({ job });
+        console.error(error);
+      }
+
+      if (job && job.progress == 100 && typeof job.result !== 'string') {
+        console.error('malformed download job: progress is 100 but no job.result', job);
+      }
+
+      /**
+       * Next steps:
+       * 1. Fetch the chunk map
+       * 2. Fetch the URL chunk by chunk, defining range of which bytes we want per chunk
+       * 3. decrypt each chunk
+       * 4. stream the decrypted chunk to a download
+       */
+    }
+  }, [job]);
+
+  return { startDownloadAndDecrypt };
 };
