@@ -12,7 +12,7 @@ import {
 } from '@/config';
 import { useElectric } from '@/lib/electric';
 
-import { useAsymmetricCryptoKeys } from './useCryptoKeys';
+import { usePersistedCryptoKeys } from './useCryptoKeys';
 import { useFiles } from './useFiles';
 import { useFolders } from './useFolders';
 import { useJobs } from './useJobs';
@@ -43,7 +43,7 @@ export const useUserId = create<UserIdState>((set) => ({
 export const useUser = () => {
   const { id, setId } = useUserId();
   const electric = useElectric()!;
-  const { createAsymmetricKeypair } = useAsymmetricCryptoKeys();
+  const { createAsymmetricKeypair } = usePersistedCryptoKeys();
   const { db } = electric;
   const { createJob } = useJobs();
   const { createFolder } = useFolders();

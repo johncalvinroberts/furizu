@@ -11,6 +11,7 @@ import {
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { server } from './server';
+import { S3LikeProviderName } from '@shared/types';
 
 type PutObjectParams = {
   Bucket: string;
@@ -23,7 +24,7 @@ type InitS3LikeClientParams = {
   accessKeyId: string;
   secretAccessKey: string;
   endpoint: string;
-  name: string;
+  name: S3LikeProviderName;
 };
 
 type Chunk = {
@@ -59,7 +60,7 @@ export type S3LikeClient = {
     params: CompleteMultipartUploadParams,
   ) => Promise<CompleteMultipartUploadCommandOutput>;
   uploadChunks: (params: UploadChunksParams) => Promise<Part[]>;
-  name: string;
+  name: S3LikeProviderName;
   createPresignedURL: (params: CreatePresignedDownloadURLParams) => Promise<string>;
 };
 

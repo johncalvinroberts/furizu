@@ -6,6 +6,7 @@ import { db } from './db';
 import { file_chunks, file_locations } from './schema';
 import { initS3LikeClient } from './s3';
 import { env } from './env';
+import { S3LikeProviderName } from '@shared/types';
 
 const tigrisClient = initS3LikeClient({
   region: env.TIGRIS.REGION,
@@ -14,19 +15,29 @@ const tigrisClient = initS3LikeClient({
   endpoint: env.TIGRIS.ENDPOINT_URL_S3,
   name: 'tigris',
 });
+const s3Client = initS3LikeClient({
+  region: env.AWS.REGION,
+  accessKeyId: env.AWS.ACCESS_KEY_ID,
+  secretAccessKey: env.AWS.SECRET_ACCESS_KEY,
+  endpoint: env.AWS.ENDPOINT_URL_S3,
+  name: 'aws_s3',
+});
 
 type PropagateParams = {
   fileId: string;
   chunkCount: number;
   bucketName: string;
-  providerName: string;
+  providerName: S3LikeProviderName;
+  providerDisplayName: string;
   userId: string;
 };
 
-const getS3LikeClient = (providerName: string) => {
+const getS3LikeClient = (providerName: S3LikeProviderName) => {
   switch (providerName) {
     case 'tigris':
       return tigrisClient;
+    case 'aws_s3':
+      return s3Client;
     default:
       throw new Error('unknown s3like storage provider');
   }
@@ -71,6 +82,7 @@ export const propagateToS3likeObjectStore = async (params: PropagateParams) => {
 
   await db.insert(file_locations).values({
     provider_name: client.name,
+    provider_display_name: params.providerDisplayName,
     provider_type: 's3like_object_storage',
     key: fileId,
     id: genUUID(),
@@ -94,12 +106,18 @@ export const createDownloadURL = async (fileId: string, locationId: string): Pro
       if (!location.bucket_name) {
         throw new Error('expected bucket name to be defined for tigris object');
       }
-      const url = await tigrisClient.createPresignedURL({
+      return tigrisClient.createPresignedURL({
         key: location.key,
         bucketName: location.bucket_name,
       });
-      return url;
-
+    case 'aws_s3':
+      if (!location.bucket_name) {
+        throw new Error('expected bucket name to be defined for tigris object');
+      }
+      return s3Client.createPresignedURL({
+        key: location.key,
+        bucketName: location.bucket_name,
+      });
     default:
       throw new Error('unknown s3like storage provider');
   }

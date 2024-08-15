@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import { z } from 'zod';
+import { S3LikeProviderName } from '@shared/types';
 
 Error.stackTraceLimit = 1000;
 
@@ -26,9 +27,18 @@ const envSchema = z.object({
     BUCKET_NAME: z.string(),
     PROVIDER_NAME: z.string().default('tigris'),
   }),
+  AWS: z.object({
+    ACCESS_KEY_ID: z.string(),
+    SECRET_ACCESS_KEY: z.string(),
+    ENDPOINT_URL_S3: z.string().url(),
+    REGION: z.string(),
+    BUCKET_NAME: z.string(),
+    PROVIDER_NAME: z.string().default('aws_s3'),
+  }),
 });
 
 export const env = envSchema.parse({
   ...process.env,
   TIGRIS: parseEnvNamespace('TIGRIS', process.env),
+  AWS: parseEnvNamespace('AWS', process.env),
 });

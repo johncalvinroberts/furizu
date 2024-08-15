@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useAsymmetricCryptoKeys } from '@/hooks/useCryptoKeys';
+import { usePersistedCryptoKeys } from '@/hooks/useCryptoKeys';
 import { useUser } from '@/hooks/useUser';
 
 import { Link } from './link';
@@ -22,7 +22,7 @@ type Props = {
 
 export const AccountMenu = ({ size = 'tiny', variant = 'outline', className }: Props) => {
   const { id, user, updatedAt, isUnprovisional, createProvisionalUser, logout } = useUser();
-  const { initializePersistedKeypair } = useAsymmetricCryptoKeys();
+  const { initializePersistedKeypair } = usePersistedCryptoKeys();
   const handleLogOut = () => {
     logout();
     toast.success('Logged out');

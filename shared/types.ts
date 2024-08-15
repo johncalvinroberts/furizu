@@ -17,3 +17,5 @@ export const FileStates = [
 export type FileState = (typeof FileStates)[number];
 
 export const ProviderTypes = ["s3like_object_storage", "opfs"] as const;
+
+export type S3LikeProviderName = "tigris" | "aws_s3";

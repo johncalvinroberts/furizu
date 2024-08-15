@@ -16,7 +16,7 @@ import {
 import { useElectric } from '@/lib/electric';
 import { arrayBufferToBase64String, fetchByteRange } from '@/lib/utils';
 
-import { useAsymmetricCryptoKeysState } from './useCryptoKeys';
+import { usePersistedCryptoKeysState } from './useCryptoKeys';
 import { useJobById, useJobs } from './useJobs';
 import { useUserId } from './useUser';
 
@@ -33,7 +33,7 @@ export const useFiles = () => {
   const createFile = useCallback(
     async (rawFile: File, folderId: string, fileId?: string) => {
       logger.log(['createFile: starting']);
-      const { keypair, id: public_key_id } = useAsymmetricCryptoKeysState.getState();
+      const { keypair, id: public_key_id } = usePersistedCryptoKeysState.getState();
       timer.start();
       if (!fileId) {
         fileId = genUUID();
@@ -207,11 +207,17 @@ export const useFileFetchDecryptDownload = (
     logger.log([`startDownloadAndDecrypt: created job for generating download URL: ${jobId}`]);
   }, [createJob, userId, fileId, location]);
 
+  const getDecryptedFileKey = () => {
+    const { keypair, id: public_key_id } = usePersistedCryptoKeysState.getState();
+    //
+  };
+
   const fetchChunksAndStreamToDownload = async (url: string) => {
     const chunks = typeof location?.chunk_sizes === 'string' && JSON.parse(location.chunk_sizes);
     if (!location || !chunks) {
       throw new Error('fetchChunksAndStreamToDownload: expected file location to be defined');
     }
+    const decryptedKey = await getDecryptedFileKey();
     let start = 0;
     for (const chunkSize of chunks) {
       const res = await fetchByteRange(url, start, chunkSize);

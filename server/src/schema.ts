@@ -87,6 +87,7 @@ export const file_locations = pgTable('file_locations', {
   bucket_name: varchar('bucket_name'),
   size: bigint('size', { mode: 'bigint' }).notNull(),
   chunk_sizes: jsonb('chunk_sizes'),
+  provider_display_name: varchar('provider_display_name'),
 });
 
 export const file_chunks = pgTable('file_chunks', {

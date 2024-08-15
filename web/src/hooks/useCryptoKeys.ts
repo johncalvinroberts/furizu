@@ -10,7 +10,7 @@ import {
 } from '@/lib/crypto';
 import { useElectric } from '@/lib/electric';
 
-export type AsymmetricCryptoKeysState = {
+export type PersistedCryptoKeysState = {
   keypair: CryptoKeyPair | null;
   id: string | null;
   initialized: boolean;
@@ -19,23 +19,23 @@ export type AsymmetricCryptoKeysState = {
 
 export type PersistedPublicKey = ExportedAsymmetricKeypair & { id: string };
 
-export const useAsymmetricCryptoKeysState = create<AsymmetricCryptoKeysState>(() => ({
+export const usePersistedCryptoKeysState = create<PersistedCryptoKeysState>(() => ({
   keypair: null,
   initialized: false,
   id: null,
   initializing: false,
 }));
 
-export const useAsymmetricCryptoKeys = () => {
-  const { keypair, id } = useAsymmetricCryptoKeysState();
+export const usePersistedCryptoKeys = () => {
+  const { keypair, id } = usePersistedCryptoKeysState();
   const { db } = useElectric()!;
 
   const createAsymmetricKeypair = async (userId: string) => {
-    const { initialized, initializing } = useAsymmetricCryptoKeysState.getState();
+    const { initialized, initializing } = usePersistedCryptoKeysState.getState();
     if (initialized || initializing) {
       return;
     }
-    useAsymmetricCryptoKeysState.setState({ initializing: true });
+    usePersistedCryptoKeysState.setState({ initializing: true });
     try {
       // create a keypair
       const keypair = await generateAsymmetricKeyPair();
@@ -56,7 +56,7 @@ export const useAsymmetricCryptoKeys = () => {
         ASYMMETRIC_KEYPAIR_LOCALSTORAGE_KEY,
         JSON.stringify({ ...exported, id }),
       );
-      useAsymmetricCryptoKeysState.setState({
+      usePersistedCryptoKeysState.setState({
         keypair,
         id,
         initialized: true,
@@ -64,17 +64,17 @@ export const useAsymmetricCryptoKeys = () => {
       });
     } catch (error) {
       console.error(error);
-      useAsymmetricCryptoKeysState.setState({ initializing: false });
+      usePersistedCryptoKeysState.setState({ initializing: false });
     }
   };
 
   const initializePersistedKeypair = async (userId: string) => {
-    const { initialized, initializing } = useAsymmetricCryptoKeysState.getState();
+    const { initialized, initializing } = usePersistedCryptoKeysState.getState();
     if (initialized || initializing) {
       console.log('returning from initializePersistedKeypair');
       return;
     }
-    useAsymmetricCryptoKeysState.setState({ initializing: true });
+    usePersistedCryptoKeysState.setState({ initializing: true });
     try {
       const persisted = localStorage.getItem(ASYMMETRIC_KEYPAIR_LOCALSTORAGE_KEY);
       if (!persisted) {
@@ -88,7 +88,7 @@ export const useAsymmetricCryptoKeys = () => {
       if (!dbRecord) {
         throw new Error(`expected db public key to be defined, got ${dbRecord}`);
       }
-      useAsymmetricCryptoKeysState.setState({
+      usePersistedCryptoKeysState.setState({
         keypair,
         id: parsed.id,
         initialized: true,

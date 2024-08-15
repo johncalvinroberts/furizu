@@ -78,9 +78,18 @@ const handleFileCreated = async (job: FileCreatedJob) => {
       .from(file_chunks)
       .where(eq(file_chunks.file_id, fileId));
     // start with tigris
+    // await propagateToS3likeObjectStore({
+    //   providerName: 'tigris',
+    //   bucketName: env.TIGRIS.BUCKET_NAME,
+    //   fileId,
+    //   chunkCount,
+    //   userId: file.electric_user_id,
+    // });
+    // then aws s3
     await propagateToS3likeObjectStore({
-      providerName: env.TIGRIS.PROVIDER_NAME,
-      bucketName: env.TIGRIS.BUCKET_NAME,
+      providerName: 'aws_s3',
+      providerDisplayName: `AWS S3 - ${env.AWS.REGION}`,
+      bucketName: env.AWS.BUCKET_NAME,
       fileId,
       chunkCount,
       userId: file.electric_user_id,
@@ -141,7 +150,8 @@ export const processJob = async (rawJobString: string) => {
         throw new Error('unknown job type created');
     }
   } catch (error) {
-    server.log.error('processJob: failed to process job', error);
+    server.log.error('processJob: failed to process job');
+    server.log.error(error);
     const message = error.message as string;
     await db
       .update(jobs)

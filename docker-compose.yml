@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   postgres:
     container_name: postgres
@@ -15,23 +13,25 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - 5432:5432
   electric:
     container_name: electric
-    image: electricsql/electric
+    image: electricsql/electric:0.11
     init: true
     depends_on:
       - postgres
     environment:
-      # known as "postgres" hostname in this 
+      # known as "postgres" hostname in this cluster
       DATABASE_URL: postgresql://postgres:some_secret_password@postgres:5432/furizu
       DATABASE_REQUIRE_SSL: false
       LOGICAL_PUBLISHER_HOST: electric
       PG_PROXY_PASSWORD: proxy_password
       AUTH_MODE: insecure
+      ELECTRIC_WRITE_TO_PG_MODE: direct_writes
     ports:
-      - 5133:5133
       - 65432:65432
+      - 5433:5433
+      - 5133:5133
     restart: always
 volumes:
   postgres_data:
