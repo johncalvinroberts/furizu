@@ -7,14 +7,23 @@ import { toast } from 'sonner';
 
 import { File_locations, Files } from '@/generated/client';
 import {
+  createIv,
   encryptAsymmetricallyWithPublicKey,
   encryptSymmetrically,
   exportSymmetricKey,
   generateSymmetricKey,
-  getRandomBytes,
+  importSymmetricKey,
+  importIv,
+  decryptAsymmetricallyWithPublicKey,
+  decryptSymmetrically,
 } from '@/lib/crypto';
 import { useElectric } from '@/lib/electric';
-import { arrayBufferToBase64String, fetchByteRange } from '@/lib/utils';
+import {
+  arrayBufferToBase64String,
+  fetchByteRange,
+  base64StringToArrayBuffer,
+  streamBlobToDownload,
+} from '@/lib/utils';
 
 import { usePersistedCryptoKeysState } from './useCryptoKeys';
 import { useJobById, useJobs } from './useJobs';
@@ -50,7 +59,7 @@ export const useFiles = () => {
           throw new Error(`expected publicKeyId to be defined, got: ${public_key_id}`);
         }
         logger.log(['starting to create file', { fileId, folderId }]);
-        const fileIv = getRandomBytes();
+        const fileIv = createIv();
         const fileInstance = await db.files.create({
           data: {
             id: fileId,
@@ -63,25 +72,26 @@ export const useFiles = () => {
             electric_user_id: userId,
             state: 'created',
             locations: [],
-            iv: fileIv.toString(),
+            iv: fileIv.base64,
           },
         });
         logger.log(['created file in files table', fileId]);
         const symmetricKey = await generateSymmetricKey();
         const exportedSymmetricKey = await exportSymmetricKey(symmetricKey);
-        const keyIv = getRandomBytes();
+        const keyIv = createIv();
         const encryptedSymmetricKey = await encryptAsymmetricallyWithPublicKey(
           exportedSymmetricKey,
           keypair.publicKey,
-          keyIv,
+          keyIv.iv,
         );
+
         await db.file_keys.create({
           data: {
             id: genUUID(),
             file_id: fileId,
             encrypted_symmetric_key: arrayBufferToBase64String(encryptedSymmetricKey),
             electric_user_id: userId,
-            iv: keyIv.toString(),
+            iv: keyIv.base64,
             public_key_id,
           },
         });
@@ -105,7 +115,7 @@ export const useFiles = () => {
             const encryptedData = await encryptSymmetrically(
               await chunk.arrayBuffer(),
               symmetricKey,
-              fileIv,
+              fileIv.iv,
             );
             const data = new Uint8Array(encryptedData);
             const id = await db.file_chunks.create({
@@ -189,6 +199,8 @@ export const useFileFetchDecryptDownload = (
   const { id: userId } = useUserId();
   const { createJob } = useJobs();
   const { job } = useJobById(jobId);
+  const { db } = useElectric()!;
+  const { file } = useFileById(fileId);
 
   const startDownloadAndDecrypt = useCallback(async () => {
     logger.log(['startDownloadAndDecrypt: starting']);
@@ -207,27 +219,64 @@ export const useFileFetchDecryptDownload = (
     logger.log([`startDownloadAndDecrypt: created job for generating download URL: ${jobId}`]);
   }, [createJob, userId, fileId, location]);
 
-  const getDecryptedFileKey = () => {
+  const getDecryptedFileKey = async (): Promise<CryptoKey> => {
     const { keypair, id: public_key_id } = usePersistedCryptoKeysState.getState();
-    //
+    if (!public_key_id || !keypair) {
+      throw new Error(
+        `Expected public_key_id and keypair to be defined, got ${public_key_id} and ${keypair}`,
+      );
+    }
+    const fileKey = await db.file_keys.findFirst({ where: { file_id: fileId, public_key_id } });
+    if (!fileKey) {
+      throw new Error(`fileKey not found for given file + public_key_id`);
+    }
+    if (!fileKey.encrypted_symmetric_key) {
+      throw new Error(`fileKey.encrypted_symmetric_key not defined`);
+    }
+
+    const data = base64StringToArrayBuffer(fileKey.encrypted_symmetric_key);
+    const iv = importIv(fileKey.iv);
+    const decrypted = await decryptAsymmetricallyWithPublicKey(data, keypair.privateKey, iv);
+    const imported = await importSymmetricKey(decrypted);
+    return imported;
   };
 
   const fetchChunksAndStreamToDownload = async (url: string) => {
-    const chunks = typeof location?.chunk_sizes === 'string' && JSON.parse(location.chunk_sizes);
-    if (!location || !chunks) {
-      throw new Error('fetchChunksAndStreamToDownload: expected file location to be defined');
+    if (!file) {
+      throw new Error(`fetchChunksAndStreamToDownload: Expected file to be defined, got ${file}`);
     }
-    const decryptedKey = await getDecryptedFileKey();
-    let start = 0;
-    for (const chunkSize of chunks) {
-      const res = await fetchByteRange(url, start, chunkSize);
-      console.log({ res });
-      start += chunkSize + 1;
+    try {
+      const chunks = typeof location?.chunk_sizes === 'string' && JSON.parse(location.chunk_sizes);
+      if (!location || !chunks) {
+        throw new Error('fetchChunksAndStreamToDownload: expected file location to be defined');
+      }
+      const decryptedSymmetricKey = await getDecryptedFileKey();
+      const iv = importIv(file.iv);
+      const stream = new ReadableStream({
+        start(controller) {
+          let start = 0;
+          async function pushChunk() {
+            for (const chunkSize of chunks) {
+              const res = await fetchByteRange(url, start, chunkSize);
+              const arrayBuffer = await res.arrayBuffer();
+              const decrypted = await decryptSymmetrically(arrayBuffer, decryptedSymmetricKey, iv);
+              controller.enqueue(new Uint8Array(decrypted));
+              start += chunkSize + 1;
+            }
+            controller.close();
+          }
+          pushChunk();
+        },
+      });
+      await streamBlobToDownload(stream, file.name);
+    } catch (error) {
+      console.error(error);
     }
   };
 
   useEffect(() => {
     logger.log([`job.progress: ${job?.progress}`]);
+    console.log({ job });
     if (job && job.progress == 100 && typeof job.result === 'string') {
       try {
         const results: { downloadURL?: string } = JSON.parse(job.result);
@@ -236,7 +285,6 @@ export const useFileFetchDecryptDownload = (
         }
         fetchChunksAndStreamToDownload(results.downloadURL);
       } catch (error) {
-        console.log({ job });
         console.error(error);
       }
 
@@ -252,6 +300,7 @@ export const useFileFetchDecryptDownload = (
        * 4. stream the decrypted chunk to a download
        */
     }
+    // eslint-disable-next-line
   }, [job]);
 
   return { startDownloadAndDecrypt };

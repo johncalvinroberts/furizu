@@ -1,6 +1,5 @@
 import 'dotenv/config';
 import { z } from 'zod';
-import { S3LikeProviderName } from '@shared/types';
 
 Error.stackTraceLimit = 1000;
 

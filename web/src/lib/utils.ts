@@ -116,3 +116,17 @@ export async function fetchByteRange(url: string, start: number, end: number) {
   const blob = await response.blob();
   return blob;
 }
+
+export async function streamBlobToDownload(stream: ReadableStream, fileName: string) {
+  const response = new Response(stream);
+
+  const blob = await response.blob();
+  const downloadUrl = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = downloadUrl;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(downloadUrl);
+}

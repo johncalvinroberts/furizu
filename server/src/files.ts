@@ -1,5 +1,4 @@
 import { genUUID } from 'electric-sql/util';
-import { S3LikeClient } from './s3';
 import { server } from './server';
 import { eq, and } from 'drizzle-orm';
 import { db } from './db';

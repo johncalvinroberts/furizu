@@ -42,6 +42,7 @@ function App() {
           client.db.users.sync(),
           client.db.quotas.sync(),
           client.db.public_keys.sync(),
+          client.db.file_keys.sync(),
           client.db.file_locations.sync(),
           client.db.jobs.sync(),
         ]);

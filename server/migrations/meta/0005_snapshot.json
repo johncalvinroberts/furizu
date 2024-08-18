@@ -60,13 +60,9 @@
         "file_chunks_file_id_files_id_fk": {
           "name": "file_chunks_file_id_files_id_fk",
           "tableFrom": "file_chunks",
-          "columnsFrom": [
-            "file_id"
-          ],
+          "columnsFrom": ["file_id"],
           "tableTo": "files",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -132,13 +128,9 @@
         "files_folder_id_folders_id_fk": {
           "name": "files_folder_id_folders_id_fk",
           "tableFrom": "files",
-          "columnsFrom": [
-            "folder_id"
-          ],
+          "columnsFrom": ["folder_id"],
           "tableTo": "folders",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -192,13 +184,9 @@
         "folders_parent_id_folders_id_fk": {
           "name": "folders_parent_id_folders_id_fk",
           "tableFrom": "folders",
-          "columnsFrom": [
-            "parent_id"
-          ],
+          "columnsFrom": ["parent_id"],
           "tableTo": "folders",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }

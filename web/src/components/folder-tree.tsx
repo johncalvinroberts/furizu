@@ -7,7 +7,7 @@ import { useLocation } from '@/hooks/useLocation';
 import { useUser } from '@/hooks/useUser';
 import { cn } from '@/lib/utils';
 
-import { Dot } from './dot';
+import { Dot } from './Dot';
 import { Empty } from './empty-tip';
 import { AccordionContent, AccordionTrigger } from './ui/accordion';
 import { Button } from './ui/button';

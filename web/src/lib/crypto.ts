@@ -4,6 +4,7 @@ export const ASYMMETRIC_ENCRYPT_ALGO = 'RSA-OAEP';
 export const KEY_ALGO = 'PBKDF2';
 
 export type ExportedAsymmetricKeypair = { publicKey: string; privateKey: string };
+export type ExportedIV = { iv: Uint8Array; base64: string };
 
 export const getRandomBytes = (size = 16): Uint8Array => {
   return crypto.getRandomValues(new Uint8Array(size));
@@ -41,7 +42,6 @@ export async function generateSymmetricKey(): Promise<CryptoKey> {
 export const exportSymmetricKey = (symmetricKey: CryptoKey): Promise<ArrayBuffer> => {
   return crypto.subtle.exportKey('raw', symmetricKey);
 };
-
 /**
  * Exports an asymmetric key. Note:
  * * Public key is exported using SPKI - Subject Public Key Info, a standard for encoding public keys.
@@ -59,6 +59,24 @@ export const exportAsymmetricKey = async (
     arrayBufferToBase64String(privateRaw),
   ]);
   return { publicKey, privateKey };
+};
+
+/**
+ * Imports a symmetric key, for e.g., importing an encrypted symmetric key into memory
+ */
+export const importSymmetricKey = async (rawKey: ArrayBuffer): Promise<CryptoKey> => {
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw',
+    rawKey,
+    {
+      name: SYMMETRIC_ENCRYPT_ALGO,
+      length: 256,
+    },
+    true,
+    ['encrypt', 'decrypt'],
+  );
+
+  return cryptoKey;
 };
 
 /**
@@ -99,13 +117,6 @@ export const importAsymmetricKeyPair = async (
   return { publicKey: publicCryptoKey, privateKey: privateCryptoKey };
 };
 
-export function generateSymmetricKeyFromPassword(password: string): Promise<CryptoKey> {
-  return crypto.subtle.importKey('raw', new TextEncoder().encode(password), KEY_ALGO, false, [
-    'encrypt',
-    'decrypt',
-  ]);
-}
-
 export async function encryptAsymmetricallyWithPublicKey(
   data: BufferSource,
   publicKey: CryptoKey,
@@ -122,6 +133,22 @@ export async function encryptAsymmetricallyWithPublicKey(
   return encryptedData;
 }
 
+export async function decryptAsymmetricallyWithPublicKey(
+  data: BufferSource,
+  privateKey: CryptoKey,
+  iv: Uint8Array,
+) {
+  const decryptedData = await crypto.subtle.decrypt(
+    {
+      name: ASYMMETRIC_ENCRYPT_ALGO,
+      iv,
+    },
+    privateKey,
+    data,
+  );
+  return decryptedData;
+}
+
 export async function encryptSymmetrically(data: BufferSource, key: CryptoKey, iv: Uint8Array) {
   const encryptedData = await crypto.subtle.encrypt(
     {
@@ -132,4 +159,30 @@ export async function encryptSymmetrically(data: BufferSource, key: CryptoKey, i
     data,
   );
   return encryptedData;
+}
+
+export async function decryptSymmetrically(data: BufferSource, key: CryptoKey, iv: Uint8Array) {
+  const decryptedData = await crypto.subtle.decrypt(
+    {
+      name: SYMMETRIC_ENCRYPT_ALGO,
+      iv,
+    },
+    key,
+    data,
+  );
+  return decryptedData;
+}
+
+export function createIv(): ExportedIV {
+  const iv = getRandomBytes();
+  const base64 = btoa(String.fromCharCode(...iv));
+  return { iv, base64 };
+}
+
+export function importIv(base64Iv: string): Uint8Array {
+  return new Uint8Array(
+    atob(base64Iv)
+      .split('')
+      .map((char) => char.charCodeAt(0)),
+  );
 }

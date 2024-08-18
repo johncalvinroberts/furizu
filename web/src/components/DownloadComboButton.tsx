@@ -48,11 +48,14 @@ export const DownloadComboButton = ({ fileId, className }: Props) => {
         onClick={handleDownload}
         disabled={!location}
       >
-        Download from {location?.provider_name}
+        {location ? `Download from ${location?.provider_name}` : 'Download'}
       </Button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button className="rounded-none rounded-r-md border border-l-input border-t-0 border-r-0 border-b-0">
+          <Button
+            className="rounded-none rounded-r-md border border-l-input border-t-0 border-r-0 border-b-0"
+            disabled={!location}
+          >
             <ChevronDown />
           </Button>
         </DropdownMenuTrigger>

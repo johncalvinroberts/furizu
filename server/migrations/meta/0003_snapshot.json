@@ -54,13 +54,9 @@
         "files_folder_id_folders_id_fk": {
           "name": "files_folder_id_folders_id_fk",
           "tableFrom": "files",
-          "columnsFrom": [
-            "folder_id"
-          ],
+          "columnsFrom": ["folder_id"],
           "tableTo": "folders",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -114,13 +110,9 @@
         "folders_parent_id_folders_id_fk": {
           "name": "folders_parent_id_folders_id_fk",
           "tableFrom": "folders",
-          "columnsFrom": [
-            "parent_id"
-          ],
+          "columnsFrom": ["parent_id"],
           "tableTo": "folders",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }

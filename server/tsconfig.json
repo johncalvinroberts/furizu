@@ -10,7 +10,7 @@
     "baseUrl": "../",
     "paths": {
       "@shared/*": ["./shared/*"],
-      "@/*": ["./server/*"],
+      "@/*": ["./server/*"]
     }
   },
   "exclude": ["node_modules", "**/node_modules/*"]
