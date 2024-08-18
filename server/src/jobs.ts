@@ -78,22 +78,25 @@ const handleFileCreated = async (job: FileCreatedJob) => {
       .from(file_chunks)
       .where(eq(file_chunks.file_id, fileId));
     // start with tigris
-    // await propagateToS3likeObjectStore({
-    //   providerName: 'tigris',
-    //   bucketName: env.TIGRIS.BUCKET_NAME,
-    //   fileId,
-    //   chunkCount,
-    //   userId: file.electric_user_id,
-    // });
+    await Promise.all([
+      propagateToS3likeObjectStore({
+        providerName: 'tigris',
+        bucketName: env.TIGRIS.BUCKET_NAME,
+        fileId,
+        chunkCount,
+        userId: file.electric_user_id,
+        providerDisplayName: `Tigris - ${env.TIGRIS.REGION}`,
+      }),
+      propagateToS3likeObjectStore({
+        providerName: 'aws_s3',
+        providerDisplayName: `AWS S3 - ${env.AWS.REGION}`,
+        bucketName: env.AWS.BUCKET_NAME,
+        fileId,
+        chunkCount,
+        userId: file.electric_user_id,
+      }),
+    ]);
     // then aws s3
-    await propagateToS3likeObjectStore({
-      providerName: 'aws_s3',
-      providerDisplayName: `AWS S3 - ${env.AWS.REGION}`,
-      bucketName: env.AWS.BUCKET_NAME,
-      fileId,
-      chunkCount,
-      userId: file.electric_user_id,
-    });
     await Promise.all([
       db.update(quotas).set({ bytes_used: sql`${quotas.bytes_used} + ${file.size}` }),
       db.update(files).set({ state: 'done' }).where(eq(files.id, fileId)),

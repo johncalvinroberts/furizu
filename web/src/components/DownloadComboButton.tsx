@@ -48,7 +48,7 @@ export const DownloadComboButton = ({ fileId, className }: Props) => {
         onClick={handleDownload}
         disabled={!location}
       >
-        {location ? `Download from ${location?.provider_name}` : 'Download'}
+        {location ? `Download from ${location?.provider_display_name}` : 'Download'}
       </Button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -61,7 +61,11 @@ export const DownloadComboButton = ({ fileId, className }: Props) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           {file?.file_locations?.map((item) => (
-            <DropdownMenuCheckboxItem key={item.id} checked={item.id === location?.id}>
+            <DropdownMenuCheckboxItem
+              key={item.id}
+              checked={item.id === location?.id}
+              onClick={() => setLocation(item)}
+            >
               {item.provider_name}
             </DropdownMenuCheckboxItem>
           ))}
