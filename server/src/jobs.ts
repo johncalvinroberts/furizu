@@ -67,7 +67,7 @@ const handleFileCreated = async (job: FileCreatedJob) => {
     const [file] = await db.select().from(files).where(eq(files.id, fileId));
     const bytes_remaining = quota.bytes_total - quota.bytes_used;
     if (file.size > bytes_remaining) {
-      server.log.error('cannot propagate file, user quota no space left');
+      server.log.error('handleFileCreated: cannot propagate file, user quota no space left');
       db.update(files).set({ state: 'propagation_backlogged' }).where(eq(files.id, fileId));
       return;
     }
@@ -77,7 +77,8 @@ const handleFileCreated = async (job: FileCreatedJob) => {
       .select({ count: count() })
       .from(file_chunks)
       .where(eq(file_chunks.file_id, fileId));
-    // start with tigris
+    // start with tigris + aws s3
+    // TODO: this should be extended to use location providers as a DB table, and/or each individual location as a separate background job
     await Promise.all([
       propagateToS3likeObjectStore({
         providerName: 'tigris',
@@ -96,13 +97,13 @@ const handleFileCreated = async (job: FileCreatedJob) => {
         userId: file.electric_user_id,
       }),
     ]);
-    // then aws s3
+    server.log.info(`handleFileCreated: Finished propagating`);
     await Promise.all([
       db.update(quotas).set({ bytes_used: sql`${quotas.bytes_used} + ${file.size}` }),
       db.update(files).set({ state: 'done' }).where(eq(files.id, fileId)),
       db.delete(file_chunks).where(eq(file_chunks.file_id, fileId)),
     ]);
-    server.log.info('completed propagation and deleting file chunks');
+    server.log.info('handleFileCreated: completed propagation and deleting file chunks');
   } catch (error) {
     server.log.error(error);
     await db.update(files).set({ state: 'error' }).where(eq(files.id, fileId));

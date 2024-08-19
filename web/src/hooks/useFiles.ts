@@ -8,20 +8,20 @@ import { toast } from 'sonner';
 import { File_locations, Files } from '@/generated/client';
 import {
   createIv,
+  decryptAsymmetricallyWithPublicKey,
+  decryptSymmetrically,
   encryptAsymmetricallyWithPublicKey,
   encryptSymmetrically,
   exportSymmetricKey,
   generateSymmetricKey,
-  importSymmetricKey,
   importIv,
-  decryptAsymmetricallyWithPublicKey,
-  decryptSymmetrically,
+  importSymmetricKey,
 } from '@/lib/crypto';
 import { useElectric } from '@/lib/electric';
 import {
   arrayBufferToBase64String,
-  fetchByteRange,
   base64StringToArrayBuffer,
+  fetchByteRange,
   streamBlobToDownload,
 } from '@/lib/utils';
 
@@ -196,6 +196,7 @@ export const useFileFetchDecryptDownload = (
   location: File_locations | undefined | null,
 ) => {
   const [jobId, setJobId] = useState<string>();
+  const [isPreparingDownload, setIsPreparingDownload] = useState(false);
   const { id: userId } = useUserId();
   const { createJob } = useJobs();
   const { job } = useJobById(jobId);
@@ -204,6 +205,7 @@ export const useFileFetchDecryptDownload = (
 
   const startDownloadAndDecrypt = useCallback(async () => {
     logger.log(['startDownloadAndDecrypt: starting']);
+    setIsPreparingDownload(true);
     if (!userId) {
       throw new Error('user id not defined, expected it to be defined');
     }
@@ -269,6 +271,8 @@ export const useFileFetchDecryptDownload = (
         },
       });
       await streamBlobToDownload(stream, file.name);
+      setIsPreparingDownload(false);
+      setJobId(undefined);
     } catch (error) {
       console.error(error);
     }
@@ -276,7 +280,6 @@ export const useFileFetchDecryptDownload = (
 
   useEffect(() => {
     logger.log([`job.progress: ${job?.progress}`]);
-    console.log({ job });
     if (job && job.progress == 100 && typeof job.result === 'string') {
       try {
         const results: { downloadURL?: string } = JSON.parse(job.result);
@@ -303,5 +306,5 @@ export const useFileFetchDecryptDownload = (
     // eslint-disable-next-line
   }, [job]);
 
-  return { startDownloadAndDecrypt };
+  return { startDownloadAndDecrypt, isPreparingDownload };
 };

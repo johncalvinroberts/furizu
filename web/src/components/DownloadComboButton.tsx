@@ -21,7 +21,10 @@ type Props = {
 export const DownloadComboButton = ({ fileId, className }: Props) => {
   const [location, setLocation] = useState<File_locations>();
   const { file } = useFileById(fileId);
-  const { startDownloadAndDecrypt } = useFileFetchDecryptDownload(fileId, location);
+  const { startDownloadAndDecrypt, isPreparingDownload } = useFileFetchDecryptDownload(
+    fileId,
+    location,
+  );
 
   const handleDownload = async () => {
     if (!location) {
@@ -46,7 +49,7 @@ export const DownloadComboButton = ({ fileId, className }: Props) => {
       <Button
         className="rounded-none rounded-l-md border border-primary"
         onClick={handleDownload}
-        disabled={!location}
+        disabled={!location || isPreparingDownload}
       >
         {location ? `Download from ${location?.provider_display_name}` : 'Download'}
       </Button>
@@ -54,7 +57,7 @@ export const DownloadComboButton = ({ fileId, className }: Props) => {
         <DropdownMenuTrigger asChild>
           <Button
             className="rounded-none rounded-r-md border border-l-input border-t-0 border-r-0 border-b-0"
-            disabled={!location}
+            disabled={!location || isPreparingDownload}
           >
             <ChevronDown />
           </Button>
@@ -66,7 +69,7 @@ export const DownloadComboButton = ({ fileId, className }: Props) => {
               checked={item.id === location?.id}
               onClick={() => setLocation(item)}
             >
-              {item.provider_name}
+              {item.provider_display_name}
             </DropdownMenuCheckboxItem>
           ))}
         </DropdownMenuContent>
