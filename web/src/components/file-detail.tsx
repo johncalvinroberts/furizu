@@ -9,6 +9,7 @@ import { formatFileSize, getErrorMessageString } from '@/lib/utils';
 
 import { DownloadComboButton } from './DownloadComboButton';
 import { Empty } from './empty-tip';
+import { FileLocationsList } from './file-locations-list';
 import FileStatus from './file-status';
 import { InlineFileForm } from './forms/inline-file-form';
 import TimeDisplay from './time-display';
@@ -49,12 +50,16 @@ const FileDetail = ({ id }: Props) => {
 
   return (
     <div className="p-4">
-      <div className="mb-4">
+      <div className="mb-8">
         {!isInlineFormOpen && (
           <div className="flex w-full space-between gap-1">
             <h3 className="font-bold flex-1 mb-2">{file?.name}</h3>
             <div className="pt-[5px]">
-              <FileStatus state={file.state as FileState} className="h-[20px]" />
+              <FileStatus
+                state={file.state as FileState}
+                className="h-[20px]"
+                locations={file.file_locations}
+              />
             </div>
             <div className="">
               <Button
@@ -94,6 +99,10 @@ const FileDetail = ({ id }: Props) => {
             <TimeDisplay date={file.updated_at} />
           </div>
         </div>
+      </div>
+      <div className="mb-8">
+        <h2>Cloud Backup Locations</h2>
+        <FileLocationsList locations={file.file_locations} />
       </div>
       <DownloadComboButton fileId={id} className="mb-2" />
       <Dialog open={isDeleteOpen} onOpenChange={toggleDelete}>

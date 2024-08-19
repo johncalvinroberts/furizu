@@ -4,8 +4,7 @@ import { useDropzone } from 'react-dropzone';
 
 import { Panel } from '@/components/panel-layout';
 import { DEFAULT_LAYOUT } from '@/config';
-import { Files } from '@/generated/client';
-import { useFiles, useFilesByFolderId } from '@/hooks/useFiles';
+import { FileWithLocations, useFiles, useFilesByFolderId } from '@/hooks/useFiles';
 import { useLocation } from '@/hooks/useLocation';
 import { cn, formatFileSize } from '@/lib/utils';
 
@@ -35,7 +34,7 @@ const UploadButton = ({ onDrop }: { onDrop: (files: File[]) => void }) => {
   );
 };
 
-const FileListItem = ({ file, index }: { file: Files; index: number }) => {
+const FileListItem = ({ file, index }: { file: FileWithLocations; index: number }) => {
   return (
     <li
       className={cn('group px-2 py-1 text-sm w-fit min-w-full block', {
@@ -53,7 +52,7 @@ const FileListItem = ({ file, index }: { file: Files; index: number }) => {
           {formatFileSize(file.size, 'short')}
         </span>
         <span className="flex-none w-[100px] text-xs text-nowrap flex items-center">
-          <FileStatus state={file.state as FileState} />
+          <FileStatus state={file.state as FileState} locations={file.file_locations} />
         </span>
         <span className="flex-none w-[180px] text-xs flex items-center">
           <TimeDisplay date={file.created_at} />

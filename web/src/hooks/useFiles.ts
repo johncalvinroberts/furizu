@@ -32,6 +32,8 @@ import { useUserId } from './useUser';
 const logger = new Logger('useFiles', 'teal');
 const timer = new TimerFactory('useFiles');
 
+export type FileWithLocations = Files & { file_locations?: File_locations[] };
+
 const CHUNK_SIZE = 250 * 1024 * 1024; // 250mb chunk size
 
 export const useFiles = () => {
@@ -168,9 +170,7 @@ export const useFiles = () => {
   return { createFile, updateFile, deleteFile };
 };
 
-export const useFileById = (
-  id: string,
-): { file: (Files & { file_locations?: File_locations[] }) | null | undefined } => {
+export const useFileById = (id: string): { file: FileWithLocations | null | undefined } => {
   const { db } = useElectric()!;
   const results = useLiveQuery(
     db.files.liveFirst({ where: { id }, include: { file_locations: true } }),
@@ -294,14 +294,6 @@ export const useFileFetchDecryptDownload = (
       if (job && job.progress == 100 && typeof job.result !== 'string') {
         console.error('malformed download job: progress is 100 but no job.result', job);
       }
-
-      /**
-       * Next steps:
-       * 1. Fetch the chunk map
-       * 2. Fetch the URL chunk by chunk, defining range of which bytes we want per chunk
-       * 3. decrypt each chunk
-       * 4. stream the decrypted chunk to a download
-       */
     }
     // eslint-disable-next-line
   }, [job]);
