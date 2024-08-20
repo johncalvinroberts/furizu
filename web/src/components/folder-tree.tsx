@@ -1,9 +1,9 @@
 import * as AccordionPrimitive from '@radix-ui/react-accordion';
 import { CornerDownRight, FolderIcon, Plus } from 'lucide-react';
 import useResizeObserver from 'use-resize-observer';
+import { Link } from 'wouter';
 
 import { FolderNode, useFolders } from '@/hooks/useFolders';
-import { useLocation } from '@/hooks/useLocation';
 import { useUser } from '@/hooks/useUser';
 import { cn } from '@/lib/utils';
 
@@ -15,7 +15,6 @@ import { ScrollArea } from './ui/scroll-area';
 
 const FolderTreeItem = ({ data, parent_id }: { data: FolderNode[]; parent_id: string | null }) => {
   const { createFolder, activeFolderId } = useFolders();
-  const { setAbsoluteLocation } = useLocation();
   const { user } = useUser();
 
   const createNewFolder = () => {
@@ -30,20 +29,24 @@ const FolderTreeItem = ({ data, parent_id }: { data: FolderNode[]; parent_id: st
           return (
             <li key={item.id}>
               <AccordionPrimitive.Item value={item.id}>
-                <AccordionTrigger
+                <Link
                   className={cn(
-                    'w-full flex px-2 items-center group',
+                    'w-full flex px-2 items-center group justify-between',
                     isActiveFolder && 'bg-accent text-accent-foreground',
                   )}
-                  onClick={() => setAbsoluteLocation(`/folder/${item.id}`)}
+                  href={`/folder/${item.id}`}
                 >
-                  <FolderIcon
-                    className="h-4 w-4 shrink-0 mr-2 text-accent-foreground/50"
-                    aria-hidden="true"
-                  />
-                  <span className="text-sm truncate">{item.name}</span>
-                  {isActiveFolder && <Dot />}
-                </AccordionTrigger>
+                  <div className="flex-1 flex items-center">
+                    <FolderIcon
+                      className="h-4 w-4 shrink-0 mr-2 text-accent-foreground/50"
+                      aria-hidden="true"
+                    />
+                    <span className="text-sm truncate">{item.name}</span>
+                    {isActiveFolder && <Dot />}
+                  </div>
+                  <AccordionTrigger />
+                </Link>
+
                 <AccordionContent className="pl-6 relative pb-0">
                   <CornerDownRight
                     color="currentColor"
