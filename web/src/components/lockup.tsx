@@ -3,7 +3,7 @@ import { Link } from 'wouter';
 import { InteractiveLogo } from './interactive-logo';
 
 type Props = {
-  variant?: 'compact' | 'full';
+  variant?: 'compact' | 'full' | 'text-only';
   className?: string;
   staticLogo?: boolean;
 };
@@ -27,6 +27,11 @@ export const Lockup = ({ variant = 'full', className, staticLogo = false }: Prop
             {staticLogo && <img src="/favicon.svg" alt="" className="w-[10px] h-[10px]" />}
             {!staticLogo && <InteractiveLogo size="40px" />}
           </Link>
+        </>
+      )}
+      {variant === 'text-only' && (
+        <>
+          <div className="font-semibold hover:font-bold w-full flex items-center">furizu.</div>
         </>
       )}
     </div>

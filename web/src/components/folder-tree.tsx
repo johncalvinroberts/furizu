@@ -1,5 +1,6 @@
 import * as AccordionPrimitive from '@radix-ui/react-accordion';
 import { CornerDownRight, FolderIcon, Plus } from 'lucide-react';
+import { useRef } from 'react';
 import useResizeObserver from 'use-resize-observer';
 import { Link } from 'wouter';
 
@@ -12,6 +13,43 @@ import { Empty } from './empty-tip';
 import { AccordionContent, AccordionTrigger } from './ui/accordion';
 import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
+
+type FolderLinkProps = {
+  href: string;
+  isActiveFolder: boolean;
+  children: React.ReactNode;
+};
+
+export const FolderLink = ({ href, isActiveFolder, children }: FolderLinkProps) => {
+  const linkRef = useRef<HTMLAnchorElement>(null);
+  const accordionTriggerRef = useRef<React.ElementRef<typeof AccordionPrimitive.Trigger>>(null);
+
+  const handleClick = () => {
+    // event.preventDefault();
+    const isClosed = accordionTriggerRef.current?.dataset['state'] === 'closed';
+    if (isClosed) {
+      accordionTriggerRef.current?.click();
+    }
+    // linkRef.current?.click();
+  };
+
+  return (
+    <div className="flex">
+      <Link
+        ref={linkRef}
+        className={cn(
+          'w-full flex px-2 items-center group justify-between',
+          isActiveFolder && 'bg-accent text-accent-foreground',
+        )}
+        href={href}
+        onClick={handleClick}
+      >
+        {children}
+      </Link>
+      <AccordionTrigger ref={accordionTriggerRef} />
+    </div>
+  );
+};
 
 const FolderTreeItem = ({ data, parent_id }: { data: FolderNode[]; parent_id: string | null }) => {
   const { createFolder, activeFolderId } = useFolders();
@@ -29,13 +67,7 @@ const FolderTreeItem = ({ data, parent_id }: { data: FolderNode[]; parent_id: st
           return (
             <li key={item.id}>
               <AccordionPrimitive.Item value={item.id}>
-                <Link
-                  className={cn(
-                    'w-full flex px-2 items-center group justify-between',
-                    isActiveFolder && 'bg-accent text-accent-foreground',
-                  )}
-                  href={`/folder/${item.id}`}
-                >
+                <FolderLink href={`/folder/${item.id}`} isActiveFolder={isActiveFolder}>
                   <div className="flex-1 flex items-center">
                     <FolderIcon
                       className="h-4 w-4 shrink-0 mr-2 text-accent-foreground/50"
@@ -44,8 +76,7 @@ const FolderTreeItem = ({ data, parent_id }: { data: FolderNode[]; parent_id: st
                     <span className="text-sm truncate">{item.name}</span>
                     {isActiveFolder && <Dot />}
                   </div>
-                  <AccordionTrigger />
-                </Link>
+                </FolderLink>
 
                 <AccordionContent className="pl-6 relative pb-0">
                   <CornerDownRight

@@ -2,6 +2,7 @@ import { useUser } from '@/hooks/useUser';
 
 import { formatFileSize } from '../lib/utils';
 import { AccountMenu } from './account-menu';
+import { LearnMoreButton } from './learn-more-modal';
 import { ModeToggle } from './mode-toggle';
 import { Progress } from './ui/progress';
 
@@ -11,6 +12,7 @@ type Props = {
 
 export const AccountPreview = ({ variant = 'full' }: Props) => {
   const { quota } = useUser();
+
   const bytesTotal = Number(quota?.bytes_total) ?? 0;
   const bytesUsed = Number(quota?.bytes_used) ?? 0;
 
@@ -36,7 +38,7 @@ export const AccountPreview = ({ variant = 'full' }: Props) => {
           <div className="px-0 py-1">
             <Progress value={Number(percentageRemaining)} />
           </div>
-          <div className="line-clamp-2 text-xs text-muted-foreground italic">Learn more</div>
+          <LearnMoreButton />
         </div>
         <div className="flex">
           <AccountMenu size="icon" variant="outline" className="mr-2" />
