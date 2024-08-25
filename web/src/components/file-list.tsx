@@ -1,6 +1,6 @@
 import { FileState } from '@shared/types';
 import { Plus } from 'lucide-react';
-import { useDropzone } from 'react-dropzone';
+import { ChangeEvent, useRef } from 'react';
 
 import { Panel } from '@/components/panel-layout';
 import { DEFAULT_LAYOUT } from '@/config';
@@ -8,6 +8,7 @@ import { FileWithLocations, useFiles, useFilesByFolderId } from '@/hooks/useFile
 import { useLocation } from '@/hooks/useLocation';
 import { cn, formatFileSize } from '@/lib/utils';
 
+import { Dot } from './Dot';
 import { Dropzone } from './dropzone';
 import FileStatus from './file-status';
 import { FolderBreadCrumbs } from './folder-bread-crumbs';
@@ -19,22 +20,50 @@ type Props = {
   folder_id: string;
 };
 
-const UploadButton = ({ onDrop }: { onDrop: (files: File[]) => void }) => {
-  const { open, getInputProps } = useDropzone({ onDrop });
+const UploadButton = ({ onChange }: { onChange: (files: File[]) => void }) => {
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      onChange(Array.from(event.target.files));
+    }
+  };
+
   return (
     <Button
       tooltip="Upload a file"
       size="tiny"
       variant="ghost"
       className="w-full text-accent-foreground/50 rounded-none"
-      onClick={open}
+      onClick={handleClick}
     >
-      <Plus size={20} /> <input {...getInputProps()} accept="audio/*" />
+      <Plus size={20} />
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="*"
+        style={{ display: 'none' }}
+        onChange={handleChange}
+      />
     </Button>
   );
 };
 
-const FileListItem = ({ file, index }: { file: FileWithLocations; index: number }) => {
+const FileListItem = ({
+  file,
+  index,
+  isActive,
+}: {
+  file: FileWithLocations;
+  index: number;
+  isActive: boolean;
+}) => {
   return (
     <li
       className={cn('group px-2 py-1 text-sm w-fit min-w-full block', {
@@ -45,7 +74,7 @@ const FileListItem = ({ file, index }: { file: FileWithLocations; index: number 
       <Link href={`/folder/${file.folder_id}/file/${file.id}`} className="flex w-full">
         <span className="flex-none w-[220px] min-w-[180px] flex space-between gap-1 px-2">
           <span className="block text-ellipsis overflow-hidden text-nowrap w-full font-medium">
-            {file.name}
+            {isActive && <Dot />} {file.name}
           </span>
         </span>
         <span className="flex-none w-[100px] text-xs text-nowrap flex items-center">
@@ -68,13 +97,13 @@ const FileListItem = ({ file, index }: { file: FileWithLocations; index: number 
 export const FolderFileList = ({ folder_id }: Props) => {
   const { location } = useLocation();
   const isFileDetailPage = location !== '/';
+  const fileDetailPageId = location.split('/').pop();
+
   const { createFile } = useFiles();
   const { files } = useFilesByFolderId(folder_id);
 
-  const handleDrop = async (files: File[]) => {
-    files.forEach((file) => {
-      createFile(file, folder_id);
-    });
+  const handleDrop = (files: File[]) => {
+    files.forEach((file) => createFile(file, folder_id));
   };
 
   const isEmpty = files.results && files.results.length < 1;
@@ -98,11 +127,16 @@ export const FolderFileList = ({ folder_id }: Props) => {
             </div>
             <ul className="max-w-full">
               {files?.results?.map((item, index) => (
-                <FileListItem key={item.id} file={item} index={index} />
+                <FileListItem
+                  key={item.id}
+                  file={item}
+                  index={index}
+                  isActive={isFileDetailPage && fileDetailPageId === item.id}
+                />
               ))}
               {!isEmpty && (
                 <li>
-                  <UploadButton onDrop={handleDrop} />
+                  <UploadButton onChange={handleDrop} />
                 </li>
               )}
             </ul>
