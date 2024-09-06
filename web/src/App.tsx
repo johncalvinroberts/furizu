@@ -54,11 +54,7 @@ function App() {
           console.log(`Synced in ${timeToSync}ms from page load`);
         }
       } catch (error) {
-        console.error(error);
-        if ((error as Error).message?.startsWith("Local schema doesn't match server's")) {
-          deleteDB();
-        }
-        throw error;
+        return deleteDB();
       } finally {
         initializing.current = false;
       }

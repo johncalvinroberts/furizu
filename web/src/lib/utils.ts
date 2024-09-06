@@ -1,5 +1,10 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import {
+  TOKEN_LOCALSTORAGE_KEY,
+  USER_ID_LOCALSTORAGE_KEY,
+  ASYMMETRIC_KEYPAIR_LOCALSTORAGE_KEY,
+} from '@/config';
 
 import { dbName } from './electric';
 
@@ -48,6 +53,9 @@ export function deleteDB() {
   // the indexedDB cannot be deleted if the database connection is still open,
   // so we need to reload the page to close any open connections.
   // On reload, the database will be recreated.
+  localStorage.removeItem(TOKEN_LOCALSTORAGE_KEY);
+  localStorage.removeItem(USER_ID_LOCALSTORAGE_KEY);
+  localStorage.removeItem(ASYMMETRIC_KEYPAIR_LOCALSTORAGE_KEY);
   window.location.reload();
 }
 export const formatFileSize = (
