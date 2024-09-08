@@ -27,7 +27,7 @@ type TreeProps = React.HTMLAttributes<HTMLDivElement> & {
   AddButton?: AddButtonType;
 };
 
-/* eslint-disable react/prop-types */
+ 
 const Tree = React.forwardRef<HTMLDivElement, TreeProps>(
   (
     {
@@ -249,4 +249,4 @@ const Leaf = React.forwardRef<
 Leaf.displayName = 'Leaf';
 
 export { Tree, type TreeDataItem };
-/* eslint-enable react/prop-types */
+ 

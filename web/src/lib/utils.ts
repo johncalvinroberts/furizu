@@ -1,9 +1,10 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+
 import {
+  ASYMMETRIC_KEYPAIR_LOCALSTORAGE_KEY,
   TOKEN_LOCALSTORAGE_KEY,
   USER_ID_LOCALSTORAGE_KEY,
-  ASYMMETRIC_KEYPAIR_LOCALSTORAGE_KEY,
 } from '@/config';
 
 import { dbName } from './electric';
